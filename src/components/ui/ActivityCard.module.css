@@ -1,0 +1,47 @@
+.card {
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+  background: var(--mantine-color-gray-0);
+}
+
+.card:hover {
+  background: var(--mantine-color-gray-1);
+  border-left-color: var(--mantine-color-blue-4);
+}
+
+.icon {
+  flex-shrink: 0;
+}
+
+.title {
+  line-height: 1.3;
+}
+
+.description {
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.time {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .card {
+    border-left-width: 2px;
+  }
+  
+  .time {
+    font-size: var(--mantine-font-size-xs);
+  }
+}
+
+[data-mantine-color-scheme="dark"] .card {
+  background: var(--mantine-color-dark-7);
+}
+
+[data-mantine-color-scheme="dark"] .card:hover {
+  background: var(--mantine-color-dark-6);
+  border-left-color: var(--mantine-color-blue-6);
+}

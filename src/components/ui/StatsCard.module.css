@@ -1,0 +1,47 @@
+.card {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  border-left: 4px solid var(--card-color);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--mantine-shadow-md);
+}
+
+.value {
+  color: var(--card-color);
+  font-variant-numeric: tabular-nums;
+}
+
+.icon {
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.card:hover .icon {
+  opacity: 1;
+}
+
+.trendUp {
+  color: var(--mantine-color-teal-6);
+}
+
+.trendDown {
+  color: var(--mantine-color-red-6);
+}
+
+.trendNeutral {
+  color: var(--mantine-color-gray-6);
+}
+
+@media (max-width: 768px) {
+  .card {
+    border-left-width: 3px;
+  }
+  
+  .value {
+    font-size: var(--mantine-font-size-lg);
+  }
+}

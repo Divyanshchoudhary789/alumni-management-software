@@ -1,0 +1,33 @@
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.mainContent {
+  min-height: calc(100vh - 60px);
+  padding: var(--mantine-spacing-md);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .mainContent {
+    padding: var(--mantine-spacing-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .mainContent {
+    padding: var(--mantine-spacing-xs);
+  }
+}
+
+/* Ensure proper spacing and layout */
+.mainContent > * {
+  margin-bottom: var(--mantine-spacing-md);
+}
+
+.mainContent > *:last-child {
+  margin-bottom: 0;
+}

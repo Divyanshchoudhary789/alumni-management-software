@@ -1,0 +1,117 @@
+.logo {
+  color: var(--mantine-color-blue-6);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.searchContainer {
+  position: relative;
+}
+
+.searchInput {
+  width: 300px;
+  transition: width 200ms ease;
+}
+
+.searchInput:focus-within {
+  width: 350px;
+}
+
+.searchResults {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  margin-top: var(--mantine-spacing-xs);
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid var(--mantine-color-gray-3);
+}
+
+[data-mantine-color-scheme="dark"] .searchResults {
+  border-color: var(--mantine-color-dark-4);
+}
+
+.searchResultItem {
+  width: 100%;
+  padding: var(--mantine-spacing-sm);
+  border-radius: var(--mantine-radius-sm);
+  transition: background-color 150ms ease;
+  text-align: left;
+}
+
+.searchResultItem:hover {
+  background-color: var(--mantine-color-gray-0);
+}
+
+[data-mantine-color-scheme="dark"] .searchResultItem:hover {
+  background-color: var(--mantine-color-dark-6);
+}
+
+.userButton {
+  padding: var(--mantine-spacing-xs);
+  border-radius: var(--mantine-radius-sm);
+  transition: background-color 150ms ease;
+}
+
+.userButton:hover {
+  background-color: var(--mantine-color-gray-0);
+}
+
+[data-mantine-color-scheme="dark"] .userButton:hover {
+  background-color: var(--mantine-color-dark-6);
+}
+
+.notificationButton {
+  position: relative;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .searchInput {
+    width: 200px;
+  }
+  
+  .searchInput:focus-within {
+    width: 250px;
+  }
+  
+  .logo {
+    font-size: var(--mantine-font-size-md);
+  }
+  
+  .searchResults {
+    left: -50px;
+    right: -50px;
+  }
+}
+
+@media (max-width: 480px) {
+  .searchInput {
+    width: 150px;
+  }
+  
+  .searchInput:focus-within {
+    width: 200px;
+  }
+  
+  .logo {
+    font-size: var(--mantine-font-size-sm);
+  }
+  
+  .headerActions {
+    gap: var(--mantine-spacing-xs);
+  }
+  
+  .searchResults {
+    left: -100px;
+    right: -20px;
+  }
+}

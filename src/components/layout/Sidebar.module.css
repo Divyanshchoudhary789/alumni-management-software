@@ -1,0 +1,120 @@
+.sidebar {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--mantine-color-white);
+}
+
+[data-mantine-color-scheme="dark"] .sidebar {
+  background-color: var(--mantine-color-dark-7);
+}
+
+.footer {
+  padding-top: var(--mantine-spacing-md);
+  margin-top: var(--mantine-spacing-md);
+  border-top: rem(1px) solid var(--mantine-color-gray-2);
+}
+
+[data-mantine-color-scheme="dark"] .footer {
+  border-top-color: var(--mantine-color-dark-4);
+}
+
+.userButton {
+  padding: var(--mantine-spacing-xs);
+  border-radius: var(--mantine-radius-sm);
+  transition: background-color 150ms ease;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.userButton:hover {
+  background-color: var(--mantine-color-gray-0);
+}
+
+[data-mantine-color-scheme="dark"] .userButton:hover {
+  background-color: var(--mantine-color-dark-6);
+}
+
+.version {
+  font-weight: 700;
+  font-size: rem(10px);
+  color: var(--mantine-color-gray-6);
+}
+
+[data-mantine-color-scheme="dark"] .version {
+  color: var(--mantine-color-gray-5);
+}
+
+.links {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.linksInner {
+  padding-bottom: var(--mantine-spacing-xl);
+}
+
+.navLink {
+  border-radius: var(--mantine-radius-md);
+  margin-bottom: rem(4px);
+  transition: all 150ms ease;
+}
+
+.navLink[data-level="1"] {
+  margin-left: var(--mantine-spacing-md);
+  font-size: var(--mantine-font-size-sm);
+  opacity: 0.9;
+}
+
+.navLink:hover {
+  background-color: var(--mantine-color-gray-0);
+  transform: translateX(2px);
+}
+
+[data-mantine-color-scheme="dark"] .navLink:hover {
+  background-color: var(--mantine-color-dark-6);
+}
+
+.navLink[data-active="true"] {
+  background-color: var(--mantine-color-blue-light);
+  color: var(--mantine-color-blue-7);
+  font-weight: 500;
+}
+
+[data-mantine-color-scheme="dark"] .navLink[data-active="true"] {
+  background-color: var(--mantine-color-blue-9);
+  color: var(--mantine-color-blue-2);
+}
+
+.navLink[data-active="true"]:hover {
+  transform: none;
+}
+
+/* Role indicator */
+.roleIndicator {
+  font-size: var(--mantine-font-size-xs);
+  color: var(--mantine-color-gray-6);
+  text-transform: capitalize;
+}
+
+[data-mantine-color-scheme="dark"] .roleIndicator {
+  color: var(--mantine-color-gray-5);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+  }
+  
+  .navLink {
+    padding: var(--mantine-spacing-sm);
+  }
+  
+  .userButton {
+    padding: var(--mantine-spacing-sm);
+  }
+}
