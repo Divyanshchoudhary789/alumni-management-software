@@ -19,7 +19,7 @@ import {
 } from '@tabler/icons-react';
 import { Event } from '@/types';
 import { EventList, EventCalendar, EventRegistrationModal } from '@/components/events';
-import { mockEventService } from '@/lib/mock-services/eventService';
+import { eventsApiService } from '@/services/api/eventsService';
 import { notifications } from '@mantine/notifications';
 import { modals } from '@mantine/modals';
 import { useRouter } from 'next/navigation';
@@ -38,9 +38,12 @@ export default function EventsPage() {
     try {
       setLoading(true);
       setError(null);
-      const response = await mockEventService.getEvents({}, undefined, 1, 100); // Get all events
-      setEvents(response.data);
+      console.log('Loading events from API...');
+      const response = await eventsApiService.getEvents({ limit: 100 }); // Get all events
+      console.log('Events API response:', response);
+      setEvents(response.events || []);
     } catch (err: any) {
+      console.error('Events loading error:', err);
       setError(err.message || 'Failed to load events');
       notifications.show({
         title: 'Error',
@@ -80,7 +83,7 @@ export default function EventsPage() {
       confirmProps: { color: 'red' },
       onConfirm: async () => {
         try {
-          await mockEventService.deleteEvent(event.id);
+          await eventsApiService.deleteEvent(event.id);
           notifications.show({
             title: 'Success',
             message: 'Event deleted successfully',
@@ -107,7 +110,7 @@ export default function EventsPage() {
     if (!selectedEvent) return;
 
     try {
-      await mockEventService.registerForEvent(selectedEvent.id, 'mock_alumni_1');
+      await eventsApiService.registerForEvent(selectedEvent.id);
       setRegistrationModalOpen(false);
       setSelectedEvent(null);
       notifications.show({

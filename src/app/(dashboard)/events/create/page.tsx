@@ -2,7 +2,7 @@
 
 import { Container } from '@mantine/core';
 import { EventForm } from '@/components/events';
-import { mockEventService } from '@/lib/mock-services/eventService';
+import { eventsApiService } from '@/services/api/eventsService';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -29,7 +29,7 @@ export default function CreateEventPage() {
 
     setLoading(true);
     try {
-      await mockEventService.createEvent({
+      await eventsApiService.createEvent({
         title: data.title,
         description: data.description,
         eventDate: data.eventDate,
@@ -37,8 +37,7 @@ export default function CreateEventPage() {
         capacity: data.capacity,
         registrationDeadline: data.registrationDeadline,
         status: data.status,
-        imageUrl: data.imageUrl,
-        createdBy: 'current_user_id' // TODO: Get from auth context
+        imageUrl: data.imageUrl
       });
 
       notifications.show({

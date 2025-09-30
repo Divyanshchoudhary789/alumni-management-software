@@ -49,7 +49,7 @@ import {
   IconArrowLeft
 } from '@tabler/icons-react';
 import { AlumniProfile } from '@/types';
-import { mockAlumniService } from '@/lib/mock-services/alumniService';
+import { alumniApiService } from '@/services/api/alumniService';
 
 interface AlumniFormProps {
   alumni?: AlumniProfile; // If provided, form is in edit mode
@@ -211,7 +211,7 @@ export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormPro
           profileImage: typeof values.profileImage === 'string' ? values.profileImage : alumni.profileImage,
           updatedAt: new Date()
         };
-        await mockAlumniService.updateAlumni(alumni.id, updatedAlumni);
+        await alumniApiService.updateAlumni(alumni.id, updatedAlumni);
         
         notifications.show({
           title: 'Profile updated',
@@ -222,7 +222,7 @@ export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormPro
 
         onSubmit?.(updatedAlumni);
       } else {
-        const newAlumni = await mockAlumniService.createAlumni({
+        const newAlumni = await alumniApiService.createAlumni({
           ...values,
           profileImage: typeof values.profileImage === 'string' ? values.profileImage : undefined,
           userId: `user_${Date.now()}` // Mock user ID
@@ -554,13 +554,6 @@ export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormPro
                     placeholder="Select or add your skills"
                     data={skillOptions}
                     searchable
-                    creatable
-                    getCreateLabel={(query) => `+ Add "${query}"`}
-                    onCreate={(query) => {
-                      const item = { value: query, label: query };
-                      skillOptions.push(query);
-                      return item;
-                    }}
                     {...form.getInputProps('skills')}
                   />
 
@@ -569,13 +562,6 @@ export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormPro
                     placeholder="Select or add your interests"
                     data={interestOptions}
                     searchable
-                    creatable
-                    getCreateLabel={(query) => `+ Add "${query}"`}
-                    onCreate={(query) => {
-                      const item = { value: query, label: query };
-                      interestOptions.push(query);
-                      return item;
-                    }}
                     {...form.getInputProps('interests')}
                   />
                 </Stack>

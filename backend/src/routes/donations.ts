@@ -8,7 +8,7 @@ import mongoose from 'mongoose';
 const router = express.Router();
 
 // GET /api/donations - List donations (admin only)
-router.get('/', adminRoute, async (req: Request, res: Response) => {
+router.get('/', adminRoute, async (req: Request, res: Response): Promise<any> => {
   try {
     const {
       page = 1,
@@ -77,7 +77,7 @@ router.get('/', adminRoute, async (req: Request, res: Response) => {
 });
 
 // GET /api/donations/:id - Get specific donation (admin only)
-router.get('/:id', adminRoute, async (req: Request, res: Response) => {
+router.get('/:id', adminRoute, async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
 
@@ -102,7 +102,7 @@ router.get('/:id', adminRoute, async (req: Request, res: Response) => {
 });
 
 // POST /api/donations - Create donation (authenticated users)
-router.post('/', authenticatedRoute, requireAlumni, async (req: Request, res: Response) => {
+router.post('/', authenticatedRoute, requireAlumni, async (req: Request, res: Response): Promise<any> => {
   try {
     const {
       amount,
@@ -175,7 +175,7 @@ router.post('/', authenticatedRoute, requireAlumni, async (req: Request, res: Re
 });
 
 // PUT /api/donations/:id/status - Update donation status (admin only)
-router.put('/:id/status', adminRoute, async (req: Request, res: Response) => {
+router.put('/:id/status', adminRoute, async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
     const { status, transactionId } = req.body;
@@ -228,7 +228,7 @@ router.put('/:id/status', adminRoute, async (req: Request, res: Response) => {
 });
 
 // GET /api/donations/campaigns - List campaigns
-router.get('/campaigns/list', authenticatedRoute, async (req: Request, res: Response) => {
+router.get('/campaigns/list', authenticatedRoute, async (req: Request, res: Response): Promise<any> => {
   try {
     const {
       page = 1,
@@ -300,7 +300,7 @@ router.get('/campaigns/list', authenticatedRoute, async (req: Request, res: Resp
 });
 
 // GET /api/donations/campaigns/:id - Get specific campaign
-router.get('/campaigns/:id', authenticatedRoute, async (req: Request, res: Response) => {
+router.get('/campaigns/:id', authenticatedRoute, async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
 
@@ -345,7 +345,7 @@ router.get('/campaigns/:id', authenticatedRoute, async (req: Request, res: Respo
 });
 
 // POST /api/donations/campaigns - Create campaign (admin only)
-router.post('/campaigns', adminRoute, async (req: Request, res: Response) => {
+router.post('/campaigns', adminRoute, async (req: Request, res: Response): Promise<any> => {
   try {
     const {
       title,
@@ -392,7 +392,7 @@ router.post('/campaigns', adminRoute, async (req: Request, res: Response) => {
 });
 
 // PUT /api/donations/campaigns/:id - Update campaign (admin only)
-router.put('/campaigns/:id', adminRoute, async (req: Request, res: Response) => {
+router.put('/campaigns/:id', adminRoute, async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
 
@@ -441,7 +441,7 @@ router.put('/campaigns/:id', adminRoute, async (req: Request, res: Response) => 
 });
 
 // GET /api/donations/stats/overview - Get donations statistics (admin only)
-router.get('/stats/overview', adminRoute, async (req: Request, res: Response) => {
+router.get('/stats/overview', adminRoute, async (req: Request, res: Response): Promise<any> => {
   try {
     const [
       totalDonations,

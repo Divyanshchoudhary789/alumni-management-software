@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { Communication, CommunicationTemplate, ICommunication } from '../models/Communication';
+import { Communication, CommunicationTemplate } from '../models/Communication';
 import { AlumniProfile } from '../models/AlumniProfile';
 import { adminRoute } from '../middleware/auth';
 import { logger } from '../config/logger';
@@ -8,7 +8,7 @@ import mongoose from 'mongoose';
 const router = express.Router();
 
 // GET /api/communications - List communications (admin only)
-router.get('/', adminRoute, async (req: Request, res: Response) => {
+router.get('/', adminRoute, async (req: Request, res: Response): Promise<any> => {
   try {
     const {
       page = 1,
@@ -20,32 +20,24 @@ router.get('/', adminRoute, async (req: Request, res: Response) => {
       sortOrder = 'desc'
     } = req.query;
 
-    const pageNum = parseInt(page as string);
-    const limitNum = parseInt(limit as string);
+    const pageNum = Number(page) > 0 ? parseInt(page as string) : 1;
+    const limitNum = Number(limit) > 0 ? parseInt(limit as string) : 20;
     const skip = (pageNum - 1) * limitNum;
 
-    // Build query
     const query: any = {};
 
     // Search functionality
     if (search) {
       query.$text = { $search: search as string };
     }
-
     // Filters
-    if (type) {
-      query.type = type;
-    }
-
-    if (status) {
-      query.status = status;
-    }
+    if (type) query.type = type;
+    if (status) query.status = status;
 
     // Sort options
     const sortOptions: any = {};
     sortOptions[sortBy as string] = sortOrder === 'desc' ? -1 : 1;
 
-    // Execute query
     const [communications, total] = await Promise.all([
       Communication.find(query)
         .populate('createdBy', 'email')
@@ -76,7 +68,7 @@ router.get('/', adminRoute, async (req: Request, res: Response) => {
 });
 
 // GET /api/communications/:id - Get specific communication (admin only)
-router.get('/:id', adminRoute, async (req: Request, res: Response) => {
+router.get('/:id', adminRoute, async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
 
@@ -101,7 +93,7 @@ router.get('/:id', adminRoute, async (req: Request, res: Response) => {
 });
 
 // POST /api/communications - Create communication (admin only)
-router.post('/', adminRoute, async (req: Request, res: Response) => {
+router.post('/', adminRoute, async (req: Request, res: Response): Promise<any> => {
   try {
     const {
       title,
@@ -112,27 +104,22 @@ router.post('/', adminRoute, async (req: Request, res: Response) => {
       recipients = []
     } = req.body;
 
-    // Validate required fields
     if (!title || !content || !type) {
-      return res.status(400).json({ 
-        error: 'Missing required fields: title, content, type' 
+      return res.status(400).json({
+        error: 'Missing required fields: title, content, type'
       });
     }
 
-    // Determine recipients based on target audience
     let finalRecipients = recipients;
     if (targetAudience.includes('all') || targetAudience.length === 0) {
       const allAlumni = await AlumniProfile.find({ isPublic: true }).select('_id');
       finalRecipients = allAlumni.map(alumni => alumni._id);
     } else {
-      // Build query based on target audience
       const audienceQuery: any = { isPublic: true };
-      
       if (targetAudience.includes('recent_graduates')) {
         const currentYear = new Date().getFullYear();
         audienceQuery.graduationYear = { $gte: currentYear - 2 };
       }
-      
       const targetedAlumni = await AlumniProfile.find(audienceQuery).select('_id');
       finalRecipients = targetedAlumni.map(alumni => alumni._id);
     }
@@ -151,8 +138,8 @@ router.post('/', adminRoute, async (req: Request, res: Response) => {
     await communication.save();
     await communication.populate('createdBy', 'email');
 
-    logger.info('Communication created:', { 
-      communicationId: communication._id, 
+    logger.info('Communication created:', {
+      communicationId: communication._id,
       createdBy: req.user!._id,
       recipientCount: finalRecipients.length
     });
@@ -168,7 +155,7 @@ router.post('/', adminRoute, async (req: Request, res: Response) => {
 });
 
 // PUT /api/communications/:id - Update communication (admin only)
-router.put('/:id', adminRoute, async (req: Request, res: Response) => {
+router.put('/:id', adminRoute, async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
 
@@ -181,36 +168,30 @@ router.put('/:id', adminRoute, async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Communication not found' });
     }
 
-    // Don't allow editing sent communications
     if (communication.status === 'sent') {
       return res.status(400).json({ error: 'Cannot edit sent communications' });
     }
 
-    const {
-      title,
-      content,
-      type,
-      targetAudience,
-      scheduledDate,
-      status
-    } = req.body;
-
-    // Update fields
-    if (title !== undefined) communication.title = title;
-    if (content !== undefined) communication.content = content;
-    if (type !== undefined) communication.type = type;
-    if (targetAudience !== undefined) communication.targetAudience = targetAudience;
-    if (scheduledDate !== undefined) {
-      communication.scheduledDate = scheduledDate ? new Date(scheduledDate) : undefined;
+    const updatableFields = [
+      'title', 'content', 'type', 'targetAudience', 'scheduledDate', 'status'
+    ];
+    for (const key of updatableFields) {
+      if (req.body[key] !== undefined) {
+        // For scheduledDate, handle conversion
+        if (key === 'scheduledDate') {
+          communication.scheduledDate = req.body[key] ? new Date(req.body[key]) : undefined;
+        } else {
+          (communication as any)[key] = req.body[key];
+        }
+      }
     }
-    if (status !== undefined) communication.status = status;
 
     await communication.save();
     await communication.populate('createdBy', 'email');
 
-    logger.info('Communication updated:', { 
-      communicationId: communication._id, 
-      updatedBy: req.user!._id 
+    logger.info('Communication updated:', {
+      communicationId: communication._id,
+      updatedBy: req.user!._id
     });
     res.json(communication);
   } catch (error) {
@@ -224,7 +205,7 @@ router.put('/:id', adminRoute, async (req: Request, res: Response) => {
 });
 
 // DELETE /api/communications/:id - Delete communication (admin only)
-router.delete('/:id', adminRoute, async (req: Request, res: Response) => {
+router.delete('/:id', adminRoute, async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
 
@@ -237,16 +218,15 @@ router.delete('/:id', adminRoute, async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Communication not found' });
     }
 
-    // Don't allow deleting sent communications
     if (communication.status === 'sent') {
       return res.status(400).json({ error: 'Cannot delete sent communications' });
     }
 
     await Communication.findByIdAndDelete(id);
 
-    logger.info('Communication deleted:', { 
-      communicationId: id, 
-      deletedBy: req.user!._id 
+    logger.info('Communication deleted:', {
+      communicationId: id,
+      deletedBy: req.user!._id
     });
     res.json({ message: 'Communication deleted successfully' });
   } catch (error) {
@@ -256,7 +236,7 @@ router.delete('/:id', adminRoute, async (req: Request, res: Response) => {
 });
 
 // POST /api/communications/:id/send - Send communication (admin only)
-router.post('/:id/send', adminRoute, async (req: Request, res: Response) => {
+router.post('/:id/send', adminRoute, async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
 
@@ -273,17 +253,16 @@ router.post('/:id/send', adminRoute, async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Communication already sent' });
     }
 
-    // TODO: Implement actual email sending logic here
-    // For now, just update the status and delivery stats
+    // TODO: Implement actual delivery logic
     communication.status = 'sent';
     communication.sentDate = new Date();
     communication.deliveryStats.sent = communication.recipients.length;
-    communication.deliveryStats.delivered = communication.recipients.length; // Mock success
+    communication.deliveryStats.delivered = communication.recipients.length; // Mock delivery
 
     await communication.save();
 
-    logger.info('Communication sent:', { 
-      communicationId: communication._id, 
+    logger.info('Communication sent:', {
+      communicationId: communication._id,
       sentBy: req.user!._id,
       recipientCount: communication.recipients.length
     });
@@ -294,8 +273,8 @@ router.post('/:id/send', adminRoute, async (req: Request, res: Response) => {
   }
 });
 
-// GET /api/communications/templates - List communication templates (admin only)
-router.get('/templates/list', adminRoute, async (req: Request, res: Response) => {
+// GET /api/communications/templates/list - List communication templates (admin only)
+router.get('/templates/list', adminRoute, async (req: Request, res: Response): Promise<any> => {
   try {
     const { type, isActive = 'true' } = req.query;
 
@@ -315,7 +294,7 @@ router.get('/templates/list', adminRoute, async (req: Request, res: Response) =>
 });
 
 // POST /api/communications/templates - Create communication template (admin only)
-router.post('/templates', adminRoute, async (req: Request, res: Response) => {
+router.post('/templates', adminRoute, async (req: Request, res: Response): Promise<any> => {
   try {
     const {
       name,
@@ -325,10 +304,9 @@ router.post('/templates', adminRoute, async (req: Request, res: Response) => {
       variables = []
     } = req.body;
 
-    // Validate required fields
     if (!name || !subject || !content || !type) {
-      return res.status(400).json({ 
-        error: 'Missing required fields: name, subject, content, type' 
+      return res.status(400).json({
+        error: 'Missing required fields: name, subject, content, type'
       });
     }
 
@@ -344,9 +322,9 @@ router.post('/templates', adminRoute, async (req: Request, res: Response) => {
     await template.save();
     await template.populate('createdBy', 'email');
 
-    logger.info('Communication template created:', { 
-      templateId: template._id, 
-      createdBy: req.user!._id 
+    logger.info('Communication template created:', {
+      templateId: template._id,
+      createdBy: req.user!._id
     });
     res.status(201).json(template);
   } catch (error) {
@@ -360,7 +338,7 @@ router.post('/templates', adminRoute, async (req: Request, res: Response) => {
 });
 
 // GET /api/communications/stats/overview - Get communications statistics (admin only)
-router.get('/stats/overview', adminRoute, async (req: Request, res: Response) => {
+router.get('/stats/overview', adminRoute, async (req: Request, res: Response): Promise<any> => {
   try {
     const [
       totalCommunications,
@@ -374,8 +352,8 @@ router.get('/stats/overview', adminRoute, async (req: Request, res: Response) =>
       Communication.countDocuments({ status: 'sent' }),
       Communication.countDocuments({ status: 'scheduled' }),
       Communication.countDocuments({ status: 'draft' }),
-      Communication.countDocuments({ 
-        createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } 
+      Communication.countDocuments({
+        createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
       }),
       Communication.aggregate([
         { $match: { status: 'sent' } },

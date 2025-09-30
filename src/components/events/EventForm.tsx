@@ -23,6 +23,7 @@ import { useForm } from '@mantine/form';
 import { IconUpload, IconAlertCircle, IconCalendar, IconMapPin } from '@tabler/icons-react';
 import { Event } from '@/types';
 import { notifications } from '@mantine/notifications';
+import { eventsApiService } from '@/services/api/eventsService';
 
 interface EventFormData {
   title: string;
@@ -183,12 +184,6 @@ export function EventForm({ event, onSubmit, onCancel, loading = false }: EventF
                 placeholder="Select or enter location"
                 required
                 searchable
-                creatable
-                getCreateLabel={(query) => `+ Create "${query}"`}
-                onCreate={(query) => {
-                  const item = { value: query, label: query };
-                  return item;
-                }}
                 data={locationSuggestions}
                 leftSection={<IconMapPin style={{ width: rem(16), height: rem(16) }} />}
                 {...form.getInputProps('location')}

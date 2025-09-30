@@ -50,6 +50,29 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Test search endpoint
+app.get('/test-search', async (req, res) => {
+  try {
+    const { search } = req.query;
+    const { AlumniProfile } = await import('./models/AlumniProfile');
+    
+    const query: any = {};
+    if (search) {
+      const searchRegex = new RegExp(search as string, 'i');
+      query.$or = [
+        { firstName: searchRegex },
+        { lastName: searchRegex },
+        { currentCompany: searchRegex }
+      ];
+    }
+    
+    const results = await AlumniProfile.find(query).limit(5);
+    res.json({ search, query, results: results.length, data: results });
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
 // API routes
 app.get('/api', (req, res) => {
   res.json({
@@ -76,7 +99,7 @@ app.use('/api/dashboard', dashboardRoutes);
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   logger.error('Unhandled error:', err);
-  
+
   res.status(err.status || 500).json({
     error: {
       message: err.message || 'Internal Server Error',
@@ -100,13 +123,13 @@ async function startServer() {
   try {
     // Connect to database
     await connectDatabase();
-    
+
     // Start listening
     app.listen(PORT, () => {
       logger.info(`Server running on port ${PORT}`);
       logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
     });
-    
+
   } catch (error) {
     logger.error('Failed to start server:', error);
     process.exit(1);

@@ -47,14 +47,20 @@ import {
   IconChevronUp
 } from '@tabler/icons-react';
 import { AlumniProfile } from '@/types';
-import { mockAlumniService, AlumniFilters, AlumniSortOptions } from '@/lib/mock-services/alumniService';
-import { PaginatedResponse } from '@/lib/mock-services/base';
+import { alumniApiService, AlumniFilters } from '@/services/api/alumniService';
+import { useUserRole } from '@/hooks/useUserRole';
+
+interface AlumniSortOptions {
+  sortBy: string;
+  sortOrder: 'asc' | 'desc';
+}
 
 interface AlumniDirectoryProps {
   onSelectAlumni?: (alumni: AlumniProfile) => void;
 }
 
 export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
+  const { isAdmin } = useUserRole();
   const [alumni, setAlumni] = useState<AlumniProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -69,6 +75,7 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
   const [filters, setFilters] = useState<AlumniFilters>({});
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchInput, setSearchInput] = useState('');
 
   // Sort states
   const [sortField, setSortField] = useState<keyof AlumniProfile>('lastName');
@@ -99,22 +106,37 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
         search: searchQuery || undefined
       };
 
-      const response: PaginatedResponse<AlumniProfile> = await mockAlumniService.getAlumni(
-        currentFilters,
-        sortOptions,
+      const apiParams = {
+        ...currentFilters,
+        ...sortOptions,
         page,
-        pagination.limit
-      );
+        limit: pagination.limit,
+      };
+      
+      console.log('API Params:', apiParams);
+      const response = await alumniApiService.getAlumni(apiParams);
 
-      setAlumni(response.data);
+      // Ensure response.alumni is an array
+      const alumniData = Array.isArray(response.alumni) ? response.alumni : [];
+      setAlumni(alumniData);
+      
       setPagination({
-        page: response.pagination.page,
-        limit: response.pagination.limit,
-        total: response.pagination.total,
-        totalPages: response.pagination.totalPages
+        page: response.pagination?.currentPage || 1,
+        limit: response.pagination?.itemsPerPage || 12,
+        total: response.pagination?.totalItems || 0,
+        totalPages: response.pagination?.totalPages || 0
       });
     } catch (err) {
+      console.error('Alumni API Error:', err);
       setError(err instanceof Error ? err.message : 'Failed to load alumni');
+      // Fallback to empty array
+      setAlumni([]);
+      setPagination({
+        page: 1,
+        limit: 12,
+        total: 0,
+        totalPages: 0
+      });
     } finally {
       setLoading(false);
     }
@@ -123,8 +145,7 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
   // Load filter options
   const loadFilterOptions = async () => {
     try {
-      const statsResponse = await mockAlumniService.getAlumniStats();
-      const stats = statsResponse.data;
+      const stats = await alumniApiService.getAlumniStats();
 
       setFilterOptions({
         graduationYears: Object.keys(stats.graduationYearDistribution)
@@ -158,10 +179,19 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
     }));
   };
 
-  // Handle search
+  // Handle search with debouncing
   const handleSearch = (value: string) => {
-    setSearchQuery(value);
+    setSearchInput(value);
   };
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchQuery(searchInput);
+    }, 500); // 500ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   // Handle sort change
   const handleSortChange = (field: keyof AlumniProfile) => {
@@ -177,6 +207,7 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
   const clearFilters = () => {
     setFilters({});
     setSearchQuery('');
+    setSearchInput('');
   };
 
   // Handle page change
@@ -187,7 +218,7 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
   // Get active filter count
   const activeFilterCount = useMemo(() => {
     let count = 0;
-    if (searchQuery) count++;
+    if (searchInput) count++;
     if (filters.graduationYear) count++;
     if (filters.degree) count++;
     if (filters.location) count++;
@@ -208,14 +239,16 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
           </Text>
         </div>
         <Group>
-          <Button
-            variant="filled"
-            leftSection={<IconUser size={16} />}
-            component="a"
-            href="/alumni/add"
-          >
-            Add Alumni
-          </Button>
+          {isAdmin && (
+            <Button
+              variant="filled"
+              leftSection={<IconUser size={16} />}
+              component="a"
+              href="/alumni/add"
+            >
+              Add Alumni
+            </Button>
+          )}
           <Button
             variant="light"
             leftSection={<IconFilter size={16} />}
@@ -236,12 +269,13 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
 
       {/* Search Bar */}
       <TextInput
-        placeholder="Search alumni by name, company, position, or skills..."
+        placeholder="Search alumni by name, company, position, skills, location..."
         leftSection={<IconSearch size={16} />}
-        value={searchQuery}
+        value={searchInput}
         onChange={(e) => handleSearch(e.target.value)}
         mb="md"
         size="md"
+        rightSection={loading && searchInput ? <Loader size="xs" /> : null}
       />
 
       {/* Filters Panel */}
@@ -370,7 +404,7 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
       {!loading && !error && (
         <>
           <Grid>
-            {alumni.map((alumniProfile) => (
+            {alumni && alumni.length > 0 ? alumni.map((alumniProfile) => (
               <Grid.Col key={alumniProfile.id} span={{ base: 12, sm: 6, lg: 4 }}>
                 <AlumniCard
                   alumni={alumniProfile}
@@ -384,11 +418,17 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
                   }}
                 />
               </Grid.Col>
-            ))}
+            )) : (
+              <Grid.Col span={12}>
+                <Text ta="center" c="dimmed" py="xl">
+                  No alumni found. Try adjusting your filters.
+                </Text>
+              </Grid.Col>
+            )}
           </Grid>
 
           {/* Empty State */}
-          {alumni.length === 0 && (
+          {alumni && alumni.length === 0 && (
             <Center py="xl">
               <Stack align="center">
                 <IconUser size={48} color="gray" />

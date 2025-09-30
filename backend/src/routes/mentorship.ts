@@ -15,7 +15,7 @@ import mongoose from 'mongoose';
 const router = express.Router();
 
 // GET /api/mentorship/connections - List mentorship connections
-router.get('/connections', authenticatedRoute, async (req: Request, res: Response) => {
+router.get('/connections', authenticatedRoute, async (req: Request, res: Response): Promise<any> => {
   try {
     const {
       page = 1,
@@ -92,7 +92,7 @@ router.get('/connections', authenticatedRoute, async (req: Request, res: Respons
 });
 
 // GET /api/mentorship/mentors - List available mentors
-router.get('/mentors', authenticatedRoute, requireAlumni, async (req: Request, res: Response) => {
+router.get('/mentors', authenticatedRoute, requireAlumni, async (req: Request, res: Response): Promise<any> => {
   try {
     const {
       page = 1,
@@ -173,7 +173,7 @@ router.get('/mentors', authenticatedRoute, requireAlumni, async (req: Request, r
 });
 
 // GET /api/mentorship/mentors/:id - Get specific mentor profile
-router.get('/mentors/:id', authenticatedRoute, requireAlumni, async (req: Request, res: Response) => {
+router.get('/mentors/:id', authenticatedRoute, requireAlumni, async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
 
@@ -211,7 +211,7 @@ router.get('/mentors/:id', authenticatedRoute, requireAlumni, async (req: Reques
 });
 
 // POST /api/mentorship/mentors - Create mentor profile
-router.post('/mentors', authenticatedRoute, requireAlumni, async (req: Request, res: Response) => {
+router.post('/mentors', authenticatedRoute, requireAlumni, async (req: Request, res: Response): Promise<any> => {
   try {
     const {
       expertise = [],
@@ -266,7 +266,7 @@ router.post('/mentors', authenticatedRoute, requireAlumni, async (req: Request, 
 });
 
 // POST /api/mentorship/mentees - Create mentee profile
-router.post('/mentees', authenticatedRoute, requireAlumni, async (req: Request, res: Response) => {
+router.post('/mentees', authenticatedRoute, requireAlumni, async (req: Request, res: Response): Promise<any> => {
   try {
     const {
       goals = [],
@@ -317,7 +317,7 @@ router.post('/mentees', authenticatedRoute, requireAlumni, async (req: Request, 
 });
 
 // POST /api/mentorship/connections - Request mentorship connection
-router.post('/connections', authenticatedRoute, requireAlumni, async (req: Request, res: Response) => {
+router.post('/connections', authenticatedRoute, requireAlumni, async (req: Request, res: Response): Promise<any> => {
   try {
     const { mentorId, notes } = req.body;
 
@@ -386,7 +386,7 @@ router.post('/connections', authenticatedRoute, requireAlumni, async (req: Reque
 });
 
 // PUT /api/mentorship/connections/:id/status - Update connection status
-router.put('/connections/:id/status', authenticatedRoute, async (req: Request, res: Response) => {
+router.put('/connections/:id/status', authenticatedRoute, async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
     const { status, startDate, endDate } = req.body;
@@ -408,8 +408,8 @@ router.put('/connections/:id/status', authenticatedRoute, async (req: Request, r
     }
 
     // Check permissions - only mentor, mentee, or admin can update
-    const isMentor = connection.mentorId.alumniId.toString() === req.user!._id.toString();
-    const isMentee = connection.menteeId.alumniId.toString() === req.user!._id.toString();
+    const isMentor = (connection.mentorId as any).alumniId?.toString() === (req.user as any)?._id?.toString();
+    const isMentee = (connection.menteeId as any).alumniId?.toString() === (req.user as any)?._id?.toString();
     const isAdmin = req.user?.role === 'admin';
 
     if (!isMentor && !isMentee && !isAdmin) {
@@ -451,7 +451,7 @@ router.put('/connections/:id/status', authenticatedRoute, async (req: Request, r
 });
 
 // POST /api/mentorship/connections/:id/feedback - Add feedback to connection
-router.post('/connections/:id/feedback', authenticatedRoute, async (req: Request, res: Response) => {
+router.post('/connections/:id/feedback', authenticatedRoute, async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
     const { feedback, rating } = req.body;
@@ -473,8 +473,8 @@ router.post('/connections/:id/feedback', authenticatedRoute, async (req: Request
     }
 
     // Check permissions and determine feedback type
-    const isMentor = connection.mentorId.alumniId.toString() === req.user!._id.toString();
-    const isMentee = connection.menteeId.alumniId.toString() === req.user!._id.toString();
+    const isMentor = (connection.mentorId as any).alumniId?.toString() === (req.user as any)?._id?.toString();
+    const isMentee = (connection.menteeId as any).alumniId?.toString() === (req.user as any)?._id?.toString();
 
     if (!isMentor && !isMentee) {
       return res.status(403).json({ error: 'Forbidden - Not authorized to add feedback' });
@@ -503,7 +503,7 @@ router.post('/connections/:id/feedback', authenticatedRoute, async (req: Request
 });
 
 // GET /api/mentorship/stats/overview - Get mentorship statistics (admin only)
-router.get('/stats/overview', adminRoute, async (req: Request, res: Response) => {
+router.get('/stats/overview', adminRoute, async (req: Request, res: Response): Promise<any> => {
   try {
     const [
       totalConnections,

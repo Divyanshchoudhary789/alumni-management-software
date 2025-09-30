@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { ColorSchemeScript, MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
+import { ClerkProvider } from '@clerk/nextjs';
 import { theme } from '@/lib/theme';
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
@@ -21,16 +22,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <head>
-        <ColorSchemeScript />
-      </head>
-      <body className={inter.className}>
-        <MantineProvider theme={theme}>
-          <Notifications />
-          {children}
-        </MantineProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" suppressHydrationWarning>
+        <head>
+          <ColorSchemeScript />
+        </head>
+        <body className={inter.className} suppressHydrationWarning>
+          <MantineProvider theme={theme}>
+            <Notifications />
+            {children}
+          </MantineProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

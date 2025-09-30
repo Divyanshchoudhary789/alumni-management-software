@@ -25,8 +25,7 @@ const AlumniProfileSchema = new Schema<IAlumniProfile>({
   userId: {
     type: Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
-    unique: true,
+    required: false,
     index: true,
   },
   firstName: {
