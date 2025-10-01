@@ -33,25 +33,30 @@ export const clerkConfig = {
       strategy: 'oauth_linkedin',
     },
   },
-  
+
   // Appearance customization for consistent UI
   appearance: {
     elements: {
-      formButtonPrimary: 'bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors',
+      formButtonPrimary:
+        'bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors',
       card: 'shadow-lg border border-gray-200 rounded-lg bg-white',
       headerTitle: 'text-2xl font-bold text-gray-900 mb-2',
       headerSubtitle: 'text-gray-600 mb-4',
-      socialButtonsBlockButton: 'border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium transition-colors',
+      socialButtonsBlockButton:
+        'border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium transition-colors',
       socialButtonsBlockButtonText: 'font-medium',
-      formFieldInput: 'border border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md px-3 py-2',
+      formFieldInput:
+        'border border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md px-3 py-2',
       formFieldLabel: 'text-gray-700 font-medium mb-1',
-      footerActionLink: 'text-blue-600 hover:text-blue-700 font-medium transition-colors',
+      footerActionLink:
+        'text-blue-600 hover:text-blue-700 font-medium transition-colors',
       dividerLine: 'bg-gray-300',
       dividerText: 'text-gray-500 text-sm',
       identityPreviewText: 'text-gray-600',
       identityPreviewEditButton: 'text-blue-600 hover:text-blue-700',
       formResendCodeLink: 'text-blue-600 hover:text-blue-700',
-      otpCodeFieldInput: 'border border-gray-300 focus:border-blue-500 focus:ring-blue-500',
+      otpCodeFieldInput:
+        'border border-gray-300 focus:border-blue-500 focus:ring-blue-500',
     },
     variables: {
       colorPrimary: '#2563eb',
@@ -66,7 +71,7 @@ export const clerkConfig = {
       fontFamily: 'system-ui, -apple-system, sans-serif',
     },
   },
-  
+
   // Localization and customization
   localization: {
     signIn: {
@@ -82,7 +87,7 @@ export const clerkConfig = {
       },
     },
   },
-  
+
   // Sign-in and sign-up options
   signIn: {
     elements: {
@@ -90,7 +95,7 @@ export const clerkConfig = {
       socialButtonsBlockButton: 'mb-2',
     },
   },
-  
+
   signUp: {
     elements: {
       socialButtonsProviderIcon: 'w-5 h-5',

@@ -1,12 +1,12 @@
 import { Card, Group, Text, Avatar, ThemeIcon, Stack } from '@mantine/core';
-import { 
-  IconUserPlus, 
-  IconCurrencyDollar, 
-  IconCalendarEvent, 
-  IconUsers, 
-  IconMail, 
+import {
+  IconUserPlus,
+  IconCurrencyDollar,
+  IconCalendarEvent,
+  IconUsers,
+  IconMail,
   IconEdit,
-  IconUsersGroup
+  IconUsersGroup,
 } from '@tabler/icons-react';
 import { RecentActivity } from '@/types';
 import classes from './ActivityCard.module.css';
@@ -17,7 +17,7 @@ interface ActivityCardProps {
 
 const getActivityIcon = (type: RecentActivity['type']) => {
   const iconProps = { size: 16 };
-  
+
   switch (type) {
     case 'new_alumni':
       return <IconUserPlus {...iconProps} />;
@@ -61,8 +61,10 @@ const getActivityColor = (type: RecentActivity['type']) => {
 
 const formatTimeAgo = (timestamp: Date) => {
   const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - timestamp.getTime()) / 1000);
-  
+  const diffInSeconds = Math.floor(
+    (now.getTime() - timestamp.getTime()) / 1000
+  );
+
   if (diffInSeconds < 60) {
     return 'Just now';
   } else if (diffInSeconds < 3600) {
@@ -81,25 +83,20 @@ const formatTimeAgo = (timestamp: Date) => {
 
 export function ActivityCard({ activity }: ActivityCardProps) {
   const color = getActivityColor(activity.type);
-  
+
   return (
-    <Card 
-      withBorder={false} 
-      radius="sm" 
-      className={classes.card}
-      p="md"
-    >
+    <Card withBorder={false} radius="sm" className={classes.card} p="md">
       <Group gap="md" align="flex-start">
-        <ThemeIcon 
-          size="md" 
-          radius="xl" 
-          variant="light" 
+        <ThemeIcon
+          size="md"
+          radius="xl"
+          variant="light"
           color={color}
           className={classes.icon}
         >
           {getActivityIcon(activity.type)}
         </ThemeIcon>
-        
+
         <Stack gap={4} style={{ flex: 1 }}>
           <Group justify="space-between" align="flex-start">
             <Text size="sm" fw={500} className={classes.title}>
@@ -109,7 +106,7 @@ export function ActivityCard({ activity }: ActivityCardProps) {
               {formatTimeAgo(activity.timestamp)}
             </Text>
           </Group>
-          
+
           <Text size="sm" c="dimmed" className={classes.description}>
             {activity.description}
           </Text>

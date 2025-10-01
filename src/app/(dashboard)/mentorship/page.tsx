@@ -15,7 +15,7 @@ import {
   ActionIcon,
   Tooltip,
   LoadingOverlay,
-  Alert
+  Alert,
 } from '@mantine/core';
 import {
   IconUsers,
@@ -23,7 +23,7 @@ import {
   IconChartBar,
   IconSettings,
   IconRefresh,
-  IconInfoCircle
+  IconInfoCircle,
 } from '@tabler/icons-react';
 import { mockMentorshipService } from '@/lib/mock-services/mentorshipService';
 import { MentorshipOverview } from '@/components/mentorship/MentorshipOverview';
@@ -66,7 +66,8 @@ export default function MentorshipPage() {
             Mentorship Program
           </Title>
           <Text c="dimmed" size="sm">
-            Connect alumni mentors with mentees to foster career growth and networking
+            Connect alumni mentors with mentees to foster career growth and
+            networking
           </Text>
         </div>
         <Group>
@@ -164,7 +165,10 @@ export default function MentorshipPage() {
         </Grid>
       )}
 
-      <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'overview')}>
+      <Tabs
+        value={activeTab}
+        onChange={value => setActiveTab(value || 'overview')}
+      >
         <Tabs.List>
           <Tabs.Tab value="overview" leftSection={<IconChartBar size={16} />}>
             Overview
@@ -182,7 +186,7 @@ export default function MentorshipPage() {
 
         <div style={{ position: 'relative' }}>
           <LoadingOverlay visible={loading} />
-          
+
           <Tabs.Panel value="overview" pt="md">
             <MentorshipOverview stats={stats} onRefresh={handleRefresh} />
           </Tabs.Panel>

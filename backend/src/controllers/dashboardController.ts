@@ -201,6 +201,258 @@ export const getDashboardMetrics = async (req: Request, res: Response): Promise<
 };
 
 /**
+ * Get alumni growth chart data
+ */
+export const getAlumniGrowthData = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const period = req.query.period as string || 'month';
+    const cacheKey = `dashboard:alumni-growth:${period}`;
+    
+    // Try to get from cache first
+    const cachedData = await cacheService.get(cacheKey);
+    if (cachedData) {
+      logger.info('Alumni growth data served from cache');
+      res.json(cachedData);
+      return;
+    }
+
+    let dateFormat: any;
+    let groupBy: any;
+    let startDate: Date;
+
+    const now = new Date();
+    
+    switch (period) {
+      case 'week':
+        startDate = new Date(now.getTime() - 7 * 7 * 24 * 60 * 60 * 1000); // 7 weeks
+        dateFormat = { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } };
+        groupBy = { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } };
+        break;
+      case 'year':
+        startDate = new Date(now.getFullYear() - 2, 0, 1); // 2 years
+        dateFormat = { $dateToString: { format: "%Y-%m", date: "$createdAt" } };
+        groupBy = { $dateToString: { format: "%Y-%m", date: "$createdAt" } };
+        break;
+      default: // month
+        startDate = new Date(now.getFullYear(), now.getMonth() - 11, 1); // 12 months
+        dateFormat = { $dateToString: { format: "%Y-%m", date: "$createdAt" } };
+        groupBy = { $dateToString: { format: "%Y-%m", date: "$createdAt" } };
+    }
+
+    const growthData = await AlumniProfile.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: groupBy,
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { _id: 1 }
+      }
+    ]);
+
+    // Calculate growth percentages
+    const result = growthData.map((item, index) => ({
+      date: item._id,
+      count: item.count,
+      growth: index > 0 ? ((item.count - growthData[index - 1].count) / growthData[index - 1].count) * 100 : 0
+    }));
+
+    // Cache for 10 minutes
+    await cacheService.set(cacheKey, result, 600);
+    
+    logger.info('Alumni growth data calculated and cached');
+    res.json(result);
+
+  } catch (error) {
+    logger.error('Error fetching alumni growth data:', error);
+    res.status(500).json({
+      error: {
+        message: 'Failed to fetch alumni growth data',
+        code: 'ALUMNI_GROWTH_ERROR'
+      }
+    });
+  }
+};
+
+/**
+ * Get event attendance chart data
+ */
+export const getEventAttendanceData = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const period = req.query.period as string || 'month';
+    const cacheKey = `dashboard:event-attendance:${period}`;
+    
+    // Try to get from cache first
+    const cachedData = await cacheService.get(cacheKey);
+    if (cachedData) {
+      logger.info('Event attendance data served from cache');
+      res.json(cachedData);
+      return;
+    }
+
+    let startDate: Date;
+    let groupBy: any;
+
+    const now = new Date();
+    
+    switch (period) {
+      case 'week':
+        startDate = new Date(now.getTime() - 7 * 7 * 24 * 60 * 60 * 1000); // 7 weeks
+        groupBy = { $dateToString: { format: "%Y-%m-%d", date: "$eventDate" } };
+        break;
+      case 'year':
+        startDate = new Date(now.getFullYear() - 2, 0, 1); // 2 years
+        groupBy = { $dateToString: { format: "%Y-%m", date: "$eventDate" } };
+        break;
+      default: // month
+        startDate = new Date(now.getFullYear(), now.getMonth() - 11, 1); // 12 months
+        groupBy = { $dateToString: { format: "%Y-%m", date: "$eventDate" } };
+    }
+
+    const attendanceData = await Event.aggregate([
+      {
+        $match: {
+          eventDate: { $gte: startDate }
+        }
+      },
+      {
+        $lookup: {
+          from: 'eventregistrations',
+          localField: '_id',
+          foreignField: 'eventId',
+          as: 'registrations'
+        }
+      },
+      {
+        $group: {
+          _id: groupBy,
+          events: { $sum: 1 },
+          registrations: { $sum: { $size: '$registrations' } },
+          attendance: {
+            $sum: {
+              $size: {
+                $filter: {
+                  input: '$registrations',
+                  cond: { $eq: ['$$this.status', 'attended'] }
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        $sort: { _id: 1 }
+      }
+    ]);
+
+    // Cache for 10 minutes
+    await cacheService.set(cacheKey, attendanceData, 600);
+    
+    logger.info('Event attendance data calculated and cached');
+    res.json(attendanceData.map(item => ({
+      date: item._id,
+      events: item.events,
+      registrations: item.registrations,
+      attendance: item.attendance
+    })));
+
+  } catch (error) {
+    logger.error('Error fetching event attendance data:', error);
+    res.status(500).json({
+      error: {
+        message: 'Failed to fetch event attendance data',
+        code: 'EVENT_ATTENDANCE_ERROR'
+      }
+    });
+  }
+};
+
+/**
+ * Get donation trends chart data
+ */
+export const getDonationTrendsData = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const period = req.query.period as string || 'month';
+    const cacheKey = `dashboard:donation-trends:${period}`;
+    
+    // Try to get from cache first
+    const cachedData = await cacheService.get(cacheKey);
+    if (cachedData) {
+      logger.info('Donation trends data served from cache');
+      res.json(cachedData);
+      return;
+    }
+
+    let startDate: Date;
+    let groupBy: any;
+
+    const now = new Date();
+    
+    switch (period) {
+      case 'week':
+        startDate = new Date(now.getTime() - 7 * 7 * 24 * 60 * 60 * 1000); // 7 weeks
+        groupBy = { $dateToString: { format: "%Y-%m-%d", date: "$donationDate" } };
+        break;
+      case 'year':
+        startDate = new Date(now.getFullYear() - 2, 0, 1); // 2 years
+        groupBy = { $dateToString: { format: "%Y-%m", date: "$donationDate" } };
+        break;
+      default: // month
+        startDate = new Date(now.getFullYear(), now.getMonth() - 11, 1); // 12 months
+        groupBy = { $dateToString: { format: "%Y-%m", date: "$donationDate" } };
+    }
+
+    const donationData = await Donation.aggregate([
+      {
+        $match: {
+          status: 'completed',
+          donationDate: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: groupBy,
+          amount: { $sum: '$amount' },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { _id: 1 }
+      }
+    ]);
+
+    // Calculate averages and format result
+    const result = donationData.map(item => ({
+      date: item._id,
+      amount: item.amount,
+      count: item.count,
+      average: item.count > 0 ? item.amount / item.count : 0
+    }));
+
+    // Cache for 10 minutes
+    await cacheService.set(cacheKey, result, 600);
+    
+    logger.info('Donation trends data calculated and cached');
+    res.json(result);
+
+  } catch (error) {
+    logger.error('Error fetching donation trends data:', error);
+    res.status(500).json({
+      error: {
+        message: 'Failed to fetch donation trends data',
+        code: 'DONATION_TRENDS_ERROR'
+      }
+    });
+  }
+};
+
+/**
  * Get recent activities with caching
  */
 export const getRecentActivities = async (req: Request, res: Response): Promise<void> => {

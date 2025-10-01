@@ -21,7 +21,7 @@ import {
   Table,
   Avatar,
   Tooltip,
-  LoadingOverlay
+  LoadingOverlay,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import {
@@ -34,11 +34,11 @@ import {
   IconEye,
   IconUsers,
   IconCalendar,
-  IconInfoCircle
+  IconInfoCircle,
 } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import { mockMentorshipService } from '@/lib/mock-services/mentorshipService';
-import { mockAlumniService } from '@/lib/mock-services/alumniService';
+import { alumniProfileService } from '@/services/alumniProfileService';
 import { MentorshipConnection } from '@/types';
 
 export function MentorshipConnections() {
@@ -50,28 +50,34 @@ export function MentorshipConnections() {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [selectedConnection, setSelectedConnection] = useState<MentorshipConnection | null>(null);
-  
-  const [createModalOpened, { open: openCreateModal, close: closeCreateModal }] = useDisclosure(false);
-  const [editModalOpened, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
-  const [viewModalOpened, { open: openViewModal, close: closeViewModal }] = useDisclosure(false);
+  const [selectedConnection, setSelectedConnection] =
+    useState<MentorshipConnection | null>(null);
+
+  const [
+    createModalOpened,
+    { open: openCreateModal, close: closeCreateModal },
+  ] = useDisclosure(false);
+  const [editModalOpened, { open: openEditModal, close: closeEditModal }] =
+    useDisclosure(false);
+  const [viewModalOpened, { open: openViewModal, close: closeViewModal }] =
+    useDisclosure(false);
 
   const loadConnections = async () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const filters: any = {};
       if (searchQuery) filters.search = searchQuery;
       if (statusFilter) filters.status = statusFilter;
-      
+
       const response = await mockMentorshipService.getMentorshipConnections(
         filters,
         { field: 'createdAt', direction: 'desc' },
         currentPage,
         10
       );
-      
+
       setConnections(response.data);
       setTotalPages(response.totalPages);
     } catch (err: any) {
@@ -83,7 +89,7 @@ export function MentorshipConnections() {
 
   const loadAlumni = async () => {
     try {
-      const response = await mockAlumniService.getAlumni();
+      const response = await alumniProfileService.getAlumni();
       setAlumni(response.data);
     } catch (err) {
       console.error('Failed to load alumni:', err);
@@ -100,17 +106,25 @@ export function MentorshipConnections() {
 
   const getAlumniName = (alumniId: string) => {
     const alumnus = alumni.find(a => a.id === alumniId);
-    return alumnus ? `${alumnus.firstName} ${alumnus.lastName}` : `Alumni #${alumniId}`;
+    return alumnus
+      ? `${alumnus.firstName} ${alumnus.lastName}`
+      : `Alumni #${alumniId}`;
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'green';
-      case 'completed': return 'blue';
-      case 'pending': return 'orange';
-      case 'paused': return 'yellow';
-      case 'cancelled': return 'red';
-      default: return 'gray';
+      case 'active':
+        return 'green';
+      case 'completed':
+        return 'blue';
+      case 'pending':
+        return 'orange';
+      case 'paused':
+        return 'yellow';
+      case 'cancelled':
+        return 'red';
+      default:
+        return 'gray';
     }
   };
 
@@ -118,7 +132,7 @@ export function MentorshipConnections() {
     return new Date(date).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric',
     });
   };
 
@@ -133,7 +147,9 @@ export function MentorshipConnections() {
   };
 
   const handleDeleteConnection = async (connectionId: string) => {
-    if (confirm('Are you sure you want to delete this mentorship connection?')) {
+    if (
+      confirm('Are you sure you want to delete this mentorship connection?')
+    ) {
       try {
         await mockMentorshipService.deleteMentorshipConnection(connectionId);
         loadConnections();
@@ -143,9 +159,15 @@ export function MentorshipConnections() {
     }
   };
 
-  const handleUpdateConnection = async (connectionId: string, updates: Partial<MentorshipConnection>) => {
+  const handleUpdateConnection = async (
+    connectionId: string,
+    updates: Partial<MentorshipConnection>
+  ) => {
     try {
-      await mockMentorshipService.updateMentorshipConnection(connectionId, updates);
+      await mockMentorshipService.updateMentorshipConnection(
+        connectionId,
+        updates
+      );
       loadConnections();
       closeEditModal();
     } catch (err: any) {
@@ -184,7 +206,7 @@ export function MentorshipConnections() {
             placeholder="Search connections..."
             leftSection={<IconSearch size={16} />}
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={e => setSearchQuery(e.target.value)}
             style={{ flex: 1 }}
           />
           <Select
@@ -196,10 +218,10 @@ export function MentorshipConnections() {
               { value: 'completed', label: 'Completed' },
               { value: 'pending', label: 'Pending' },
               { value: 'paused', label: 'Paused' },
-              { value: 'cancelled', label: 'Cancelled' }
+              { value: 'cancelled', label: 'Cancelled' },
             ]}
             value={statusFilter}
-            onChange={(value) => setStatusFilter(value || '')}
+            onChange={value => setStatusFilter(value || '')}
             clearable
           />
         </Group>
@@ -208,7 +230,7 @@ export function MentorshipConnections() {
       {/* Connections Table */}
       <Card withBorder style={{ position: 'relative' }}>
         <LoadingOverlay visible={loading} />
-        
+
         <Table striped highlightOnHover>
           <Table.Thead>
             <Table.Tr>
@@ -222,7 +244,7 @@ export function MentorshipConnections() {
           </Table.Thead>
           <Table.Tbody>
             {connections.length > 0 ? (
-              connections.map((connection) => (
+              connections.map(connection => (
                 <Table.Tr key={connection.id}>
                   <Table.Td>
                     <Group gap="sm">
@@ -288,7 +310,9 @@ export function MentorshipConnections() {
                           <Menu.Item
                             leftSection={<IconTrash size={14} />}
                             color="red"
-                            onClick={() => handleDeleteConnection(connection.id)}
+                            onClick={() =>
+                              handleDeleteConnection(connection.id)
+                            }
                           >
                             Delete
                           </Menu.Item>
@@ -332,30 +356,41 @@ export function MentorshipConnections() {
           <Stack gap="md">
             <Grid>
               <Grid.Col span={6}>
-                <Text size="sm" fw={500} c="dimmed">Mentor</Text>
+                <Text size="sm" fw={500} c="dimmed">
+                  Mentor
+                </Text>
                 <Text>{getAlumniName(selectedConnection.mentorId)}</Text>
               </Grid.Col>
               <Grid.Col span={6}>
-                <Text size="sm" fw={500} c="dimmed">Mentee</Text>
+                <Text size="sm" fw={500} c="dimmed">
+                  Mentee
+                </Text>
                 <Text>{getAlumniName(selectedConnection.menteeId)}</Text>
               </Grid.Col>
               <Grid.Col span={6}>
-                <Text size="sm" fw={500} c="dimmed">Status</Text>
+                <Text size="sm" fw={500} c="dimmed">
+                  Status
+                </Text>
                 <Badge color={getStatusColor(selectedConnection.status)}>
                   {selectedConnection.status}
                 </Badge>
               </Grid.Col>
               <Grid.Col span={6}>
-                <Text size="sm" fw={500} c="dimmed">Duration</Text>
+                <Text size="sm" fw={500} c="dimmed">
+                  Duration
+                </Text>
                 <Text>
-                  {formatDate(selectedConnection.startDate)} - {formatDate(selectedConnection.endDate)}
+                  {formatDate(selectedConnection.startDate)} -{' '}
+                  {formatDate(selectedConnection.endDate)}
                 </Text>
               </Grid.Col>
             </Grid>
-            
+
             {selectedConnection.notes && (
               <div>
-                <Text size="sm" fw={500} c="dimmed" mb="xs">Notes</Text>
+                <Text size="sm" fw={500} c="dimmed" mb="xs">
+                  Notes
+                </Text>
                 <Text size="sm">{selectedConnection.notes}</Text>
               </div>
             )}
@@ -400,11 +435,11 @@ export function MentorshipConnections() {
 }
 
 // Edit Connection Form Component
-function EditConnectionForm({ 
-  connection, 
-  onSave, 
-  onCancel 
-}: { 
+function EditConnectionForm({
+  connection,
+  onSave,
+  onCancel,
+}: {
   connection: MentorshipConnection;
   onSave: (id: string, updates: Partial<MentorshipConnection>) => void;
   onCancel: () => void;
@@ -417,7 +452,7 @@ function EditConnectionForm({
     onSave(connection.id, {
       status,
       notes,
-      endDate: endDate || connection.endDate
+      endDate: endDate || connection.endDate,
     });
   };
 
@@ -430,45 +465,43 @@ function EditConnectionForm({
           { value: 'completed', label: 'Completed' },
           { value: 'pending', label: 'Pending' },
           { value: 'paused', label: 'Paused' },
-          { value: 'cancelled', label: 'Cancelled' }
+          { value: 'cancelled', label: 'Cancelled' },
         ]}
         value={status}
-        onChange={(value) => setStatus(value as any)}
+        onChange={value => setStatus(value as any)}
         required
       />
-      
+
       <DateInput
         label="End Date"
         value={endDate}
         onChange={setEndDate}
         leftSection={<IconCalendar size={16} />}
       />
-      
+
       <Textarea
         label="Notes"
         value={notes}
-        onChange={(e) => setNotes(e.target.value)}
+        onChange={e => setNotes(e.target.value)}
         rows={4}
       />
-      
+
       <Group justify="flex-end">
         <Button variant="light" onClick={onCancel}>
           Cancel
         </Button>
-        <Button onClick={handleSave}>
-          Save Changes
-        </Button>
+        <Button onClick={handleSave}>Save Changes</Button>
       </Group>
     </Stack>
   );
 }
 
 // Create Connection Form Component
-function CreateConnectionForm({ 
-  alumni, 
-  onSave, 
-  onCancel 
-}: { 
+function CreateConnectionForm({
+  alumni,
+  onSave,
+  onCancel,
+}: {
   alumni: any[];
   onSave: () => void;
   onCancel: () => void;
@@ -482,7 +515,7 @@ function CreateConnectionForm({
 
   const alumniOptions = alumni.map(a => ({
     value: a.id,
-    label: `${a.firstName} ${a.lastName} (${a.graduationYear})`
+    label: `${a.firstName} ${a.lastName} (${a.graduationYear})`,
   }));
 
   const handleSave = async () => {
@@ -490,19 +523,20 @@ function CreateConnectionForm({
 
     try {
       setLoading(true);
-      
+
       // Calculate end date if not provided (6 months from start)
-      const calculatedEndDate = endDate || new Date(startDate.getTime() + (6 * 30 * 24 * 60 * 60 * 1000));
-      
+      const calculatedEndDate =
+        endDate || new Date(startDate.getTime() + 6 * 30 * 24 * 60 * 60 * 1000);
+
       await mockMentorshipService.createMentorshipConnection({
         mentorId,
         menteeId,
         status: 'pending',
         startDate,
         endDate: calculatedEndDate,
-        notes
+        notes,
       });
-      
+
       onSave();
     } catch (err) {
       console.error('Failed to create connection:', err);
@@ -518,21 +552,21 @@ function CreateConnectionForm({
         placeholder="Select mentor"
         data={alumniOptions}
         value={mentorId}
-        onChange={(value) => setMentorId(value || '')}
+        onChange={value => setMentorId(value || '')}
         searchable
         required
       />
-      
+
       <Select
         label="Mentee"
         placeholder="Select mentee"
         data={alumniOptions}
         value={menteeId}
-        onChange={(value) => setMenteeId(value || '')}
+        onChange={value => setMenteeId(value || '')}
         searchable
         required
       />
-      
+
       <DateInput
         label="Start Date"
         value={startDate}
@@ -540,7 +574,7 @@ function CreateConnectionForm({
         leftSection={<IconCalendar size={16} />}
         required
       />
-      
+
       <DateInput
         label="End Date"
         value={endDate}
@@ -548,15 +582,15 @@ function CreateConnectionForm({
         leftSection={<IconCalendar size={16} />}
         description="Leave empty to set 6 months from start date"
       />
-      
+
       <Textarea
         label="Notes"
         placeholder="Add any notes about this mentorship connection..."
         value={notes}
-        onChange={(e) => setNotes(e.target.value)}
+        onChange={e => setNotes(e.target.value)}
         rows={4}
       />
-      
+
       <Group justify="flex-end">
         <Button variant="light" onClick={onCancel}>
           Cancel

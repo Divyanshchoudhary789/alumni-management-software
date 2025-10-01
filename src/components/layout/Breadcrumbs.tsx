@@ -30,14 +30,14 @@ const routeLabels: Record<string, string> = {
 
 export function Breadcrumbs() {
   const pathname = usePathname();
-  
+
   // Don't show breadcrumbs on the main dashboard
   if (pathname === '/dashboard') {
     return null;
   }
 
   const pathSegments = pathname.split('/').filter(Boolean);
-  
+
   // Remove the first segment if it's 'dashboard'
   if (pathSegments[0] === 'dashboard') {
     pathSegments.shift();
@@ -52,9 +52,11 @@ export function Breadcrumbs() {
   pathSegments.forEach((segment, index) => {
     currentPath += `/${segment}`;
     const isLast = index === pathSegments.length - 1;
-    
+
     breadcrumbItems.push({
-      title: routeLabels[segment] || segment.charAt(0).toUpperCase() + segment.slice(1),
+      title:
+        routeLabels[segment] ||
+        segment.charAt(0).toUpperCase() + segment.slice(1),
       href: isLast ? undefined : currentPath,
     });
   });
@@ -62,13 +64,18 @@ export function Breadcrumbs() {
   const items = breadcrumbItems.map((item, index) => {
     if (item.href) {
       return (
-        <Anchor component={Link} href={item.href} key={index} className={classes.breadcrumbLink}>
+        <Anchor
+          component={Link}
+          href={item.href}
+          key={index}
+          className={classes.breadcrumbLink}
+        >
           {index === 0 && <IconHome size={16} style={{ marginRight: 4 }} />}
           {item.title}
         </Anchor>
       );
     }
-    
+
     return (
       <Text key={index} className={classes.currentPage}>
         {item.title}

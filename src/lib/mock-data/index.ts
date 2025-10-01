@@ -11,7 +11,10 @@ import { generateMockAlumni } from './alumni';
 import { generateMockEvents, generateMockEventRegistrations } from './events';
 import { generateMockDonations } from './donations';
 import { generateMockCommunications } from './communications';
-import { generateDashboardMetrics, generateRecentActivities } from './dashboard';
+import {
+  generateDashboardMetrics,
+  generateRecentActivities,
+} from './dashboard';
 import { generateMockMentorshipConnections } from './mentorship';
 
 export interface MockDataSet {
@@ -38,15 +41,18 @@ export const generateCompleteMockData = (options?: {
     eventsCount = 20,
     donationsCount = 100,
     communicationsCount = 20,
-    mentorshipCount = 20
+    mentorshipCount = 20,
   } = options || {};
 
   // Generate base data
   const alumni = generateMockAlumni(alumniCount);
   const events = generateMockEvents(eventsCount);
-  const donations = generateMockDonations(donationsCount, alumni.map(a => a.id));
+  const donations = generateMockDonations(
+    donationsCount,
+    alumni.map(a => a.id)
+  );
   const communications = generateMockCommunications(communicationsCount);
-  
+
   // Generate dependent data
   const eventRegistrations = generateMockEventRegistrations(events, alumni);
   const mentorshipConnections = generateMockMentorshipConnections(
@@ -54,9 +60,13 @@ export const generateCompleteMockData = (options?: {
     alumni.slice(0, 10).map(a => a.id), // First 10 as potential mentors
     alumni.slice(10).map(a => a.id) // Rest as potential mentees
   );
-  
+
   // Generate dashboard data
-  const dashboardMetrics = generateDashboardMetrics(alumni.length, events, donations);
+  const dashboardMetrics = generateDashboardMetrics(
+    alumni.length,
+    events,
+    donations
+  );
   const recentActivities = generateRecentActivities(alumni, events, donations);
 
   return {
@@ -67,7 +77,7 @@ export const generateCompleteMockData = (options?: {
     communications,
     mentorshipConnections,
     dashboardMetrics,
-    recentActivities
+    recentActivities,
   };
 };
 

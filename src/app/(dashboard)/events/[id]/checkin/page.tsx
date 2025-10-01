@@ -8,7 +8,7 @@ import {
   Center,
   Button,
   Group,
-  Text
+  Text,
 } from '@mantine/core';
 import { IconAlertCircle, IconArrowLeft } from '@tabler/icons-react';
 import { Event } from '@/types';

@@ -1,32 +1,36 @@
-import { Card, Title, Group, Select, Skeleton } from '@mantine/core';
+import { Card, Title, Group, Select, Skeleton, Text } from '@mantine/core';
 import { LineChart } from '@mantine/charts';
-import { useState, useEffect } from 'react';
-import { mockDashboardService } from '@/lib/mock-services';
+import { useState, useCallback } from 'react';
+import { useApi } from '@/hooks/useApi';
+import { mockAlumniService } from '@/lib/mock-services/alumniService';
 
 interface AlumniGrowthChartProps {
   height?: number;
 }
 
 export function AlumniGrowthChart({ height = 300 }: AlumniGrowthChartProps) {
-  const [data, setData] = useState<Array<{ period: string; count: number }>>([]);
-  const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<'month' | 'quarter' | 'year'>('month');
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const response = await mockDashboardService.getAlumniGrowthData(period);
-        setData(response.data);
-      } catch (error) {
-        console.error('Failed to load alumni growth data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Fetch alumni statistics for the chart
+  const apiCall = useCallback(() => mockAlumniService.getAlumniStats().then(res => res.data), []);
 
-    loadData();
-  }, [period]);
+  const {
+    data: alumniStats,
+    loading,
+    error,
+  } = useApi(apiCall, {
+    showErrorNotification: false,
+    immediate: true,
+  });
+
+  // Transform alumni graduation year stats to chart format
+  const chartData =
+    alumniStats?.graduationYearDistribution
+      ? Object.entries(alumniStats.graduationYearDistribution).map(([year, count]) => ({
+          period: year,
+          count,
+        }))
+      : [];
 
   if (loading) {
     return (
@@ -40,30 +44,52 @@ export function AlumniGrowthChart({ height = 300 }: AlumniGrowthChartProps) {
     );
   }
 
+  if (!chartData || chartData.length === 0) {
+    return (
+      <Card withBorder radius="md" p="lg">
+        <Group justify="space-between" mb="md">
+          <Title order={3}>Alumni Growth</Title>
+          <Select
+            value={period}
+            onChange={value => setPeriod(value as 'month' | 'quarter' | 'year')}
+            data={[
+              { value: 'month', label: 'Monthly' },
+              { value: 'quarter', label: 'Quarterly' },
+              { value: 'year', label: 'Yearly' },
+            ]}
+            size="sm"
+            w={120}
+          />
+        </Group>
+        <div style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Text c="dimmed">No data available</Text>
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <Card withBorder radius="md" p="lg">
       <Group justify="space-between" mb="md">
         <Title order={3}>Alumni Growth</Title>
         <Select
           value={period}
-          onChange={(value) => setPeriod(value as 'month' | 'quarter' | 'year')}
+          onChange={value => setPeriod(value as 'month' | 'quarter' | 'year')}
           data={[
             { value: 'month', label: 'Monthly' },
             { value: 'quarter', label: 'Quarterly' },
-            { value: 'year', label: 'Yearly' }
+            { value: 'year', label: 'Yearly' },
           ]}
           size="sm"
           w={120}
         />
       </Group>
-      
+
       <LineChart
         h={height}
-        data={data}
+        data={chartData}
         dataKey="period"
-        series={[
-          { name: 'count', label: 'Alumni Count', color: 'blue.6' }
-        ]}
+        series={[{ name: 'count', label: 'Alumni Count', color: 'blue.6' }]}
         curveType="monotone"
         strokeWidth={3}
         dotProps={{ r: 4, strokeWidth: 2 }}
@@ -74,7 +100,7 @@ export function AlumniGrowthChart({ height = 300 }: AlumniGrowthChartProps) {
         yAxisLabel="Number of Alumni"
         withTooltip
         tooltipAnimationDuration={200}
-        valueFormatter={(value) => value.toLocaleString()}
+        valueFormatter={value => value.toLocaleString()}
       />
     </Card>
   );

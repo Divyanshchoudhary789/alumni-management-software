@@ -1,9 +1,28 @@
 'use client';
 
-import { Card, Title, Group, Text, SimpleGrid, Skeleton, Badge, Progress } from '@mantine/core';
-import { IconUsers, IconTrendingUp, IconCalendarEvent, IconCurrencyDollar, IconMail, IconEye } from '@tabler/icons-react';
+import {
+  Card,
+  Title,
+  Group,
+  Text,
+  SimpleGrid,
+  Skeleton,
+  Badge,
+  Progress,
+} from '@mantine/core';
+import {
+  IconUsers,
+  IconTrendingUp,
+  IconCalendarEvent,
+  IconCurrencyDollar,
+  IconMail,
+  IconEye,
+} from '@tabler/icons-react';
 import { useState, useEffect } from 'react';
-import { mockAnalyticsService, EngagementMetrics } from '@/lib/mock-services/analyticsService';
+import {
+  mockAnalyticsService,
+  EngagementMetrics,
+} from '@/lib/mock-services/analyticsService';
 
 interface AnalyticsOverviewProps {
   dateRange?: {
@@ -20,7 +39,9 @@ export function AnalyticsOverview({ dateRange }: AnalyticsOverviewProps) {
     const loadMetrics = async () => {
       try {
         setLoading(true);
-        const response = await mockAnalyticsService.getEngagementMetrics({ dateRange });
+        const response = await mockAnalyticsService.getEngagementMetrics({
+          dateRange,
+        });
         setMetrics(response.data);
       } catch (error) {
         console.error('Failed to load engagement metrics:', error);
@@ -52,7 +73,9 @@ export function AnalyticsOverview({ dateRange }: AnalyticsOverviewProps) {
   if (!metrics) {
     return (
       <Card withBorder radius="md" p="lg">
-        <Text c="dimmed" ta="center">Failed to load analytics data</Text>
+        <Text c="dimmed" ta="center">
+          Failed to load analytics data
+        </Text>
       </Card>
     );
   }
@@ -75,10 +98,14 @@ export function AnalyticsOverview({ dateRange }: AnalyticsOverviewProps) {
       {/* Total Users */}
       <Card withBorder radius="md" p="lg">
         <Group justify="space-between" mb="xs">
-          <Text size="sm" c="dimmed" fw={500}>Total Users</Text>
+          <Text size="sm" c="dimmed" fw={500}>
+            Total Users
+          </Text>
           <IconUsers size={20} color="var(--mantine-color-blue-6)" />
         </Group>
-        <Text size="xl" fw={700} mb="xs">{formatNumber(metrics.totalUsers)}</Text>
+        <Text size="xl" fw={700} mb="xs">
+          {formatNumber(metrics.totalUsers)}
+        </Text>
         <Group gap="xs">
           <Badge size="sm" variant="light" color="blue">
             {formatNumber(metrics.activeUsers)} active
@@ -89,24 +116,38 @@ export function AnalyticsOverview({ dateRange }: AnalyticsOverviewProps) {
       {/* Engagement Rate */}
       <Card withBorder radius="md" p="lg">
         <Group justify="space-between" mb="xs">
-          <Text size="sm" c="dimmed" fw={500}>Engagement Rate</Text>
+          <Text size="sm" c="dimmed" fw={500}>
+            Engagement Rate
+          </Text>
           <IconTrendingUp size={20} color="var(--mantine-color-green-6)" />
         </Group>
-        <Text size="xl" fw={700} mb="xs">{formatPercentage(metrics.engagementRate)}</Text>
-        <Progress 
-          value={metrics.engagementRate} 
-          size="sm" 
-          color={metrics.engagementRate > 70 ? 'green' : metrics.engagementRate > 50 ? 'yellow' : 'red'}
+        <Text size="xl" fw={700} mb="xs">
+          {formatPercentage(metrics.engagementRate)}
+        </Text>
+        <Progress
+          value={metrics.engagementRate}
+          size="sm"
+          color={
+            metrics.engagementRate > 70
+              ? 'green'
+              : metrics.engagementRate > 50
+                ? 'yellow'
+                : 'red'
+          }
         />
       </Card>
 
       {/* Page Views */}
       <Card withBorder radius="md" p="lg">
         <Group justify="space-between" mb="xs">
-          <Text size="sm" c="dimmed" fw={500}>Page Views</Text>
+          <Text size="sm" c="dimmed" fw={500}>
+            Page Views
+          </Text>
           <IconEye size={20} color="var(--mantine-color-violet-6)" />
         </Group>
-        <Text size="xl" fw={700} mb="xs">{formatNumber(metrics.pageViews)}</Text>
+        <Text size="xl" fw={700} mb="xs">
+          {formatNumber(metrics.pageViews)}
+        </Text>
         <Text size="sm" c="dimmed">
           {formatNumber(metrics.uniqueVisitors)} unique visitors
         </Text>
@@ -115,10 +156,14 @@ export function AnalyticsOverview({ dateRange }: AnalyticsOverviewProps) {
       {/* Average Session Duration */}
       <Card withBorder radius="md" p="lg">
         <Group justify="space-between" mb="xs">
-          <Text size="sm" c="dimmed" fw={500}>Avg. Session Duration</Text>
+          <Text size="sm" c="dimmed" fw={500}>
+            Avg. Session Duration
+          </Text>
           <IconCalendarEvent size={20} color="var(--mantine-color-orange-6)" />
         </Group>
-        <Text size="xl" fw={700} mb="xs">{formatDuration(metrics.averageSessionDuration)}</Text>
+        <Text size="xl" fw={700} mb="xs">
+          {formatDuration(metrics.averageSessionDuration)}
+        </Text>
         <Text size="sm" c="dimmed">
           {formatPercentage(100 - metrics.bounceRate)} engagement
         </Text>
@@ -127,13 +172,17 @@ export function AnalyticsOverview({ dateRange }: AnalyticsOverviewProps) {
       {/* Return Visitor Rate */}
       <Card withBorder radius="md" p="lg">
         <Group justify="space-between" mb="xs">
-          <Text size="sm" c="dimmed" fw={500}>Return Visitors</Text>
+          <Text size="sm" c="dimmed" fw={500}>
+            Return Visitors
+          </Text>
           <IconUsers size={20} color="var(--mantine-color-teal-6)" />
         </Group>
-        <Text size="xl" fw={700} mb="xs">{formatPercentage(metrics.returnVisitorRate)}</Text>
-        <Progress 
-          value={metrics.returnVisitorRate} 
-          size="sm" 
+        <Text size="xl" fw={700} mb="xs">
+          {formatPercentage(metrics.returnVisitorRate)}
+        </Text>
+        <Progress
+          value={metrics.returnVisitorRate}
+          size="sm"
           color={metrics.returnVisitorRate > 60 ? 'teal' : 'orange'}
         />
       </Card>
@@ -141,17 +190,31 @@ export function AnalyticsOverview({ dateRange }: AnalyticsOverviewProps) {
       {/* Bounce Rate */}
       <Card withBorder radius="md" p="lg">
         <Group justify="space-between" mb="xs">
-          <Text size="sm" c="dimmed" fw={500}>Bounce Rate</Text>
-          <IconTrendingUp 
-            size={20} 
-            color={metrics.bounceRate < 30 ? "var(--mantine-color-green-6)" : "var(--mantine-color-red-6)"} 
+          <Text size="sm" c="dimmed" fw={500}>
+            Bounce Rate
+          </Text>
+          <IconTrendingUp
+            size={20}
+            color={
+              metrics.bounceRate < 30
+                ? 'var(--mantine-color-green-6)'
+                : 'var(--mantine-color-red-6)'
+            }
           />
         </Group>
-        <Text size="xl" fw={700} mb="xs">{formatPercentage(metrics.bounceRate)}</Text>
-        <Progress 
-          value={metrics.bounceRate} 
-          size="sm" 
-          color={metrics.bounceRate < 30 ? 'green' : metrics.bounceRate < 50 ? 'yellow' : 'red'}
+        <Text size="xl" fw={700} mb="xs">
+          {formatPercentage(metrics.bounceRate)}
+        </Text>
+        <Progress
+          value={metrics.bounceRate}
+          size="sm"
+          color={
+            metrics.bounceRate < 30
+              ? 'green'
+              : metrics.bounceRate < 50
+                ? 'yellow'
+                : 'red'
+          }
         />
       </Card>
     </SimpleGrid>

@@ -1,10 +1,16 @@
+// Load environment variables first
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
-import dotenv from 'dotenv';
+import path from 'path';
 import { connectDatabase } from './config/database';
 import { logger } from './config/logger';
+import { setupSwagger } from './config/swagger';
+import { globalErrorHandler, notFoundHandler } from './middleware/errorHandler';
+import { generalLimiter, securityHeaders, sanitizeInput, getCorsOptions } from './middleware/security';
 import webhookRoutes from './routes/webhooks';
 import authRoutes from './routes/auth';
 import alumniRoutes from './routes/alumni';
@@ -13,33 +19,38 @@ import communicationsRoutes from './routes/communications';
 import donationsRoutes from './routes/donations';
 import mentorshipRoutes from './routes/mentorship';
 import dashboardRoutes from './routes/dashboard';
+import uploadRoutes from './routes/upload';
 
-// Load environment variables
-dotenv.config();
+// Environment variables already loaded at the top
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust proxy for accurate IP addresses
+app.set('trust proxy', 1);
+
 // Security middleware
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false, // Disable CSP for Swagger UI
+  crossOriginEmbedderPolicy: false
+}));
+app.use(securityHeaders);
 
 // CORS configuration
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true,
-}));
+app.use(cors(getCorsOptions()));
+
+// Request sanitization
+app.use(sanitizeInput);
 
 // Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
-});
-app.use(limiter);
+app.use(generalLimiter);
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Serve static files (uploads)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -73,12 +84,18 @@ app.get('/test-search', async (req, res) => {
   }
 });
 
+// Setup API documentation
+setupSwagger(app);
+
 // API routes
 app.get('/api', (req, res) => {
   res.json({
     message: 'Alumni Management API',
     version: '1.0.0',
     status: 'running',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    documentation: '/api-docs'
   });
 });
 
@@ -95,28 +112,13 @@ app.use('/api/communications', communicationsRoutes);
 app.use('/api/donations', donationsRoutes);
 app.use('/api/mentorship', mentorshipRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/upload', uploadRoutes);
 
-// Error handling middleware
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  logger.error('Unhandled error:', err);
+// 404 handler for API routes
+app.use('/api/*', notFoundHandler);
 
-  res.status(err.status || 500).json({
-    error: {
-      message: err.message || 'Internal Server Error',
-      ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
-    },
-  });
-});
-
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({
-    error: {
-      message: 'Route not found',
-      path: req.originalUrl,
-    },
-  });
-});
+// Global error handling middleware
+app.use(globalErrorHandler);
 
 // Start server
 async function startServer() {

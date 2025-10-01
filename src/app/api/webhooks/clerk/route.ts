@@ -3,10 +3,13 @@ import { NextResponse } from 'next/server';
 import { Webhook } from 'svix';
 
 const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
+const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
 
 export async function POST(req: Request) {
   if (!webhookSecret) {
-    throw new Error('Please add CLERK_WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local');
+    throw new Error(
+      'Please add CLERK_WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local'
+    );
   }
 
   // Get the headers
@@ -47,32 +50,37 @@ export async function POST(req: Request) {
 
   // Handle the webhook
   const eventType = evt.type;
-  
+
   console.log(`Webhook with an ID of ${evt.data.id} and type of ${eventType}`);
-  console.log('Webhook body:', body);
 
-  switch (eventType) {
-    case 'user.created':
-      // Handle user creation
-      console.log('User created:', evt.data);
-      // TODO: Sync user with backend database
-      break;
-    
-    case 'user.updated':
-      // Handle user update
-      console.log('User updated:', evt.data);
-      // TODO: Update user in backend database
-      break;
-    
-    case 'user.deleted':
-      // Handle user deletion
-      console.log('User deleted:', evt.data);
-      // TODO: Delete user from backend database
-      break;
-    
-    default:
-      console.log(`Unhandled webhook event type: ${eventType}`);
+  try {
+    // Forward webhook to backend for processing
+    const response = await fetch(`${backendUrl}/api/webhooks/clerk`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'svix-id': svix_id,
+        'svix-timestamp': svix_timestamp,
+        'svix-signature': svix_signature,
+      },
+      body: body,
+    });
+
+    if (!response.ok) {
+      console.error('Backend webhook processing failed:', response.statusText);
+      return new Response('Backend processing failed', { status: 500 });
+    }
+
+    const result = await response.json();
+    console.log('Backend webhook processing result:', result);
+
+    return NextResponse.json({ 
+      message: 'Webhook processed successfully',
+      eventType,
+      userId: evt.data.id 
+    });
+  } catch (error) {
+    console.error('Error forwarding webhook to backend:', error);
+    return new Response('Error processing webhook', { status: 500 });
   }
-
-  return NextResponse.json({ message: 'Webhook received' });
 }

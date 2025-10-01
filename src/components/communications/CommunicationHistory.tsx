@@ -20,7 +20,7 @@ import {
   LoadingOverlay,
   Box,
   Card,
-  SimpleGrid
+  SimpleGrid,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
@@ -41,23 +41,26 @@ import {
   IconChartBar,
   IconTrendingUp,
   IconMouse,
-  IconMailOpened
+  IconMailOpened,
 } from '@tabler/icons-react';
 import { Communication } from '@/types';
-import { mockCommunicationService, CommunicationFilters } from '@/lib/mock-services/communicationService';
+import {
+  mockCommunicationService,
+  CommunicationFilters,
+} from '@/lib/mock-services/communicationService';
 
 const statusColors = {
   draft: 'gray',
   scheduled: 'blue',
   sent: 'green',
-  failed: 'red'
+  failed: 'red',
 };
 
 const statusIcons = {
   draft: IconEdit,
   scheduled: IconClock,
   sent: IconCheck,
-  failed: IconX
+  failed: IconX,
 };
 
 const typeLabels: Record<string, string> = {
@@ -68,7 +71,7 @@ const typeLabels: Record<string, string> = {
   program_launch: 'Program Launch',
   donation_receipt: 'Donation Receipt',
   welcome: 'Welcome Message',
-  reminder: 'Reminder'
+  reminder: 'Reminder',
 };
 
 const typeColors: Record<string, string> = {
@@ -79,18 +82,24 @@ const typeColors: Record<string, string> = {
   program_launch: 'purple',
   donation_receipt: 'teal',
   welcome: 'cyan',
-  reminder: 'yellow'
+  reminder: 'yellow',
 };
 
 export function CommunicationHistory() {
   const [communications, setCommunications] = useState<Communication[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCommunication, setSelectedCommunication] = useState<Communication | null>(null);
-  const [previewOpened, { open: openPreview, close: closePreview }] = useDisclosure(false);
-  const [deleteConfirmOpened, { open: openDeleteConfirm, close: closeDeleteConfirm }] = useDisclosure(false);
+  const [selectedCommunication, setSelectedCommunication] =
+    useState<Communication | null>(null);
+  const [previewOpened, { open: openPreview, close: closePreview }] =
+    useDisclosure(false);
+  const [
+    deleteConfirmOpened,
+    { open: openDeleteConfirm, close: closeDeleteConfirm },
+  ] = useDisclosure(false);
   const [stats, setStats] = useState<any>(null);
-  const [analyticsOpened, { open: openAnalytics, close: closeAnalytics }] = useDisclosure(false);
-  
+  const [analyticsOpened, { open: openAnalytics, close: closeAnalytics }] =
+    useDisclosure(false);
+
   // Pagination and filtering
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -104,7 +113,7 @@ export function CommunicationHistory() {
     { value: 'business', label: 'Business Alumni' },
     { value: 'engineering', label: 'Engineering Alumni' },
     { value: 'donors', label: 'Donors' },
-    { value: 'entrepreneurs', label: 'Entrepreneurs' }
+    { value: 'entrepreneurs', label: 'Entrepreneurs' },
   ];
 
   const loadCommunications = async () => {
@@ -116,14 +125,14 @@ export function CommunicationHistory() {
         currentPage,
         10
       );
-      
+
       setCommunications(response.data);
       setTotalPages(response.pagination.totalPages);
     } catch (error: any) {
       notifications.show({
         title: 'Error',
         message: error.message || 'Failed to load communications',
-        color: 'red'
+        color: 'red',
       });
     } finally {
       setLoading(false);
@@ -159,13 +168,15 @@ export function CommunicationHistory() {
 
   const handleDelete = async () => {
     if (!selectedCommunication) return;
-    
+
     try {
-      await mockCommunicationService.deleteCommunication(selectedCommunication.id);
+      await mockCommunicationService.deleteCommunication(
+        selectedCommunication.id
+      );
       notifications.show({
         title: 'Success',
         message: 'Communication deleted successfully',
-        color: 'green'
+        color: 'green',
       });
       loadCommunications();
       closeDeleteConfirm();
@@ -173,7 +184,7 @@ export function CommunicationHistory() {
       notifications.show({
         title: 'Error',
         message: error.message || 'Failed to delete communication',
-        color: 'red'
+        color: 'red',
       });
     }
   };
@@ -184,14 +195,14 @@ export function CommunicationHistory() {
       notifications.show({
         title: 'Success',
         message: 'Communication sent successfully',
-        color: 'green'
+        color: 'green',
       });
       loadCommunications();
     } catch (error: any) {
       notifications.show({
         title: 'Error',
         message: error.message || 'Failed to send communication',
-        color: 'red'
+        color: 'red',
       });
     }
   };
@@ -266,11 +277,13 @@ export function CommunicationHistory() {
 
       <Paper p="md" withBorder>
         <LoadingOverlay visible={loading} />
-        
+
         <Stack gap="md">
           {/* Header */}
           <Group justify="space-between">
-            <Text size="lg" fw={600}>Communication History</Text>
+            <Text size="lg" fw={600}>
+              Communication History
+            </Text>
             <Group gap="xs">
               <Button
                 leftSection={<IconChartBar size={16} />}
@@ -295,11 +308,11 @@ export function CommunicationHistory() {
               placeholder="Search communications..."
               leftSection={<IconSearch size={16} />}
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              onChange={e => setSearchQuery(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSearch()}
               style={{ flex: 1 }}
             />
-            
+
             <Select
               placeholder="Type"
               data={[
@@ -307,13 +320,15 @@ export function CommunicationHistory() {
                 { value: 'newsletter', label: 'Newsletter' },
                 { value: 'event_invitation', label: 'Event Invitation' },
                 { value: 'announcement', label: 'Announcement' },
-                { value: 'fundraising', label: 'Fundraising' }
+                { value: 'fundraising', label: 'Fundraising' },
               ]}
               value={filters.type || ''}
-              onChange={(value) => handleFilterChange({ type: value || undefined })}
+              onChange={value =>
+                handleFilterChange({ type: value || undefined })
+              }
               clearable
             />
-            
+
             <Select
               placeholder="Status"
               data={[
@@ -321,13 +336,17 @@ export function CommunicationHistory() {
                 { value: 'draft', label: 'Draft' },
                 { value: 'scheduled', label: 'Scheduled' },
                 { value: 'sent', label: 'Sent' },
-                { value: 'failed', label: 'Failed' }
+                { value: 'failed', label: 'Failed' },
               ]}
               value={filters.status || ''}
-              onChange={(value) => handleFilterChange({ status: value as Communication['status'] || undefined })}
+              onChange={value =>
+                handleFilterChange({
+                  status: (value as Communication['status']) || undefined,
+                })
+              }
               clearable
             />
-            
+
             <Button onClick={handleSearch}>Search</Button>
           </Group>
 
@@ -344,7 +363,7 @@ export function CommunicationHistory() {
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {communications.map((communication) => (
+              {communications.map(communication => (
                 <Table.Tr key={communication.id}>
                   <Table.Td>
                     <Text fw={500} lineClamp={1}>
@@ -372,7 +391,8 @@ export function CommunicationHistory() {
                     <Group gap="xs">
                       <IconUsers size={14} />
                       <Text size="sm">
-                        {communication.targetAudience.length} group{communication.targetAudience.length !== 1 ? 's' : ''}
+                        {communication.targetAudience.length} group
+                        {communication.targetAudience.length !== 1 ? 's' : ''}
                       </Text>
                     </Group>
                   </Table.Td>
@@ -380,10 +400,9 @@ export function CommunicationHistory() {
                     <Group gap="xs">
                       <IconCalendar size={14} />
                       <Text size="sm">
-                        {communication.sentDate 
+                        {communication.sentDate
                           ? communication.sentDate.toLocaleDateString()
-                          : communication.createdAt.toLocaleDateString()
-                        }
+                          : communication.createdAt.toLocaleDateString()}
                       </Text>
                     </Group>
                   </Table.Td>
@@ -401,7 +420,7 @@ export function CommunicationHistory() {
                           <IconEye size={14} />
                         </ActionIcon>
                       </Tooltip>
-                      
+
                       <Menu shadow="md" width={200}>
                         <Menu.Target>
                           <ActionIcon variant="light" size="sm">
@@ -415,7 +434,7 @@ export function CommunicationHistory() {
                               Send Now
                             </Menu.Item>
                           )}
-                          
+
                           {communication.status === 'failed' && (
                             <Menu.Item
                               leftSection={<IconSend size={14} />}
@@ -424,7 +443,7 @@ export function CommunicationHistory() {
                               Resend
                             </Menu.Item>
                           )}
-                          
+
                           {communication.status !== 'sent' && (
                             <>
                               <Menu.Item leftSection={<IconEdit size={14} />}>
@@ -475,36 +494,48 @@ export function CommunicationHistory() {
           <Stack gap="md">
             <Group justify="space-between">
               <div>
-                <Text fw={600} size="lg">{selectedCommunication.title}</Text>
+                <Text fw={600} size="lg">
+                  {selectedCommunication.title}
+                </Text>
                 <Group gap="xs" mt="xs">
                   <Badge variant="light">
-                    {typeLabels[selectedCommunication.type] || selectedCommunication.type}
+                    {typeLabels[selectedCommunication.type] ||
+                      selectedCommunication.type}
                   </Badge>
-                  <Badge color={statusColors[selectedCommunication.status]} variant="light">
+                  <Badge
+                    color={statusColors[selectedCommunication.status]}
+                    variant="light"
+                  >
                     {selectedCommunication.status}
                   </Badge>
                 </Group>
               </div>
             </Group>
-            
+
             <Group gap="xs">
-              <Text size="sm" c="dimmed">Target Audience:</Text>
+              <Text size="sm" c="dimmed">
+                Target Audience:
+              </Text>
               {selectedCommunication.targetAudience.map(audience => (
                 <Badge key={audience} size="sm" variant="outline">
-                  {audienceOptions.find(a => a.value === audience)?.label || audience}
+                  {audienceOptions.find(a => a.value === audience)?.label ||
+                    audience}
                 </Badge>
               ))}
             </Group>
-            
+
             <Group gap="xs">
               <Text size="sm" c="dimmed">
-                {selectedCommunication.sentDate ? 'Sent:' : 'Created:'} 
+                {selectedCommunication.sentDate ? 'Sent:' : 'Created:'}
               </Text>
               <Text size="sm">
-                {(selectedCommunication.sentDate || selectedCommunication.createdAt).toLocaleString()}
+                {(
+                  selectedCommunication.sentDate ||
+                  selectedCommunication.createdAt
+                ).toLocaleString()}
               </Text>
             </Group>
-            
+
             <Box
               style={{
                 border: '1px solid var(--mantine-color-gray-3)',
@@ -512,9 +543,11 @@ export function CommunicationHistory() {
                 padding: 'var(--mantine-spacing-md)',
                 minHeight: '200px',
                 maxHeight: '400px',
-                overflow: 'auto'
+                overflow: 'auto',
               }}
-              dangerouslySetInnerHTML={{ __html: selectedCommunication.content }}
+              dangerouslySetInnerHTML={{
+                __html: selectedCommunication.content,
+              }}
             />
           </Stack>
         )}
@@ -530,11 +563,11 @@ export function CommunicationHistory() {
         <Stack gap="md">
           <Alert color="red" variant="light">
             <Text size="sm">
-              Are you sure you want to delete "{selectedCommunication?.title}"? 
+              Are you sure you want to delete "{selectedCommunication?.title}"?
               This action cannot be undone.
             </Text>
           </Alert>
-          
+
           <Group justify="flex-end">
             <Button variant="light" onClick={closeDeleteConfirm}>
               Cancel
@@ -594,7 +627,10 @@ export function CommunicationHistory() {
                     24.3%
                   </Text>
                 </div>
-                <IconTrendingUp size={24} color="var(--mantine-color-orange-6)" />
+                <IconTrendingUp
+                  size={24}
+                  color="var(--mantine-color-orange-6)"
+                />
               </Group>
             </Card>
 
@@ -615,86 +651,120 @@ export function CommunicationHistory() {
 
           {/* Performance by Type */}
           <Card withBorder p="md">
-            <Text fw={600} mb="md">Performance by Communication Type</Text>
+            <Text fw={600} mb="md">
+              Performance by Communication Type
+            </Text>
             <Stack gap="sm">
-              {Object.entries(stats?.typeBreakdown || {}).map(([type, count]) => {
-                // Mock engagement data
-                const openRate = Math.floor(Math.random() * 30) + 50; // 50-80%
-                const clickRate = Math.floor(Math.random() * 20) + 15; // 15-35%
-                
-                return (
-                  <Group key={type} justify="space-between">
-                    <Group gap="xs">
-                      <Badge variant="light" color={typeColors[type] || 'gray'}>
-                        {typeLabels[type] || type}
-                      </Badge>
-                      <Text size="sm" c="dimmed">
-                        {count} sent
-                      </Text>
-                    </Group>
-                    <Group gap="md">
+              {Object.entries(stats?.typeBreakdown || {}).map(
+                ([type, count]) => {
+                  // Mock engagement data
+                  const openRate = Math.floor(Math.random() * 30) + 50; // 50-80%
+                  const clickRate = Math.floor(Math.random() * 20) + 15; // 15-35%
+
+                  return (
+                    <Group key={type} justify="space-between">
                       <Group gap="xs">
-                        <Text size="sm" c="dimmed">Open:</Text>
-                        <Text size="sm" fw={500} c="green">
-                          {openRate}%
+                        <Badge
+                          variant="light"
+                          color={typeColors[type] || 'gray'}
+                        >
+                          {typeLabels[type] || type}
+                        </Badge>
+                        <Text size="sm" c="dimmed">
+                          {count} sent
                         </Text>
                       </Group>
-                      <Group gap="xs">
-                        <Text size="sm" c="dimmed">Click:</Text>
-                        <Text size="sm" fw={500} c="orange">
-                          {clickRate}%
-                        </Text>
+                      <Group gap="md">
+                        <Group gap="xs">
+                          <Text size="sm" c="dimmed">
+                            Open:
+                          </Text>
+                          <Text size="sm" fw={500} c="green">
+                            {openRate}%
+                          </Text>
+                        </Group>
+                        <Group gap="xs">
+                          <Text size="sm" c="dimmed">
+                            Click:
+                          </Text>
+                          <Text size="sm" fw={500} c="orange">
+                            {clickRate}%
+                          </Text>
+                        </Group>
                       </Group>
                     </Group>
-                  </Group>
-                );
-              })}
+                  );
+                }
+              )}
             </Stack>
           </Card>
 
           {/* Audience Engagement */}
           <Card withBorder p="md">
-            <Text fw={600} mb="md">Audience Engagement</Text>
+            <Text fw={600} mb="md">
+              Audience Engagement
+            </Text>
             <Stack gap="sm">
-              {Object.entries(stats?.audienceReach || {}).slice(0, 6).map(([audience, count]) => {
-                const engagementRate = Math.floor(Math.random() * 40) + 40; // 40-80%
-                const audienceLabel = audienceOptions.find(a => a.value === audience)?.label || audience;
-                
-                return (
-                  <Group key={audience} justify="space-between">
-                    <Group gap="xs">
-                      <Text size="sm" fw={500}>
-                        {audienceLabel}
-                      </Text>
-                      <Text size="sm" c="dimmed">
-                        {count} communications
-                      </Text>
+              {Object.entries(stats?.audienceReach || {})
+                .slice(0, 6)
+                .map(([audience, count]) => {
+                  const engagementRate = Math.floor(Math.random() * 40) + 40; // 40-80%
+                  const audienceLabel =
+                    audienceOptions.find(a => a.value === audience)?.label ||
+                    audience;
+
+                  return (
+                    <Group key={audience} justify="space-between">
+                      <Group gap="xs">
+                        <Text size="sm" fw={500}>
+                          {audienceLabel}
+                        </Text>
+                        <Text size="sm" c="dimmed">
+                          {count} communications
+                        </Text>
+                      </Group>
+                      <Group gap="xs">
+                        <Text size="sm" c="dimmed">
+                          Engagement:
+                        </Text>
+                        <Text
+                          size="sm"
+                          fw={500}
+                          c={
+                            engagementRate > 60
+                              ? 'green'
+                              : engagementRate > 40
+                                ? 'orange'
+                                : 'red'
+                          }
+                        >
+                          {engagementRate}%
+                        </Text>
+                      </Group>
                     </Group>
-                    <Group gap="xs">
-                      <Text size="sm" c="dimmed">Engagement:</Text>
-                      <Text size="sm" fw={500} c={engagementRate > 60 ? 'green' : engagementRate > 40 ? 'orange' : 'red'}>
-                        {engagementRate}%
-                      </Text>
-                    </Group>
-                  </Group>
-                );
-              })}
+                  );
+                })}
             </Stack>
           </Card>
 
           {/* Recent Performance Trends */}
           <Card withBorder p="md">
-            <Text fw={600} mb="md">Recent Performance Trends</Text>
+            <Text fw={600} mb="md">
+              Recent Performance Trends
+            </Text>
             <Alert color="blue" variant="light">
               <Stack gap="xs">
                 <Text size="sm">
-                  <strong>📈 Trending Up:</strong> Event invitations showing 15% higher open rates this month
+                  <strong>📈 Trending Up:</strong> Event invitations showing 15%
+                  higher open rates this month
                 </Text>
                 <Text size="sm">
-                  <strong>📊 Insight:</strong> Tuesday and Thursday sends perform 23% better than other days
+                  <strong>📊 Insight:</strong> Tuesday and Thursday sends
+                  perform 23% better than other days
                 </Text>
                 <Text size="sm">
-                  <strong>🎯 Recommendation:</strong> Consider A/B testing subject lines for newsletter communications
+                  <strong>🎯 Recommendation:</strong> Consider A/B testing
+                  subject lines for newsletter communications
                 </Text>
               </Stack>
             </Alert>
@@ -702,34 +772,48 @@ export function CommunicationHistory() {
 
           {/* Delivery Status */}
           <Card withBorder p="md">
-            <Text fw={600} mb="md">Delivery Status Overview</Text>
+            <Text fw={600} mb="md">
+              Delivery Status Overview
+            </Text>
             <SimpleGrid cols={2} spacing="md">
               <Stack gap="xs">
                 <Group justify="space-between">
                   <Text size="sm">Successfully Delivered</Text>
-                  <Text size="sm" fw={500} c="green">98.7%</Text>
+                  <Text size="sm" fw={500} c="green">
+                    98.7%
+                  </Text>
                 </Group>
                 <Group justify="space-between">
                   <Text size="sm">Bounced</Text>
-                  <Text size="sm" fw={500} c="red">1.1%</Text>
+                  <Text size="sm" fw={500} c="red">
+                    1.1%
+                  </Text>
                 </Group>
                 <Group justify="space-between">
                   <Text size="sm">Spam Reports</Text>
-                  <Text size="sm" fw={500} c="orange">0.2%</Text>
+                  <Text size="sm" fw={500} c="orange">
+                    0.2%
+                  </Text>
                 </Group>
               </Stack>
               <Stack gap="xs">
                 <Group justify="space-between">
                   <Text size="sm">Unsubscribes</Text>
-                  <Text size="sm" fw={500} c="yellow">0.8%</Text>
+                  <Text size="sm" fw={500} c="yellow">
+                    0.8%
+                  </Text>
                 </Group>
                 <Group justify="space-between">
                   <Text size="sm">Failed Delivery</Text>
-                  <Text size="sm" fw={500} c="red">0.3%</Text>
+                  <Text size="sm" fw={500} c="red">
+                    0.3%
+                  </Text>
                 </Group>
                 <Group justify="space-between">
                   <Text size="sm">Pending</Text>
-                  <Text size="sm" fw={500} c="blue">0.1%</Text>
+                  <Text size="sm" fw={500} c="blue">
+                    0.1%
+                  </Text>
                 </Group>
               </Stack>
             </SimpleGrid>

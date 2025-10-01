@@ -10,7 +10,11 @@ export { default as AuthDemo } from './AuthDemo';
 
 // Authentication Hooks
 export { useAuth } from '@/hooks/useAuth';
-export { useAuthGuard, useRequireAuth, useRequireAdmin } from '@/hooks/useAuthGuard';
+export {
+  useAuthGuard,
+  useRequireAuth,
+  useRequireAdmin,
+} from '@/hooks/useAuthGuard';
 
 // Types
 export type { AuthContextType, UserMetadata, ClerkUser } from '@/types/clerk';

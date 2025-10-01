@@ -1,13 +1,13 @@
 'use client';
 
-import { 
-  Card, 
-  Title, 
-  Group, 
-  Text, 
-  Button, 
-  Select, 
-  MultiSelect, 
+import {
+  Card,
+  Title,
+  Group,
+  Text,
+  Button,
+  Select,
+  MultiSelect,
   Stack,
   Skeleton,
   Table,
@@ -16,12 +16,21 @@ import {
   ActionIcon,
   Modal,
   TextInput,
-  Textarea
+  Textarea,
 } from '@mantine/core';
 import { LineChart, BarChart, AreaChart } from '@mantine/charts';
-import { IconPlus, IconDownload, IconEye, IconTrash, IconEdit } from '@tabler/icons-react';
+import {
+  IconPlus,
+  IconDownload,
+  IconEye,
+  IconTrash,
+  IconEdit,
+} from '@tabler/icons-react';
 import { useState, useEffect } from 'react';
-import { mockAnalyticsService, AnalyticsFilters } from '@/lib/mock-services/analyticsService';
+import {
+  mockAnalyticsService,
+  AnalyticsFilters,
+} from '@/lib/mock-services/analyticsService';
 
 interface CustomReport {
   id: string;
@@ -41,8 +50,12 @@ interface CustomReportsProps {
 
 export function CustomReports({ filters }: CustomReportsProps) {
   const [reports, setReports] = useState<CustomReport[]>([]);
-  const [selectedReport, setSelectedReport] = useState<CustomReport | null>(null);
-  const [reportData, setReportData] = useState<Array<Record<string, any>> | null>(null);
+  const [selectedReport, setSelectedReport] = useState<CustomReport | null>(
+    null
+  );
+  const [reportData, setReportData] = useState<Array<
+    Record<string, any>
+  > | null>(null);
   const [loading, setLoading] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [newReport, setNewReport] = useState({
@@ -50,7 +63,7 @@ export function CustomReports({ filters }: CustomReportsProps) {
     description: '',
     metrics: [] as string[],
     groupBy: 'month' as 'day' | 'week' | 'month' | 'year',
-    chartType: 'line' as 'line' | 'bar' | 'area'
+    chartType: 'line' as 'line' | 'bar' | 'area',
   });
 
   const availableMetrics = [
@@ -63,7 +76,7 @@ export function CustomReports({ filters }: CustomReportsProps) {
     { value: 'new_registrations', label: 'New Registrations' },
     { value: 'communications_sent', label: 'Communications Sent' },
     { value: 'page_views', label: 'Page Views' },
-    { value: 'active_users', label: 'Active Users' }
+    { value: 'active_users', label: 'Active Users' },
   ];
 
   // Initialize with some sample reports
@@ -78,7 +91,7 @@ export function CustomReports({ filters }: CustomReportsProps) {
         groupBy: 'month',
         chartType: 'line',
         createdAt: new Date(2024, 0, 15),
-        lastRun: new Date(2024, 2, 10)
+        lastRun: new Date(2024, 2, 10),
       },
       {
         id: '2',
@@ -89,7 +102,7 @@ export function CustomReports({ filters }: CustomReportsProps) {
         groupBy: 'month',
         chartType: 'bar',
         createdAt: new Date(2024, 1, 1),
-        lastRun: new Date(2024, 2, 8)
+        lastRun: new Date(2024, 2, 8),
       },
       {
         id: '3',
@@ -100,8 +113,8 @@ export function CustomReports({ filters }: CustomReportsProps) {
         groupBy: 'month',
         chartType: 'area',
         createdAt: new Date(2024, 1, 20),
-        lastRun: new Date(2024, 2, 5)
-      }
+        lastRun: new Date(2024, 2, 5),
+      },
     ];
     setReports(sampleReports);
   }, []);
@@ -110,21 +123,19 @@ export function CustomReports({ filters }: CustomReportsProps) {
     try {
       setLoading(true);
       setSelectedReport(report);
-      
+
       const response = await mockAnalyticsService.getCustomReport(
         report.metrics,
         { ...report.filters, ...filters },
         report.groupBy
       );
-      
+
       setReportData(response.data);
-      
+
       // Update last run time
-      setReports(prev => prev.map(r => 
-        r.id === report.id 
-          ? { ...r, lastRun: new Date() }
-          : r
-      ));
+      setReports(prev =>
+        prev.map(r => (r.id === report.id ? { ...r, lastRun: new Date() } : r))
+      );
     } catch (error) {
       console.error('Failed to run report:', error);
     } finally {
@@ -144,7 +155,7 @@ export function CustomReports({ filters }: CustomReportsProps) {
       groupBy: newReport.groupBy,
       chartType: newReport.chartType,
       createdAt: new Date(),
-      lastRun: new Date()
+      lastRun: new Date(),
     };
 
     setReports(prev => [...prev, report]);
@@ -154,9 +165,9 @@ export function CustomReports({ filters }: CustomReportsProps) {
       description: '',
       metrics: [],
       groupBy: 'month',
-      chartType: 'line'
+      chartType: 'line',
     });
-    
+
     // Automatically run the new report
     runReport(report);
   };
@@ -171,16 +182,18 @@ export function CustomReports({ filters }: CustomReportsProps) {
 
   const exportReport = async (format: 'csv' | 'pdf' | 'excel') => {
     if (!selectedReport) return;
-    
+
     try {
       const response = await mockAnalyticsService.exportData(
         'analytics',
         format,
         { ...selectedReport.filters, ...filters }
       );
-      
+
       // Simulate download
-      console.log(`Exporting report "${selectedReport.name}" as ${format.toUpperCase()}`);
+      console.log(
+        `Exporting report "${selectedReport.name}" as ${format.toUpperCase()}`
+      );
       console.log('Download URL:', response.data.downloadUrl);
     } catch (error) {
       console.error('Failed to export report:', error);
@@ -196,12 +209,12 @@ export function CustomReports({ filters }: CustomReportsProps) {
       dataKey: 'period',
       series: selectedReport.metrics.map((metric, index) => ({
         name: metric,
-        color: `var(--mantine-color-blue-${6 + (index % 3)})`
+        color: `var(--mantine-color-blue-${6 + (index % 3)})`,
       })),
       withTooltip: true,
       tooltipAnimationDuration: 200,
       gridAxis: 'xy' as const,
-      tickLine: 'xy' as const
+      tickLine: 'xy' as const,
     };
 
     switch (selectedReport.chartType) {
@@ -258,19 +271,22 @@ export function CustomReports({ filters }: CustomReportsProps) {
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {reports.map((report) => (
+              {reports.map(report => (
                 <Table.Tr key={report.id}>
                   <Table.Td>
                     <Text fw={500}>{report.name}</Text>
                   </Table.Td>
                   <Table.Td>
-                    <Text size="sm" c="dimmed">{report.description}</Text>
+                    <Text size="sm" c="dimmed">
+                      {report.description}
+                    </Text>
                   </Table.Td>
                   <Table.Td>
                     <Group gap="xs">
                       {report.metrics.slice(0, 2).map(metric => (
                         <Badge key={metric} size="sm" variant="light">
-                          {availableMetrics.find(m => m.value === metric)?.label || metric}
+                          {availableMetrics.find(m => m.value === metric)
+                            ?.label || metric}
                         </Badge>
                       ))}
                       {report.metrics.length > 2 && (
@@ -316,9 +332,11 @@ export function CustomReports({ filters }: CustomReportsProps) {
           <Group justify="space-between" mb="md">
             <div>
               <Title order={4}>{selectedReport.name}</Title>
-              <Text size="sm" c="dimmed">{selectedReport.description}</Text>
+              <Text size="sm" c="dimmed">
+                {selectedReport.description}
+              </Text>
             </div>
-            
+
             <Group>
               <Button
                 variant="light"
@@ -344,14 +362,16 @@ export function CustomReports({ filters }: CustomReportsProps) {
           ) : reportData ? (
             renderChart()
           ) : (
-            <div style={{ 
-              height: 400, 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              backgroundColor: 'var(--mantine-color-gray-0)',
-              borderRadius: 'var(--mantine-radius-md)'
-            }}>
+            <div
+              style={{
+                height: 400,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: 'var(--mantine-color-gray-0)',
+                borderRadius: 'var(--mantine-radius-md)',
+              }}
+            >
               <Text c="dimmed">Select a report to view data</Text>
             </div>
           )}
@@ -370,7 +390,9 @@ export function CustomReports({ filters }: CustomReportsProps) {
             label="Report Name"
             placeholder="Enter report name"
             value={newReport.name}
-            onChange={(e) => setNewReport(prev => ({ ...prev, name: e.target.value }))}
+            onChange={e =>
+              setNewReport(prev => ({ ...prev, name: e.target.value }))
+            }
             required
           />
 
@@ -378,7 +400,9 @@ export function CustomReports({ filters }: CustomReportsProps) {
             label="Description"
             placeholder="Enter report description"
             value={newReport.description}
-            onChange={(e) => setNewReport(prev => ({ ...prev, description: e.target.value }))}
+            onChange={e =>
+              setNewReport(prev => ({ ...prev, description: e.target.value }))
+            }
             rows={3}
           />
 
@@ -387,7 +411,7 @@ export function CustomReports({ filters }: CustomReportsProps) {
             placeholder="Select metrics to include"
             data={availableMetrics}
             value={newReport.metrics}
-            onChange={(metrics) => setNewReport(prev => ({ ...prev, metrics }))}
+            onChange={metrics => setNewReport(prev => ({ ...prev, metrics }))}
             required
           />
 
@@ -398,13 +422,15 @@ export function CustomReports({ filters }: CustomReportsProps) {
                 { value: 'day', label: 'Daily' },
                 { value: 'week', label: 'Weekly' },
                 { value: 'month', label: 'Monthly' },
-                { value: 'year', label: 'Yearly' }
+                { value: 'year', label: 'Yearly' },
               ]}
               value={newReport.groupBy}
-              onChange={(value) => setNewReport(prev => ({ 
-                ...prev, 
-                groupBy: value as 'day' | 'week' | 'month' | 'year' 
-              }))}
+              onChange={value =>
+                setNewReport(prev => ({
+                  ...prev,
+                  groupBy: value as 'day' | 'week' | 'month' | 'year',
+                }))
+              }
             />
 
             <Select
@@ -412,13 +438,15 @@ export function CustomReports({ filters }: CustomReportsProps) {
               data={[
                 { value: 'line', label: 'Line Chart' },
                 { value: 'bar', label: 'Bar Chart' },
-                { value: 'area', label: 'Area Chart' }
+                { value: 'area', label: 'Area Chart' },
               ]}
               value={newReport.chartType}
-              onChange={(value) => setNewReport(prev => ({ 
-                ...prev, 
-                chartType: value as 'line' | 'bar' | 'area' 
-              }))}
+              onChange={value =>
+                setNewReport(prev => ({
+                  ...prev,
+                  chartType: value as 'line' | 'bar' | 'area',
+                }))
+              }
             />
           </Group>
 
@@ -426,9 +454,7 @@ export function CustomReports({ filters }: CustomReportsProps) {
             <Button variant="light" onClick={() => setCreateModalOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={createReport}>
-              Create Report
-            </Button>
+            <Button onClick={createReport}>Create Report</Button>
           </Group>
         </Stack>
       </Modal>

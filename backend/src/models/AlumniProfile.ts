@@ -26,7 +26,6 @@ const AlumniProfileSchema = new Schema<IAlumniProfile>({
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: false,
-    index: true,
   },
   firstName: {
     type: String,
@@ -45,7 +44,6 @@ const AlumniProfileSchema = new Schema<IAlumniProfile>({
     required: true,
     min: 1900,
     max: new Date().getFullYear() + 10,
-    index: true,
   },
   degree: {
     type: String,
@@ -67,7 +65,6 @@ const AlumniProfileSchema = new Schema<IAlumniProfile>({
     type: String,
     trim: true,
     maxlength: 100,
-    index: true,
   },
   bio: {
     type: String,

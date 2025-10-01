@@ -42,7 +42,9 @@ interface CampaignManagementProps {
   showAddButton?: boolean;
 }
 
-export function CampaignManagement({ showAddButton = true }: CampaignManagementProps) {
+export function CampaignManagement({
+  showAddButton = true,
+}: CampaignManagementProps) {
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [formOpened, setFormOpened] = useState(false);
@@ -59,15 +61,16 @@ export function CampaignManagement({ showAddButton = true }: CampaignManagementP
       endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 90 days from now
     },
     validate: {
-      name: (value) => (!value ? 'Campaign name is required' : null),
-      description: (value) => (!value ? 'Description is required' : null),
-      goal: (value) => {
+      name: value => (!value ? 'Campaign name is required' : null),
+      description: value => (!value ? 'Description is required' : null),
+      goal: value => {
         if (!value || value <= 0) return 'Goal must be greater than 0';
         if (value > 10000000) return 'Goal cannot exceed $10,000,000';
         return null;
       },
       endDate: (value, values) => {
-        if (value <= values.startDate) return 'End date must be after start date';
+        if (value <= values.startDate)
+          return 'End date must be after start date';
         return null;
       },
     },
@@ -105,11 +108,16 @@ export function CampaignManagement({ showAddButton = true }: CampaignManagementP
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'green';
-      case 'completed': return 'blue';
-      case 'paused': return 'yellow';
-      case 'ended': return 'gray';
-      default: return 'gray';
+      case 'active':
+        return 'green';
+      case 'completed':
+        return 'blue';
+      case 'paused':
+        return 'yellow';
+      case 'ended':
+        return 'gray';
+      default:
+        return 'gray';
     }
   };
 
@@ -143,11 +151,13 @@ export function CampaignManagement({ showAddButton = true }: CampaignManagementP
       // Mock campaign creation/update
       notifications.show({
         title: 'Success',
-        message: editingCampaign ? 'Campaign updated successfully' : 'Campaign created successfully',
+        message: editingCampaign
+          ? 'Campaign updated successfully'
+          : 'Campaign created successfully',
         color: 'green',
         icon: <IconCheck size={16} />,
       });
-      
+
       form.reset();
       setFormOpened(false);
       setEditingCampaign(null);
@@ -187,7 +197,9 @@ export function CampaignManagement({ showAddButton = true }: CampaignManagementP
   if (loading) {
     return (
       <Card padding="lg" radius="md" withBorder>
-        <Title order={3} mb="md">Campaign Management</Title>
+        <Title order={3} mb="md">
+          Campaign Management
+        </Title>
         <Grid>
           {[...Array(3)].map((_, index) => (
             <Grid.Col key={index} span={{ base: 12, md: 6, lg: 4 }}>
@@ -216,16 +228,17 @@ export function CampaignManagement({ showAddButton = true }: CampaignManagementP
 
         {campaigns.length > 0 ? (
           <Grid>
-            {campaigns.map((campaign) => {
-              const progressPercentage = (campaign.raised / campaign.goal) * 100;
+            {campaigns.map(campaign => {
+              const progressPercentage =
+                (campaign.raised / campaign.goal) * 100;
               const daysRemaining = getDaysRemaining(campaign.endDate);
-              
+
               return (
                 <Grid.Col key={campaign.id} span={{ base: 12, md: 6, lg: 4 }}>
                   <Card padding="md" radius="sm" withBorder>
                     <Group justify="space-between" mb="xs">
-                      <Badge 
-                        color={getStatusColor(campaign.status)} 
+                      <Badge
+                        color={getStatusColor(campaign.status)}
                         size="sm"
                         variant="light"
                       >
@@ -240,7 +253,9 @@ export function CampaignManagement({ showAddButton = true }: CampaignManagementP
                         <Menu.Dropdown>
                           <Menu.Item
                             leftSection={<IconEye size={14} />}
-                            onClick={() => {/* View details */}}
+                            onClick={() => {
+                              /* View details */
+                            }}
                           >
                             View Details
                           </Menu.Item>
@@ -270,12 +285,18 @@ export function CampaignManagement({ showAddButton = true }: CampaignManagementP
                       {campaign.description}
                     </Text>
 
-                    <Progress 
-                      value={progressPercentage} 
-                      size="lg" 
+                    <Progress
+                      value={progressPercentage}
+                      size="lg"
                       radius="sm"
                       mb="xs"
-                      color={progressPercentage >= 100 ? 'green' : progressPercentage >= 75 ? 'blue' : 'orange'}
+                      color={
+                        progressPercentage >= 100
+                          ? 'green'
+                          : progressPercentage >= 75
+                            ? 'blue'
+                            : 'orange'
+                      }
                     />
 
                     <Group justify="space-between" mb="md">
@@ -295,7 +316,7 @@ export function CampaignManagement({ showAddButton = true }: CampaignManagementP
                             {progressPercentage.toFixed(1)}% complete
                           </Text>
                         </Group>
-                        
+
                         {daysRemaining > 0 ? (
                           <Group gap="xs">
                             <IconCalendar size={14} />
@@ -328,8 +349,15 @@ export function CampaignManagement({ showAddButton = true }: CampaignManagementP
             })}
           </Grid>
         ) : (
-          <Alert icon={<IconAlertCircle size={16} />} color="blue" variant="light">
-            <Text>No campaigns found. Create your first campaign to start fundraising.</Text>
+          <Alert
+            icon={<IconAlertCircle size={16} />}
+            color="blue"
+            variant="light"
+          >
+            <Text>
+              No campaigns found. Create your first campaign to start
+              fundraising.
+            </Text>
           </Alert>
         )}
       </Card>
@@ -387,8 +415,8 @@ export function CampaignManagement({ showAddButton = true }: CampaignManagementP
             />
 
             <Group justify="flex-end">
-              <Button 
-                variant="light" 
+              <Button
+                variant="light"
                 onClick={() => {
                   setFormOpened(false);
                   setEditingCampaign(null);
@@ -414,7 +442,8 @@ export function CampaignManagement({ showAddButton = true }: CampaignManagementP
       >
         <Stack gap="md">
           <Text>
-            Are you sure you want to delete this campaign? This action cannot be undone and will affect all associated donations.
+            Are you sure you want to delete this campaign? This action cannot be
+            undone and will affect all associated donations.
           </Text>
           <Group justify="flex-end">
             <Button variant="light" onClick={() => setDeleteModalOpened(false)}>

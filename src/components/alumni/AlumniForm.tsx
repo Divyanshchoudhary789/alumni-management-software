@@ -25,7 +25,7 @@ import {
   Image,
   Modal,
   Progress,
-  Notification
+  Notification,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
@@ -46,7 +46,7 @@ import {
   IconTrash,
   IconEdit,
   IconDeviceFloppy,
-  IconArrowLeft
+  IconArrowLeft,
 } from '@tabler/icons-react';
 import { AlumniProfile } from '@/types';
 import { alumniApiService } from '@/services/api/alumniService';
@@ -76,7 +76,12 @@ interface AlumniFormData {
   profileImage?: File | string;
 }
 
-export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormProps) {
+export function AlumniForm({
+  alumni,
+  onSubmit,
+  onCancel,
+  onBack,
+}: AlumniFormProps) {
   const [loading, setLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(
     alumni?.profileImage || null
@@ -105,45 +110,48 @@ export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormPro
       isPublic: alumni?.isPublic ?? true,
       skills: alumni?.skills || [],
       interests: alumni?.interests || [],
-      profileImage: alumni?.profileImage
+      profileImage: alumni?.profileImage,
     },
     validate: {
-      firstName: (value) => 
+      firstName: value =>
         value.length < 2 ? 'First name must be at least 2 characters' : null,
-      lastName: (value) => 
+      lastName: value =>
         value.length < 2 ? 'Last name must be at least 2 characters' : null,
-      graduationYear: (value) => {
+      graduationYear: value => {
         if (value < 1950) return 'Graduation year must be after 1950';
-        if (value > currentYear + 10) return 'Graduation year cannot be more than 10 years in the future';
+        if (value > currentYear + 10)
+          return 'Graduation year cannot be more than 10 years in the future';
         return null;
       },
-      degree: (value) => 
-        value.length < 2 ? 'Degree is required' : null,
-      phone: (value) => {
-        if (value && !/^[\+]?[1-9][\d]{0,15}$/.test(value.replace(/[\s\-\(\)]/g, ''))) {
+      degree: value => (value.length < 2 ? 'Degree is required' : null),
+      phone: value => {
+        if (
+          value &&
+          !/^[\+]?[1-9][\d]{0,15}$/.test(value.replace(/[\s\-\(\)]/g, ''))
+        ) {
           return 'Please enter a valid phone number';
         }
         return null;
       },
-      linkedinUrl: (value) => {
+      linkedinUrl: value => {
         if (value && !value.includes('linkedin.com')) {
           return 'Please enter a valid LinkedIn URL';
         }
         return null;
       },
-      websiteUrl: (value) => {
+      websiteUrl: value => {
         if (value && !/^https?:\/\/.+\..+/.test(value)) {
           return 'Please enter a valid website URL';
         }
         return null;
       },
-      bio: (value) => {
+      bio: value => {
         if (value && value.length > 500) {
           return 'Bio must be less than 500 characters';
         }
         return null;
-      }
-    }
+      },
+    },
   });
 
   // Handle image upload
@@ -160,7 +168,7 @@ export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormPro
         title: 'Invalid file type',
         message: 'Please select an image file',
         color: 'red',
-        icon: <IconAlertCircle size={16} />
+        icon: <IconAlertCircle size={16} />,
       });
       return;
     }
@@ -171,14 +179,14 @@ export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormPro
         title: 'File too large',
         message: 'Image must be less than 5MB',
         color: 'red',
-        icon: <IconAlertCircle size={16} />
+        icon: <IconAlertCircle size={16} />,
       });
       return;
     }
 
     // Create preview
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = e => {
       setImagePreview(e.target?.result as string);
     };
     reader.readAsDataURL(file);
@@ -188,7 +196,7 @@ export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormPro
     // Simulate upload progress
     setUploadProgress(0);
     const interval = setInterval(() => {
-      setUploadProgress((prev) => {
+      setUploadProgress(prev => {
         if (prev >= 100) {
           clearInterval(interval);
           return 100;
@@ -208,31 +216,37 @@ export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormPro
         const updatedAlumni = {
           ...alumni,
           ...values,
-          profileImage: typeof values.profileImage === 'string' ? values.profileImage : alumni.profileImage,
-          updatedAt: new Date()
+          profileImage:
+            typeof values.profileImage === 'string'
+              ? values.profileImage
+              : alumni.profileImage,
+          updatedAt: new Date(),
         };
         await alumniApiService.updateAlumni(alumni.id, updatedAlumni);
-        
+
         notifications.show({
           title: 'Profile updated',
           message: 'Alumni profile has been updated successfully',
           color: 'green',
-          icon: <IconCheck size={16} />
+          icon: <IconCheck size={16} />,
         });
 
         onSubmit?.(updatedAlumni);
       } else {
         const newAlumni = await alumniApiService.createAlumni({
           ...values,
-          profileImage: typeof values.profileImage === 'string' ? values.profileImage : undefined,
-          userId: `user_${Date.now()}` // Mock user ID
+          profileImage:
+            typeof values.profileImage === 'string'
+              ? values.profileImage
+              : undefined,
+          userId: `user_${Date.now()}`, // Mock user ID
         });
-        
+
         notifications.show({
           title: 'Profile created',
           message: 'Alumni profile has been created successfully',
           color: 'green',
-          icon: <IconCheck size={16} />
+          icon: <IconCheck size={16} />,
         });
 
         onSubmit?.(newAlumni.data);
@@ -240,9 +254,10 @@ export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormPro
     } catch (error) {
       notifications.show({
         title: 'Error',
-        message: error instanceof Error ? error.message : 'Failed to save profile',
+        message:
+          error instanceof Error ? error.message : 'Failed to save profile',
         color: 'red',
-        icon: <IconAlertCircle size={16} />
+        icon: <IconAlertCircle size={16} />,
       });
     } finally {
       setLoading(false);
@@ -266,21 +281,55 @@ export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormPro
     'History',
     'Art',
     'Music',
-    'Other'
+    'Other',
   ];
 
   const skillOptions = [
-    'JavaScript', 'Python', 'Java', 'React', 'Node.js', 'SQL', 'AWS', 'Docker',
-    'Kubernetes', 'Analytics', 'Leadership', 'Strategy', 'Design', 'Marketing',
-    'Sales', 'Project Management', 'Communication', 'Problem Solving'
+    'JavaScript',
+    'Python',
+    'Java',
+    'React',
+    'Node.js',
+    'SQL',
+    'AWS',
+    'Docker',
+    'Kubernetes',
+    'Analytics',
+    'Leadership',
+    'Strategy',
+    'Design',
+    'Marketing',
+    'Sales',
+    'Project Management',
+    'Communication',
+    'Problem Solving',
   ];
 
   const interestOptions = [
-    'Web Development', 'Machine Learning', 'Data Science', 'Mobile Development',
-    'Cloud Computing', 'Cybersecurity', 'Blockchain', 'AI/ML', 'IoT',
-    'Business Strategy', 'Entrepreneurship', 'Startups', 'Finance',
-    'Marketing', 'Design', 'Photography', 'Travel', 'Sports', 'Music',
-    'Reading', 'Cooking', 'Fitness', 'Volunteering', 'Mentoring'
+    'Web Development',
+    'Machine Learning',
+    'Data Science',
+    'Mobile Development',
+    'Cloud Computing',
+    'Cybersecurity',
+    'Blockchain',
+    'AI/ML',
+    'IoT',
+    'Business Strategy',
+    'Entrepreneurship',
+    'Startups',
+    'Finance',
+    'Marketing',
+    'Design',
+    'Photography',
+    'Travel',
+    'Sports',
+    'Music',
+    'Reading',
+    'Cooking',
+    'Fitness',
+    'Volunteering',
+    'Mentoring',
   ];
 
   return (
@@ -290,10 +339,7 @@ export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormPro
         <div>
           <Group gap="md">
             {onBack && (
-              <ActionIcon
-                variant="subtle"
-                onClick={onBack}
-              >
+              <ActionIcon variant="subtle" onClick={onBack}>
                 <IconArrowLeft size={20} />
               </ActionIcon>
             )}
@@ -302,10 +348,9 @@ export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormPro
                 {isEditMode ? 'Edit Alumni Profile' : 'Add New Alumni'}
               </Title>
               <Text c="dimmed" size="sm">
-                {isEditMode 
+                {isEditMode
                   ? 'Update alumni information and settings'
-                  : 'Create a new alumni profile with complete information'
-                }
+                  : 'Create a new alumni profile with complete information'}
               </Text>
             </div>
           </Group>
@@ -321,7 +366,7 @@ export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormPro
               <Card shadow="sm" padding="lg" radius="md" withBorder>
                 <Stack align="center" gap="md">
                   <Title order={4}>Profile Photo</Title>
-                  
+
                   <div style={{ position: 'relative' }}>
                     <Avatar
                       src={imagePreview}
@@ -362,7 +407,11 @@ export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormPro
                   />
 
                   {uploadProgress > 0 && uploadProgress < 100 && (
-                    <Progress value={uploadProgress} size="sm" style={{ width: '100%' }} />
+                    <Progress
+                      value={uploadProgress}
+                      size="sm"
+                      style={{ width: '100%' }}
+                    />
                   )}
 
                   <Text size="xs" c="dimmed" ta="center">
@@ -377,7 +426,7 @@ export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormPro
               <Card shadow="sm" padding="lg" radius="md" withBorder>
                 <Stack gap="md">
                   <Title order={4}>Privacy Settings</Title>
-                  
+
                   <Switch
                     label="Public Profile"
                     description="Allow other alumni to view your profile"
@@ -398,8 +447,7 @@ export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormPro
                   >
                     {form.values.isPublic
                       ? 'Your profile will be visible to other alumni and administrators'
-                      : 'Your profile will only be visible to administrators'
-                    }
+                      : 'Your profile will only be visible to administrators'}
                   </Alert>
                 </Stack>
               </Card>
@@ -413,7 +461,7 @@ export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormPro
               <Card shadow="sm" padding="lg" radius="md" withBorder>
                 <Stack gap="md">
                   <Title order={4}>Basic Information</Title>
-                  
+
                   <Grid>
                     <Grid.Col span={{ base: 12, sm: 6 }}>
                       <TextInput
@@ -450,7 +498,7 @@ export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormPro
               <Card shadow="sm" padding="lg" radius="md" withBorder>
                 <Stack gap="md">
                   <Title order={4}>Education</Title>
-                  
+
                   <Grid>
                     <Grid.Col span={{ base: 12, sm: 6 }}>
                       <NumberInput
@@ -482,7 +530,7 @@ export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormPro
               <Card shadow="sm" padding="lg" radius="md" withBorder>
                 <Stack gap="md">
                   <Title order={4}>Professional Information</Title>
-                  
+
                   <Grid>
                     <Grid.Col span={{ base: 12, sm: 6 }}>
                       <TextInput
@@ -515,7 +563,7 @@ export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormPro
               <Card shadow="sm" padding="lg" radius="md" withBorder>
                 <Stack gap="md">
                   <Title order={4}>Contact Information</Title>
-                  
+
                   <Grid>
                     <Grid.Col span={{ base: 12, sm: 6 }}>
                       <TextInput
@@ -548,7 +596,7 @@ export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormPro
               <Card shadow="sm" padding="lg" radius="md" withBorder>
                 <Stack gap="md">
                   <Title order={4}>Skills & Interests</Title>
-                  
+
                   <MultiSelect
                     label="Skills"
                     placeholder="Select or add your skills"
@@ -577,7 +625,7 @@ export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormPro
                   >
                     Cancel
                   </Button>
-                  
+
                   <Group>
                     <Button
                       type="submit"
@@ -603,11 +651,7 @@ export function AlumniForm({ alumni, onSubmit, onCancel, onBack }: AlumniFormPro
         centered
       >
         {imagePreview && (
-          <Image
-            src={imagePreview}
-            alt="Profile photo preview"
-            radius="md"
-          />
+          <Image src={imagePreview} alt="Profile photo preview" radius="md" />
         )}
       </Modal>
     </Container>

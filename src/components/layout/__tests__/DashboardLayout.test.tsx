@@ -20,7 +20,9 @@ jest.mock('../Breadcrumbs', () => ({
   Breadcrumbs: () => <div data-testid="breadcrumbs">Breadcrumbs</div>,
 }));
 
-const renderDashboardLayout = (children: React.ReactNode = <div>Test Content</div>) => {
+const renderDashboardLayout = (
+  children: React.ReactNode = <div>Test Content</div>
+) => {
   return render(
     <MantineProvider>
       <DashboardLayout>{children}</DashboardLayout>
@@ -42,13 +44,13 @@ describe('DashboardLayout Component', () => {
     });
 
     renderDashboardLayout();
-    
+
     expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
   it('renders layout components when user is loaded', () => {
     renderDashboardLayout();
-    
+
     expect(screen.getByTestId('header')).toBeInTheDocument();
     expect(screen.getByTestId('sidebar')).toBeInTheDocument();
     expect(screen.getByTestId('breadcrumbs')).toBeInTheDocument();
@@ -58,7 +60,7 @@ describe('DashboardLayout Component', () => {
   it('renders children content', () => {
     const testContent = <div>Custom Test Content</div>;
     renderDashboardLayout(testContent);
-    
+
     expect(screen.getByText('Custom Test Content')).toBeInTheDocument();
   });
 });

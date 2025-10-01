@@ -46,9 +46,10 @@ export async function GET(request: NextRequest) {
         description: 'Monthly tech talks for alumni',
         url: '/dashboard/events/5',
       },
-    ].filter(item => 
-      item.title.toLowerCase().includes(query.toLowerCase()) ||
-      item.description.toLowerCase().includes(query.toLowerCase())
+    ].filter(
+      item =>
+        item.title.toLowerCase().includes(query.toLowerCase()) ||
+        item.description.toLowerCase().includes(query.toLowerCase())
     );
 
     return NextResponse.json({ results: mockResults });

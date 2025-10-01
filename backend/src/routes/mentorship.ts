@@ -1,16 +1,26 @@
 import express, { Request, Response } from 'express';
-import { 
-  MentorshipConnection, 
-  MentorProfile, 
+import {
+  MentorshipConnection,
+  MentorProfile,
   MenteeProfile,
+  MentorshipPayment,
   IMentorshipConnection,
   IMentorProfile,
-  IMenteeProfile
+  IMenteeProfile,
+  IMentorshipPayment
 } from '../models/Mentorship';
 import { AlumniProfile } from '../models/AlumniProfile';
 import { authenticatedRoute, adminRoute, requireAlumni } from '../middleware/auth';
 import { logger } from '../config/logger';
 import mongoose from 'mongoose';
+import Stripe from 'stripe';
+
+// Initialize Stripe (only if key is provided)
+const stripe = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-09-30.clover',
+    })
+  : null;
 
 const router = express.Router();
 
@@ -548,6 +558,255 @@ router.get('/stats/overview', adminRoute, async (req: Request, res: Response): P
   } catch (error) {
     logger.error('Error fetching mentorship statistics:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST /api/mentorship/payments/create-intent - Create payment intent for mentorship
+router.post('/payments/create-intent', authenticatedRoute, requireAlumni, async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { mentorshipConnectionId, amount, currency = 'usd', description } = req.body;
+
+    if (!mentorshipConnectionId || !amount) {
+      return res.status(400).json({ error: 'Mentorship connection ID and amount are required' });
+    }
+
+    if (!stripe) {
+      return res.status(503).json({ error: 'Payment service not available' });
+    }
+
+    // Verify the connection exists and user is authorized
+    const connection = await MentorshipConnection.findById(mentorshipConnectionId)
+      .populate('mentorId')
+      .populate('menteeId');
+
+    if (!connection) {
+      return res.status(404).json({ error: 'Mentorship connection not found' });
+    }
+
+    // Check if user is the mentee
+    const isMentee = (connection.menteeId as any).alumniId?.toString() === (req.user!._id as string);
+    if (!isMentee) {
+      return res.status(403).json({ error: 'Only mentees can initiate payments' });
+    }
+
+    // Check if connection is active
+    if (connection.status !== 'active') {
+      return res.status(400).json({ error: 'Can only pay for active mentorship connections' });
+    }
+
+    // Create payment intent
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(amount * 100), // Convert to cents
+      currency: currency.toLowerCase(),
+      metadata: {
+        mentorshipConnectionId,
+        mentorId: (connection.mentorId as any)._id.toString(),
+        menteeId: req.user!._id as string,
+      },
+      description: description || `Mentorship payment for connection ${mentorshipConnectionId}`,
+    });
+
+    // Create payment record
+    const payment = new MentorshipPayment({
+      mentorshipConnectionId,
+      mentorId: (connection.mentorId as any)._id,
+      menteeId: req.user!._id,
+      amount,
+      currency: currency.toUpperCase(),
+      paymentMethod: 'stripe',
+      paymentIntentId: paymentIntent.id,
+      status: 'pending',
+      description: description || `Mentorship payment for connection ${mentorshipConnectionId}`,
+    });
+
+    await payment.save();
+
+    logger.info('Payment intent created:', {
+      paymentIntentId: paymentIntent.id,
+      mentorshipConnectionId,
+      amount,
+      userId: req.user!._id
+    });
+
+    res.json({
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id,
+      paymentId: payment._id,
+    });
+  } catch (error) {
+    logger.error('Error creating payment intent:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST /api/mentorship/payments/webhook - Stripe webhook for payment confirmation
+router.post('/payments/webhook', express.raw({ type: 'application/json' }), async (req: Request, res: Response): Promise<any> => {
+  try {
+    const sig = req.headers['stripe-signature'] as string;
+    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    if (!stripe || !endpointSecret) {
+      return res.status(503).json({ error: 'Webhook service not available' });
+    }
+
+    let event: Stripe.Event;
+
+    try {
+      event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    } catch (err: any) {
+      logger.error('Webhook signature verification failed:', err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    // Handle the event
+    if (event.type === 'payment_intent.succeeded') {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      const { mentorshipConnectionId, mentorId, menteeId } = paymentIntent.metadata;
+
+      // Update payment status
+      await MentorshipPayment.findOneAndUpdate(
+        { paymentIntentId: paymentIntent.id },
+        {
+          status: 'completed',
+          transactionId: paymentIntent.id,
+        }
+      );
+
+      logger.info('Payment completed:', {
+        paymentIntentId: paymentIntent.id,
+        mentorshipConnectionId,
+        amount: paymentIntent.amount,
+      });
+    } else if (event.type === 'payment_intent.payment_failed') {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+
+      // Update payment status
+      await MentorshipPayment.findOneAndUpdate(
+        { paymentIntentId: paymentIntent.id },
+        { status: 'failed' }
+      );
+
+      logger.info('Payment failed:', {
+        paymentIntentId: paymentIntent.id,
+      });
+    }
+
+    res.json({ received: true });
+  } catch (error) {
+    logger.error('Error processing webhook:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /api/mentorship/payments - Get payment history
+router.get('/payments', authenticatedRoute, async (req: Request, res: Response): Promise<any> => {
+  try {
+    const {
+      page = 1,
+      limit = 20,
+      status,
+      sortBy = 'createdAt',
+      sortOrder = 'desc'
+    } = req.query;
+
+    const pageNum = parseInt(page as string);
+    const limitNum = parseInt(limit as string);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Build query based on user role
+    let query: any = {};
+
+    if (req.user?.role === 'admin') {
+      // Admin can see all payments
+      if (status) query.status = status;
+    } else {
+      // Users can only see their own payments
+      query.$or = [
+        { mentorId: req.user!._id },
+        { menteeId: req.user!._id }
+      ];
+      if (status) query.status = status;
+    }
+
+    // Sort options
+    const sortOptions: any = {};
+    sortOptions[sortBy as string] = sortOrder === 'desc' ? -1 : 1;
+
+    // Execute query
+    const [payments, total] = await Promise.all([
+      MentorshipPayment.find(query)
+        .populate({
+          path: 'mentorshipConnectionId',
+          populate: [
+            { path: 'mentorId', populate: { path: 'alumniId', select: 'firstName lastName' } },
+            { path: 'menteeId', populate: { path: 'alumniId', select: 'firstName lastName' } }
+          ]
+        })
+        .sort(sortOptions)
+        .skip(skip)
+        .limit(limitNum)
+        .lean(),
+      MentorshipPayment.countDocuments(query)
+    ]);
+
+    const totalPages = Math.ceil(total / limitNum);
+
+    res.json({
+      payments,
+      pagination: {
+        currentPage: pageNum,
+        totalPages,
+        totalItems: total,
+        itemsPerPage: limitNum,
+        hasNextPage: pageNum < totalPages,
+        hasPrevPage: pageNum > 1
+      }
+    });
+  } catch (error) {
+    logger.error('Error fetching payments:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// PUT /api/mentorship/mentors/:id - Update mentor profile (with pricing)
+router.put('/mentors/:id', authenticatedRoute, requireAlumni, async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid mentor ID' });
+    }
+
+    // Find mentor profile
+    const mentor = await MentorProfile.findById(id);
+    if (!mentor) {
+      return res.status(404).json({ error: 'Mentor profile not found' });
+    }
+
+    // Check ownership
+    if (mentor.alumniId.toString() !== (req.user!._id as string)) {
+      return res.status(403).json({ error: 'Cannot update another user\'s mentor profile' });
+    }
+
+    // Update mentor profile
+    Object.assign(mentor, updateData);
+    await mentor.save();
+    await mentor.populate('alumniId', 'firstName lastName currentCompany');
+
+    logger.info('Mentor profile updated:', {
+      mentorId: mentor._id,
+      alumniId: req.user!._id
+    });
+
+    res.json(mentor);
+  } catch (error) {
+    logger.error('Error updating mentor profile:', error);
+    if (error instanceof Error && error.name === 'ValidationError') {
+      res.status(400).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Internal server error' });
+    }
   }
 });
 

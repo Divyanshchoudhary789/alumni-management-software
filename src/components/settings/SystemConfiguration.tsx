@@ -15,11 +15,15 @@ import {
   Divider,
   NumberInput,
   Alert,
-  LoadingOverlay
+  LoadingOverlay,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
-import { IconCheck, IconAlertCircle, IconInfoCircle } from '@tabler/icons-react';
+import {
+  IconCheck,
+  IconAlertCircle,
+  IconInfoCircle,
+} from '@tabler/icons-react';
 import { settingsService } from '@/lib/mock-services/settingsService';
 import { SystemSettings } from '@/types';
 
@@ -44,15 +48,20 @@ export function SystemConfiguration() {
       smtpPort: 587,
       smtpUser: '',
       fromEmail: '',
-      fromName: ''
+      fromName: '',
     },
     validate: {
-      organizationName: (value) => (!value ? 'Organization name is required' : null),
-      smtpHost: (value, values) => 
-        values.enableEmailNotifications && !value ? 'SMTP host is required when email notifications are enabled' : null,
-      fromEmail: (value, values) => 
-        values.enableEmailNotifications && !value ? 'From email is required when email notifications are enabled' : null,
-    }
+      organizationName: value =>
+        !value ? 'Organization name is required' : null,
+      smtpHost: (value, values) =>
+        values.enableEmailNotifications && !value
+          ? 'SMTP host is required when email notifications are enabled'
+          : null,
+      fromEmail: (value, values) =>
+        values.enableEmailNotifications && !value
+          ? 'From email is required when email notifications are enabled'
+          : null,
+    },
   });
 
   const handleSubmit = async (values: typeof form.values) => {
@@ -66,27 +75,27 @@ export function SystemConfiguration() {
           smtpUser: values.smtpUser,
           smtpPassword: '', // Would be handled securely in real implementation
           fromEmail: values.fromEmail,
-          fromName: values.fromName
+          fromName: values.fromName,
         },
         notificationSettings: {
           enableEmailNotifications: values.enableEmailNotifications,
           enablePushNotifications: values.enablePushNotifications,
-          defaultNotificationFrequency: values.defaultNotificationFrequency
-        }
+          defaultNotificationFrequency: values.defaultNotificationFrequency,
+        },
       });
 
       notifications.show({
         title: 'Settings Updated',
         message: 'System configuration has been saved successfully',
         color: 'green',
-        icon: <IconCheck size={16} />
+        icon: <IconCheck size={16} />,
       });
     } catch (error) {
       notifications.show({
         title: 'Error',
         message: 'Failed to update system settings',
         color: 'red',
-        icon: <IconAlertCircle size={16} />
+        icon: <IconAlertCircle size={16} />,
       });
     } finally {
       setLoading(false);
@@ -100,7 +109,9 @@ export function SystemConfiguration() {
 
         {/* Organization Settings */}
         <Card withBorder>
-          <Title order={3} mb="md">Organization Settings</Title>
+          <Title order={3} mb="md">
+            Organization Settings
+          </Title>
           <Grid>
             <Grid.Col span={6}>
               <TextInput
@@ -117,7 +128,7 @@ export function SystemConfiguration() {
                   { value: 'en', label: 'English' },
                   { value: 'es', label: 'Spanish' },
                   { value: 'fr', label: 'French' },
-                  { value: 'de', label: 'German' }
+                  { value: 'de', label: 'German' },
                 ]}
                 {...form.getInputProps('language')}
               />
@@ -131,9 +142,15 @@ export function SystemConfiguration() {
                   { value: 'America/Chicago', label: 'Central Time (CT)' },
                   { value: 'America/Denver', label: 'Mountain Time (MT)' },
                   { value: 'America/Los_Angeles', label: 'Pacific Time (PT)' },
-                  { value: 'Europe/London', label: 'Greenwich Mean Time (GMT)' },
-                  { value: 'Europe/Paris', label: 'Central European Time (CET)' },
-                  { value: 'Asia/Tokyo', label: 'Japan Standard Time (JST)' }
+                  {
+                    value: 'Europe/London',
+                    label: 'Greenwich Mean Time (GMT)',
+                  },
+                  {
+                    value: 'Europe/Paris',
+                    label: 'Central European Time (CET)',
+                  },
+                  { value: 'Asia/Tokyo', label: 'Japan Standard Time (JST)' },
                 ]}
                 {...form.getInputProps('defaultTimeZone')}
               />
@@ -144,7 +161,7 @@ export function SystemConfiguration() {
                 data={[
                   { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY (US)' },
                   { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY (EU)' },
-                  { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD (ISO)' }
+                  { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD (ISO)' },
                 ]}
                 {...form.getInputProps('dateFormat')}
               />
@@ -157,7 +174,7 @@ export function SystemConfiguration() {
                   { value: 'EUR', label: 'Euro (EUR)' },
                   { value: 'GBP', label: 'British Pound (GBP)' },
                   { value: 'CAD', label: 'Canadian Dollar (CAD)' },
-                  { value: 'AUD', label: 'Australian Dollar (AUD)' }
+                  { value: 'AUD', label: 'Australian Dollar (AUD)' },
                 ]}
                 {...form.getInputProps('currency')}
               />
@@ -167,7 +184,9 @@ export function SystemConfiguration() {
 
         {/* System Preferences */}
         <Card withBorder>
-          <Title order={3} mb="md">System Preferences</Title>
+          <Title order={3} mb="md">
+            System Preferences
+          </Title>
           <Stack gap="md">
             <Switch
               label="Maintenance Mode"
@@ -177,29 +196,39 @@ export function SystemConfiguration() {
             <Switch
               label="Allow Self Registration"
               description="Allow new users to register themselves"
-              {...form.getInputProps('allowSelfRegistration', { type: 'checkbox' })}
+              {...form.getInputProps('allowSelfRegistration', {
+                type: 'checkbox',
+              })}
             />
             <Switch
               label="Require Email Verification"
               description="Require users to verify their email address before accessing the system"
-              {...form.getInputProps('requireEmailVerification', { type: 'checkbox' })}
+              {...form.getInputProps('requireEmailVerification', {
+                type: 'checkbox',
+              })}
             />
           </Stack>
         </Card>
 
         {/* Notification Settings */}
         <Card withBorder>
-          <Title order={3} mb="md">Notification Settings</Title>
+          <Title order={3} mb="md">
+            Notification Settings
+          </Title>
           <Stack gap="md">
             <Switch
               label="Enable Email Notifications"
               description="Send notifications via email"
-              {...form.getInputProps('enableEmailNotifications', { type: 'checkbox' })}
+              {...form.getInputProps('enableEmailNotifications', {
+                type: 'checkbox',
+              })}
             />
             <Switch
               label="Enable Push Notifications"
               description="Send browser push notifications"
-              {...form.getInputProps('enablePushNotifications', { type: 'checkbox' })}
+              {...form.getInputProps('enablePushNotifications', {
+                type: 'checkbox',
+              })}
             />
             <Select
               label="Default Notification Frequency"
@@ -207,7 +236,7 @@ export function SystemConfiguration() {
               data={[
                 { value: 'immediate', label: 'Immediate' },
                 { value: 'daily', label: 'Daily Digest' },
-                { value: 'weekly', label: 'Weekly Digest' }
+                { value: 'weekly', label: 'Weekly Digest' },
               ]}
               {...form.getInputProps('defaultNotificationFrequency')}
             />
@@ -217,9 +246,12 @@ export function SystemConfiguration() {
         {/* Email Configuration */}
         {form.values.enableEmailNotifications && (
           <Card withBorder>
-            <Title order={3} mb="md">Email Configuration</Title>
+            <Title order={3} mb="md">
+              Email Configuration
+            </Title>
             <Alert icon={<IconInfoCircle size={16} />} mb="md">
-              Configure SMTP settings to enable email notifications and communications.
+              Configure SMTP settings to enable email notifications and
+              communications.
             </Alert>
             <Grid>
               <Grid.Col span={6}>

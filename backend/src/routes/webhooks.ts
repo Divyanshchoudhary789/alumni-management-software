@@ -1,9 +1,16 @@
 import express from 'express';
-// import { Webhook } from 'svix'; // Temporarily commented out
-import { User } from '../models';
+import { Webhook } from 'svix';
+import { User, Mentorship } from '../models';
 import { logger } from '../config/logger';
+import { syncUserFromClerk } from '../middleware/auth';
+import { createClerkClient } from '@clerk/backend';
 
 const router = express.Router();
+
+// Initialize Clerk client
+const clerkClient = createClerkClient({
+  secretKey: process.env.CLERK_SECRET_KEY!,
+});
 
 // Clerk webhook endpoint
 router.post('/clerk', express.raw({ type: 'application/json' }), async (req: express.Request, res: express.Response): Promise<void> => {
@@ -13,6 +20,7 @@ router.post('/clerk', express.raw({ type: 'application/json' }), async (req: exp
     if (!WEBHOOK_SECRET) {
       logger.error('CLERK_WEBHOOK_SECRET is not configured');
       res.status(500).json({ error: 'Webhook secret not configured' });
+      return;
     }
 
     // Get the headers
@@ -24,17 +32,30 @@ router.post('/clerk', express.raw({ type: 'application/json' }), async (req: exp
     if (!svix_id || !svix_timestamp || !svix_signature) {
       logger.error('Missing svix headers');
       res.status(400).json({ error: 'Missing svix headers' });
+      return;
     }
 
     // Get the body
     const body = req.body;
+    const bodyString = body.toString();
 
-    // Temporarily skip webhook verification for development
-    // TODO: Install svix package and uncomment verification
-    const evt = {
-      type: 'user.created', // Mock event for now
-      data: req.body
-    };
+    // Create a new Svix instance with webhook secret
+    const wh = new Webhook(WEBHOOK_SECRET);
+
+    let evt: any;
+
+    // Verify the payload with the headers
+    try {
+      evt = wh.verify(bodyString, {
+        'svix-id': svix_id,
+        'svix-timestamp': svix_timestamp,
+        'svix-signature': svix_signature,
+      });
+    } catch (err) {
+      logger.error('Error verifying webhook:', err);
+      res.status(400).json({ error: 'Error verifying webhook' });
+      return;
+    }
 
     // Handle the webhook
     const eventType = evt.type;
@@ -52,11 +73,21 @@ router.post('/clerk', express.raw({ type: 'application/json' }), async (req: exp
       case 'user.deleted':
         await handleUserDeleted(eventData);
         break;
+      case 'session.created':
+        await handleSessionCreated(eventData);
+        break;
+      case 'session.ended':
+        await handleSessionEnded(eventData);
+        break;
       default:
         logger.warn(`Unhandled webhook event type: ${eventType}`);
     }
 
-    res.status(200).json({ received: true });
+    res.status(200).json({ 
+      received: true, 
+      eventType,
+      userId: eventData.id 
+    });
   } catch (error) {
     logger.error('Webhook processing error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -66,43 +97,49 @@ router.post('/clerk', express.raw({ type: 'application/json' }), async (req: exp
 // Handle user creation
 async function handleUserCreated(userData: any) {
   try {
-    const { id: clerkUserId, email_addresses, external_accounts } = userData;
+    const { id: clerkUserId } = userData;
     
-    // Get primary email
-    const primaryEmail = email_addresses?.find((email: any) => email.id === userData.primary_email_address_id);
-    if (!primaryEmail) {
-      logger.error('No primary email found for user:', clerkUserId);
-      return;
-    }
-
-    // Determine OAuth provider
-    let oauthProvider: 'google' | 'linkedin' = 'google'; // default
-    if (external_accounts && external_accounts.length > 0) {
-      const provider = external_accounts[0].provider;
-      if (provider === 'oauth_linkedin' || provider === 'linkedin') {
-        oauthProvider = 'linkedin';
-      }
-    }
-
-    // Check if user already exists
-    const existingUser = await User.findOne({ clerkUserId });
-    if (existingUser) {
-      logger.warn('User already exists:', clerkUserId);
-      return;
-    }
-
-    // Create new user
-    const newUser = new User({
-      clerkUserId,
-      email: primaryEmail.email_address,
-      role: 'alumni', // Default role
-      oauthProvider,
+    // Get full user data from Clerk API for accurate information
+    const clerkUser = await clerkClient.users.getUser(clerkUserId);
+    
+    // Use the existing syncUserFromClerk function for consistency
+    const user = await syncUserFromClerk(clerkUserId, clerkUser);
+    
+    logger.info('User created via webhook:', { 
+      clerkUserId, 
+      email: user.email,
+      role: user.role,
+      oauthProvider: user.oauthProvider 
     });
 
-    await newUser.save();
-    logger.info('User created successfully:', { clerkUserId, email: primaryEmail.email_address });
+    // Set user metadata in Clerk for role-based access
+    await clerkClient.users.updateUserMetadata(clerkUserId, {
+      publicMetadata: {
+        role: user.role,
+        onboardingCompleted: false,
+      },
+      privateMetadata: {
+        databaseId: user.id,
+        lastSyncAt: new Date().toISOString(),
+      },
+      unsafeMetadata: {
+        role: user.role,
+        databaseId: user.id,
+      },
+    });
+
+    // Log user creation for audit trail
+    logger.info('User successfully created and synced:', {
+      clerkUserId,
+      databaseId: user.id,
+      email: user.email,
+      role: user.role,
+      oauthProvider: user.oauthProvider,
+      createdAt: user.createdAt,
+    });
+
   } catch (error) {
-    logger.error('Error creating user:', error);
+    logger.error('Error creating user via webhook:', error);
     throw error;
   }
 }
@@ -110,37 +147,39 @@ async function handleUserCreated(userData: any) {
 // Handle user updates
 async function handleUserUpdated(userData: any) {
   try {
-    const { id: clerkUserId, email_addresses, external_accounts } = userData;
+    const { id: clerkUserId } = userData;
     
-    // Find existing user
-    const existingUser = await User.findOne({ clerkUserId });
-    if (!existingUser) {
-      logger.warn('User not found for update:', clerkUserId);
-      // Create user if it doesn't exist
-      await handleUserCreated(userData);
-      return;
-    }
+    // Get full user data from Clerk API
+    const clerkUser = await clerkClient.users.getUser(clerkUserId);
+    
+    // Sync user data using existing function
+    const user = await syncUserFromClerk(clerkUserId, clerkUser);
+    
+    // Update user metadata in Clerk with comprehensive information
+    await clerkClient.users.updateUserMetadata(clerkUserId, {
+      publicMetadata: {
+        role: user.role,
+        onboardingCompleted: true,
+      },
+      privateMetadata: {
+        databaseId: user.id,
+        lastSyncAt: new Date().toISOString(),
+        lastUpdatedAt: user.updatedAt.toISOString(),
+      },
+      unsafeMetadata: {
+        role: user.role,
+        databaseId: user.id,
+      },
+    });
 
-    // Get primary email
-    const primaryEmail = email_addresses?.find((email: any) => email.id === userData.primary_email_address_id);
-    if (primaryEmail) {
-      existingUser.email = primaryEmail.email_address;
-    }
-
-    // Update OAuth provider if changed
-    if (external_accounts && external_accounts.length > 0) {
-      const provider = external_accounts[0].provider;
-      if (provider === 'oauth_linkedin' || provider === 'linkedin') {
-        existingUser.oauthProvider = 'linkedin';
-      } else {
-        existingUser.oauthProvider = 'google';
-      }
-    }
-
-    await existingUser.save();
-    logger.info('User updated successfully:', { clerkUserId, email: existingUser.email });
+    logger.info('User updated via webhook:', { 
+      clerkUserId, 
+      email: user.email,
+      role: user.role,
+      lastSyncAt: new Date().toISOString(),
+    });
   } catch (error) {
-    logger.error('Error updating user:', error);
+    logger.error('Error updating user via webhook:', error);
     throw error;
   }
 }
@@ -150,17 +189,98 @@ async function handleUserDeleted(userData: any) {
   try {
     const { id: clerkUserId } = userData;
     
-    // Find and delete user
-    const deletedUser = await User.findOneAndDelete({ clerkUserId });
-    if (!deletedUser) {
+    // Find user before deletion for cleanup
+    const userToDelete = await User.findOne({ clerkUserId });
+    if (!userToDelete) {
       logger.warn('User not found for deletion:', clerkUserId);
       return;
     }
 
-    logger.info('User deleted successfully:', { clerkUserId, email: deletedUser.email });
+    // Clean up related data before deleting user
+    await cleanupUserRelatedData(userToDelete.id);
+    
+    // Delete user from database
+    const deletedUser = await User.findOneAndDelete({ clerkUserId });
+
+    logger.info('User deleted via webhook with cleanup:', { 
+      clerkUserId, 
+      email: deletedUser?.email,
+      databaseId: userToDelete.id,
+      deletedAt: new Date().toISOString(),
+    });
   } catch (error) {
-    logger.error('Error deleting user:', error);
+    logger.error('Error deleting user via webhook:', error);
     throw error;
+  }
+}
+
+// Helper function to clean up user-related data
+async function cleanupUserRelatedData(userId: string) {
+  try {
+    // Import models dynamically to avoid circular dependencies
+    const { AlumniProfile } = await import('../models/AlumniProfile');
+    const { Event } = await import('../models/Event');
+    const { Donation } = await import('../models/Donation');
+    const { Communication } = await import('../models/Communication');
+
+    // Delete alumni profile if exists
+    await AlumniProfile.findOneAndDelete({ userId });
+    
+    // Update events created by this user (set to null or admin)
+    await Event.updateMany(
+      { createdBy: userId },
+      { $unset: { createdBy: 1 } }
+    );
+    
+    // Update donations by this user
+    await Donation.updateMany(
+      { donorId: userId },
+      { $unset: { donorId: 1 } }
+    );
+    
+    // Update communications created by this user
+    await Communication.updateMany(
+      { createdBy: userId },
+      { $unset: { createdBy: 1 } }
+    );
+    
+    // Remove mentorship connections
+    await Mentorship.deleteMany({
+      $or: [{ mentorId: userId }, { menteeId: userId }]
+    });
+
+    logger.info('User related data cleaned up:', { userId });
+  } catch (error) {
+    logger.error('Error cleaning up user related data:', error);
+    throw error;
+  }
+}
+
+// Handle session creation (for audit logging)
+async function handleSessionCreated(sessionData: any) {
+  try {
+    const { user_id: clerkUserId } = sessionData;
+    
+    logger.info('User session created:', { 
+      clerkUserId,
+      sessionId: sessionData.id 
+    });
+  } catch (error) {
+    logger.error('Error handling session creation:', error);
+  }
+}
+
+// Handle session end (for audit logging)
+async function handleSessionEnded(sessionData: any) {
+  try {
+    const { user_id: clerkUserId } = sessionData;
+    
+    logger.info('User session ended:', { 
+      clerkUserId,
+      sessionId: sessionData.id 
+    });
+  } catch (error) {
+    logger.error('Error handling session end:', error);
   }
 }
 

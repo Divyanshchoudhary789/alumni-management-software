@@ -9,7 +9,7 @@ import {
   Stack,
   Collapse,
   ActionIcon,
-  rem
+  rem,
 } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
 import { IconSearch, IconFilter, IconX } from '@tabler/icons-react';
@@ -35,34 +35,35 @@ export function EventFilters({
   filters,
   onFiltersChange,
   onClearFilters,
-  locations = []
+  locations = [],
 }: EventFiltersProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   const handleFilterChange = (key: keyof EventFilterValues, value: any) => {
     onFiltersChange({
       ...filters,
-      [key]: value
+      [key]: value,
     });
   };
 
-  const hasActiveFilters = filters.search || 
-                          filters.status || 
-                          filters.dateFrom || 
-                          filters.dateTo || 
-                          filters.location;
+  const hasActiveFilters =
+    filters.search ||
+    filters.status ||
+    filters.dateFrom ||
+    filters.dateTo ||
+    filters.location;
 
   const statusOptions = [
     { value: '', label: 'All Statuses' },
     { value: 'published', label: 'Published' },
     { value: 'draft', label: 'Draft' },
     { value: 'completed', label: 'Completed' },
-    { value: 'cancelled', label: 'Cancelled' }
+    { value: 'cancelled', label: 'Cancelled' },
   ];
 
   const locationOptions = [
     { value: '', label: 'All Locations' },
-    ...locations.map(location => ({ value: location, label: location }))
+    ...locations.map(location => ({ value: location, label: location })),
   ];
 
   return (
@@ -71,15 +72,19 @@ export function EventFilters({
         <Group>
           <TextInput
             placeholder="Search events..."
-            leftSection={<IconSearch style={{ width: rem(16), height: rem(16) }} />}
+            leftSection={
+              <IconSearch style={{ width: rem(16), height: rem(16) }} />
+            }
             value={filters.search}
-            onChange={(e) => handleFilterChange('search', e.target.value)}
+            onChange={e => handleFilterChange('search', e.target.value)}
             style={{ flex: 1 }}
           />
-          
+
           <Button
             variant="light"
-            leftSection={<IconFilter style={{ width: rem(16), height: rem(16) }} />}
+            leftSection={
+              <IconFilter style={{ width: rem(16), height: rem(16) }} />
+            }
             onClick={() => setShowAdvanced(!showAdvanced)}
           >
             Filters
@@ -105,7 +110,7 @@ export function EventFilters({
                 placeholder="Select status"
                 data={statusOptions}
                 value={filters.status}
-                onChange={(value) => handleFilterChange('status', value)}
+                onChange={value => handleFilterChange('status', value)}
                 clearable
               />
 
@@ -114,7 +119,7 @@ export function EventFilters({
                 placeholder="Select location"
                 data={locationOptions}
                 value={filters.location}
-                onChange={(value) => handleFilterChange('location', value)}
+                onChange={value => handleFilterChange('location', value)}
                 clearable
                 searchable
               />
@@ -125,7 +130,7 @@ export function EventFilters({
                 label="From Date"
                 placeholder="Select start date"
                 value={filters.dateFrom}
-                onChange={(value) => handleFilterChange('dateFrom', value)}
+                onChange={value => handleFilterChange('dateFrom', value)}
                 clearable
               />
 
@@ -133,7 +138,7 @@ export function EventFilters({
                 label="To Date"
                 placeholder="Select end date"
                 value={filters.dateTo}
-                onChange={(value) => handleFilterChange('dateTo', value)}
+                onChange={value => handleFilterChange('dateTo', value)}
                 clearable
                 minDate={filters.dateFrom || undefined}
               />

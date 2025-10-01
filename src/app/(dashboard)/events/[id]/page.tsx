@@ -20,7 +20,7 @@ import {
   rem,
   Alert,
   Loader,
-  Center
+  Center,
 } from '@mantine/core';
 import {
   IconCalendar,
@@ -31,12 +31,17 @@ import {
   IconTrash,
   IconUserPlus,
   IconDots,
-  IconAlertCircle
+  IconAlertCircle,
 } from '@tabler/icons-react';
 import { Event, AlumniProfile } from '@/types';
-import { EventStatusBadge, EventRegistrationModal, AttendeeManagement, WaitlistManagement } from '@/components/events';
+import {
+  EventStatusBadge,
+  EventRegistrationModal,
+  AttendeeManagement,
+  WaitlistManagement,
+} from '@/components/events';
 import { mockEventService } from '@/lib/mock-services/eventService';
-import { mockAlumniService } from '@/lib/mock-services/alumniService';
+import { alumniProfileService } from '@/services/alumniProfileService';
 import { notifications } from '@mantine/notifications';
 import { modals } from '@mantine/modals';
 import { useRouter } from 'next/navigation';
@@ -76,10 +81,10 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
         const alumniIds = eventResponse.data.registrations
           .filter(r => r.status === 'registered' || r.status === 'attended')
           .map(r => r.alumniId);
-        
+
         // Get alumni details for attendees
-        const alumniResponse = await mockAlumniService.getAlumni();
-        const attendeeProfiles = alumniResponse.data.filter(alumni => 
+        const alumniResponse = await alumniProfileService.getAlumni();
+        const attendeeProfiles = alumniResponse.data.filter(alumni =>
           alumniIds.includes(alumni.id)
         );
         setAttendees(attendeeProfiles);
@@ -110,7 +115,8 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
       title: 'Delete Event',
       children: (
         <Text size="sm">
-          Are you sure you want to delete "{event.title}"? This action cannot be undone.
+          Are you sure you want to delete "{event.title}"? This action cannot be
+          undone.
         </Text>
       ),
       labels: { confirm: 'Delete', cancel: 'Cancel' },
@@ -123,17 +129,17 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
           notifications.show({
             title: 'Success',
             message: 'Event deleted successfully',
-            color: 'green'
+            color: 'green',
           });
           router.push('/events');
         } catch (err: any) {
           notifications.show({
             title: 'Error',
             message: err.message || 'Failed to delete event',
-            color: 'red'
+            color: 'red',
           });
         }
-      }
+      },
     });
   };
 
@@ -151,7 +157,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
       notifications.show({
         title: 'Success',
         message: `Successfully registered for ${event.title}`,
-        color: 'green'
+        color: 'green',
       });
       if (eventId) {
         loadEventDetails(eventId); // Reload to update registration count
@@ -160,7 +166,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
       notifications.show({
         title: 'Error',
         message: err.message || 'Failed to register for event',
-        color: 'red'
+        color: 'red',
       });
     }
   };
@@ -185,19 +191,24 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
     );
   }
 
-  const registeredCount = event.registrations.filter(r => r.status === 'registered').length;
-  const attendedCount = event.registrations.filter(r => r.status === 'attended').length;
+  const registeredCount = event.registrations.filter(
+    r => r.status === 'registered'
+  ).length;
+  const attendedCount = event.registrations.filter(
+    r => r.status === 'attended'
+  ).length;
   const totalRegistrations = registeredCount + attendedCount;
   const capacityPercentage = (totalRegistrations / event.capacity) * 100;
-  
+
   const isUpcoming = event.eventDate > new Date();
   const isPastDeadline = event.registrationDeadline < new Date();
   const isAtCapacity = totalRegistrations >= event.capacity;
-  
-  const canRegister = event.status === 'published' && 
-                     isUpcoming && 
-                     !isPastDeadline && 
-                     !isAtCapacity;
+
+  const canRegister =
+    event.status === 'published' &&
+    isUpcoming &&
+    !isPastDeadline &&
+    !isAtCapacity;
 
   return (
     <Container size="xl" py="xl">
@@ -223,14 +234,18 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
 
             <Menu.Dropdown>
               <Menu.Item
-                leftSection={<IconEdit style={{ width: rem(14), height: rem(14) }} />}
+                leftSection={
+                  <IconEdit style={{ width: rem(14), height: rem(14) }} />
+                }
                 onClick={handleEdit}
               >
                 Edit Event
               </Menu.Item>
               <Menu.Item
                 color="red"
-                leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
+                leftSection={
+                  <IconTrash style={{ width: rem(14), height: rem(14) }} />
+                }
                 onClick={handleDelete}
               >
                 Delete Event
@@ -253,7 +268,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
             <Paper p="md" withBorder>
               <Stack gap="md">
                 <Title order={3}>Event Details</Title>
-                
+
                 <Group>
                   <IconCalendar style={{ width: rem(20), height: rem(20) }} />
                   <div>
@@ -279,7 +294,8 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
                   <div>
                     <Text fw={500}>Capacity</Text>
                     <Text size="sm" c="dimmed">
-                      {totalRegistrations} / {event.capacity} registered ({Math.round(capacityPercentage)}%)
+                      {totalRegistrations} / {event.capacity} registered (
+                      {Math.round(capacityPercentage)}%)
                     </Text>
                   </div>
                 </Group>
@@ -307,14 +323,17 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
 
                 {isRegistered && (
                   <Alert color="green" title="Registration Confirmed">
-                    You are registered for this event. We'll send you updates and reminders.
+                    You are registered for this event. We'll send you updates
+                    and reminders.
                   </Alert>
                 )}
 
                 {!canRegister && event.status === 'published' && (
                   <Alert color="orange" title="Registration Unavailable">
                     {isPastDeadline && 'Registration deadline has passed.'}
-                    {isAtCapacity && !isPastDeadline && 'Event is at full capacity.'}
+                    {isAtCapacity &&
+                      !isPastDeadline &&
+                      'Event is at full capacity.'}
                     {!isUpcoming && 'This event has already occurred.'}
                   </Alert>
                 )}
@@ -326,9 +345,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
           <Paper p="md" withBorder>
             <Stack gap="md">
               <Group justify="space-between">
-                <Title order={3}>
-                  Attendees ({attendees.length})
-                </Title>
+                <Title order={3}>Attendees ({attendees.length})</Title>
                 {event.status === 'completed' && (
                   <Badge color="blue" variant="light">
                     {attendedCount} attended
@@ -343,7 +360,9 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
               ) : (
                 <Stack gap="sm" style={{ maxHeight: 400, overflowY: 'auto' }}>
                   {attendees.map(attendee => {
-                    const registration = event.registrations.find(r => r.alumniId === attendee.id);
+                    const registration = event.registrations.find(
+                      r => r.alumniId === attendee.id
+                    );
                     return (
                       <Card key={attendee.id} p="sm" withBorder>
                         <Group>
@@ -357,7 +376,8 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
                               {attendee.firstName} {attendee.lastName}
                             </Text>
                             <Text size="xs" c="dimmed">
-                              {attendee.currentPosition} at {attendee.currentCompany}
+                              {attendee.currentPosition} at{' '}
+                              {attendee.currentCompany}
                             </Text>
                             <Text size="xs" c="dimmed">
                               Class of {attendee.graduationYear}
@@ -365,10 +385,16 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
                           </div>
                           <Badge
                             size="xs"
-                            color={registration?.status === 'attended' ? 'green' : 'blue'}
+                            color={
+                              registration?.status === 'attended'
+                                ? 'green'
+                                : 'blue'
+                            }
                             variant="light"
                           >
-                            {registration?.status === 'attended' ? 'Attended' : 'Registered'}
+                            {registration?.status === 'attended'
+                              ? 'Attended'
+                              : 'Registered'}
                           </Badge>
                         </Group>
                       </Card>
@@ -382,8 +408,14 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
 
         {/* Admin Components - Only show for admin users */}
         <Stack gap="xl">
-          <AttendeeManagement event={event} onEventUpdate={() => eventId && loadEventDetails(eventId)} />
-          <WaitlistManagement event={event} onEventUpdate={() => eventId && loadEventDetails(eventId)} />
+          <AttendeeManagement
+            event={event}
+            onEventUpdate={() => eventId && loadEventDetails(eventId)}
+          />
+          <WaitlistManagement
+            event={event}
+            onEventUpdate={() => eventId && loadEventDetails(eventId)}
+          />
         </Stack>
       </Stack>
 

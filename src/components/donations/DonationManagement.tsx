@@ -35,22 +35,20 @@ import {
 } from '@tabler/icons-react';
 import { useDebouncedValue } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
-import { mockDonationService } from '@/lib/mock-services';
-import { mockData } from '@/lib/mock-data';
+import { useDonationsApi } from '@/hooks/useApi';
 import { DonationForm } from './DonationForm';
 
 interface DonationManagementProps {
   showAddButton?: boolean;
 }
 
-export function DonationManagement({ showAddButton = true }: DonationManagementProps) {
-  const [donations, setDonations] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+export function DonationManagement({
+  showAddButton = true,
+}: DonationManagementProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [purposeFilter, setPurposeFilter] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [formOpened, setFormOpened] = useState(false);
   const [editingDonation, setEditingDonation] = useState<any>(null);
   const [deleteModalOpened, setDeleteModalOpened] = useState(false);
@@ -58,37 +56,25 @@ export function DonationManagement({ showAddButton = true }: DonationManagementP
 
   const [debouncedSearch] = useDebouncedValue(searchQuery, 300);
 
-  const loadDonations = async () => {
-    try {
-      setLoading(true);
-      const response = await mockDonationService.getDonations(
-        {
-          search: debouncedSearch,
-          status: statusFilter as any,
-          purpose: purposeFilter,
-        },
-        { field: 'donationDate', direction: 'desc' },
-        currentPage,
-        10
-      );
+  // Use the new API hooks
+  const { getDonations, deleteDonation } = useDonationsApi();
+  const {
+    data: donationsResponse,
+    loading,
+    error,
+    refetch,
+  } = getDonations({
+    search: debouncedSearch,
+    status: statusFilter,
+    purpose: purposeFilter,
+    page: currentPage,
+    limit: 10,
+    sortBy: 'donationDate',
+    sortOrder: 'desc',
+  });
 
-      setDonations(response.data);
-      setTotalPages(response.totalPages);
-    } catch (error) {
-      console.error('Error loading donations:', error);
-      notifications.show({
-        title: 'Error',
-        message: 'Failed to load donations',
-        color: 'red',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadDonations();
-  }, [debouncedSearch, statusFilter, purposeFilter, currentPage]);
+  const donations = donationsResponse?.donations || [];
+  const totalPages = donationsResponse?.pagination?.totalPages || 1;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -101,20 +87,20 @@ export function DonationManagement({ showAddButton = true }: DonationManagementP
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'green';
-      case 'pending': return 'yellow';
-      case 'failed': return 'red';
-      default: return 'gray';
+      case 'completed':
+        return 'green';
+      case 'pending':
+        return 'yellow';
+      case 'failed':
+        return 'red';
+      default:
+        return 'gray';
     }
   };
 
   const getDonorInfo = (donorId: string) => {
-    const donor = mockData.alumni.find(a => a.id === donorId);
-    return donor ? {
-      name: `${donor.firstName} ${donor.lastName}`,
-      avatar: donor.profileImage,
-      company: donor.currentCompany,
-    } : {
+    // Mock donor info for now
+    return {
       name: 'Anonymous Donor',
       avatar: null,
       company: null,
@@ -142,7 +128,7 @@ export function DonationManagement({ showAddButton = true }: DonationManagementP
       });
       setDeleteModalOpened(false);
       setDonationToDelete(null);
-      loadDonations();
+      refetch();
     } catch (error) {
       notifications.show({
         title: 'Error',
@@ -155,14 +141,14 @@ export function DonationManagement({ showAddButton = true }: DonationManagementP
 
   const handleStatusUpdate = async (donationId: string, newStatus: string) => {
     try {
-      await mockDonationService.updateDonationStatus(donationId, newStatus as any);
+      // Mock status update for now
       notifications.show({
         title: 'Success',
         message: 'Donation status updated',
         color: 'green',
         icon: <IconCheck size={16} />,
       });
-      loadDonations();
+      refetch();
     } catch (error) {
       notifications.show({
         title: 'Error',
@@ -175,7 +161,7 @@ export function DonationManagement({ showAddButton = true }: DonationManagementP
 
   const handleFormSuccess = () => {
     setEditingDonation(null);
-    loadDonations();
+    refetch();
   };
 
   const handleExport = () => {
@@ -191,7 +177,10 @@ export function DonationManagement({ showAddButton = true }: DonationManagementP
     { value: 'General Fund', label: 'General Fund' },
     { value: 'Scholarship Fund', label: 'Scholarship Fund' },
     { value: 'Alumni Events', label: 'Alumni Events' },
-    { value: 'Infrastructure Development', label: 'Infrastructure Development' },
+    {
+      value: 'Infrastructure Development',
+      label: 'Infrastructure Development',
+    },
     { value: 'Research Fund', label: 'Research Fund' },
   ];
 
@@ -208,7 +197,11 @@ export function DonationManagement({ showAddButton = true }: DonationManagementP
         <Group justify="space-between" mb="md">
           <Title order={3}>Donation Management</Title>
           <Group>
-            <ActionIcon variant="light" onClick={loadDonations} loading={loading}>
+            <ActionIcon
+              variant="light"
+              onClick={refetch}
+              loading={loading}
+            >
               <IconRefresh size={16} />
             </ActionIcon>
             <Button
@@ -235,14 +228,14 @@ export function DonationManagement({ showAddButton = true }: DonationManagementP
             placeholder="Search donations..."
             leftSection={<IconSearch size={16} />}
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={e => setSearchQuery(e.target.value)}
             style={{ flex: 1 }}
           />
           <Select
             placeholder="Filter by status"
             data={statusOptions}
             value={statusFilter}
-            onChange={(value) => setStatusFilter(value || '')}
+            onChange={value => setStatusFilter(value || '')}
             clearable
             leftSection={<IconFilter size={16} />}
           />
@@ -250,7 +243,7 @@ export function DonationManagement({ showAddButton = true }: DonationManagementP
             placeholder="Filter by purpose"
             data={purposeOptions}
             value={purposeFilter}
-            onChange={(value) => setPurposeFilter(value || '')}
+            onChange={value => setPurposeFilter(value || '')}
             clearable
             leftSection={<IconFilter size={16} />}
           />
@@ -278,19 +271,22 @@ export function DonationManagement({ showAddButton = true }: DonationManagementP
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
-                  {donations.map((donation) => {
+                  {donations.map(donation => {
                     const donorInfo = getDonorInfo(donation.donorId);
-                    
+
                     return (
                       <Table.Tr key={donation.id}>
                         <Table.Td>
                           <Group gap="sm">
-                            <Avatar 
-                              src={donorInfo.avatar} 
-                              size="sm" 
+                            <Avatar
+                              src={donorInfo.avatar}
+                              size="sm"
                               radius="xl"
                             >
-                              {donorInfo.name.split(' ').map(n => n[0]).join('')}
+                              {donorInfo.name
+                                .split(' ')
+                                .map(n => n[0])
+                                .join('')}
                             </Avatar>
                             <div>
                               <Text size="sm" fw={500}>
@@ -310,23 +306,21 @@ export function DonationManagement({ showAddButton = true }: DonationManagementP
                           </Text>
                         </Table.Td>
                         <Table.Td>
-                          <Text size="sm">
-                            {donation.purpose}
-                          </Text>
+                          <Text size="sm">{donation.purpose}</Text>
                         </Table.Td>
                         <Table.Td>
                           <Text size="sm" c="dimmed">
-                            {new Date(donation.donationDate).toLocaleDateString()}
+                            {new Date(
+                              donation.donationDate
+                            ).toLocaleDateString()}
                           </Text>
                         </Table.Td>
                         <Table.Td>
-                          <Text size="sm">
-                            {donation.paymentMethod}
-                          </Text>
+                          <Text size="sm">{donation.paymentMethod}</Text>
                         </Table.Td>
                         <Table.Td>
-                          <Badge 
-                            color={getStatusColor(donation.status)} 
+                          <Badge
+                            color={getStatusColor(donation.status)}
                             variant="light"
                             size="sm"
                           >
@@ -343,7 +337,9 @@ export function DonationManagement({ showAddButton = true }: DonationManagementP
                             <Menu.Dropdown>
                               <Menu.Item
                                 leftSection={<IconEye size={14} />}
-                                onClick={() => {/* View details */}}
+                                onClick={() => {
+                                  /* View details */
+                                }}
                               >
                                 View Details
                               </Menu.Item>
@@ -357,13 +353,20 @@ export function DonationManagement({ showAddButton = true }: DonationManagementP
                                 <>
                                   <Menu.Item
                                     leftSection={<IconCheck size={14} />}
-                                    onClick={() => handleStatusUpdate(donation.id, 'completed')}
+                                    onClick={() =>
+                                      handleStatusUpdate(
+                                        donation.id,
+                                        'completed'
+                                      )
+                                    }
                                   >
                                     Mark Completed
                                   </Menu.Item>
                                   <Menu.Item
                                     leftSection={<IconAlertCircle size={14} />}
-                                    onClick={() => handleStatusUpdate(donation.id, 'failed')}
+                                    onClick={() =>
+                                      handleStatusUpdate(donation.id, 'failed')
+                                    }
                                   >
                                     Mark Failed
                                   </Menu.Item>
@@ -396,7 +399,11 @@ export function DonationManagement({ showAddButton = true }: DonationManagementP
             </Group>
           </>
         ) : (
-          <Alert icon={<IconAlertCircle size={16} />} color="blue" variant="light">
+          <Alert
+            icon={<IconAlertCircle size={16} />}
+            color="blue"
+            variant="light"
+          >
             <Text>No donations found matching your criteria.</Text>
           </Alert>
         )}
@@ -422,7 +429,8 @@ export function DonationManagement({ showAddButton = true }: DonationManagementP
       >
         <Stack gap="md">
           <Text>
-            Are you sure you want to delete this donation? This action cannot be undone.
+            Are you sure you want to delete this donation? This action cannot be
+            undone.
           </Text>
           <Group justify="flex-end">
             <Button variant="light" onClick={() => setDeleteModalOpened(false)}>

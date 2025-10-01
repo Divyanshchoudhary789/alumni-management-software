@@ -27,6 +27,26 @@ declare global {
 // Middleware: Require Authentication
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    // Check if we're in development mode and have dev auth header
+    const isDevMode = process.env.NODE_ENV === 'development';
+    const devToken = req.headers['x-dev-token'] as string;
+
+    if (isDevMode && devToken) {
+      // In development mode, accept dev token with user info
+      try {
+        const devUser = JSON.parse(devToken);
+        logger.info('Dev auth successful for user:', devUser.id);
+        req.auth = {
+          userId: devUser.id,
+          sessionId: 'dev-session',
+        };
+        return next();
+      } catch (error) {
+        logger.warn('Invalid dev token format:', error, 'Token:', devToken);
+        return res.status(401).json({ error: 'Invalid development token' });
+      }
+    }
+
     const token = req.headers.authorization?.replace('Bearer ', '');
     if (!token) return res.status(401).json({ error: 'No authorization token provided' });
 
@@ -75,13 +95,46 @@ export const loadUser = async (req: Request, res: Response, next: NextFunction) 
       return res.status(401).json({ error: 'Unauthorized - No user ID' });
     }
 
-    const clerkUserId = req.auth.userId;
-    req.clerkUserId = clerkUserId;
+    const isDevMode = process.env.NODE_ENV === 'development';
+    const devToken = req.headers['x-dev-token'] as string;
 
-    const user = await User.findOne({ clerkUserId });
-    if (!user) {
-      logger.warn('User not found in database:', clerkUserId);
-      return res.status(404).json({ error: 'User not found' });
+    let user;
+
+    if (isDevMode && devToken) {
+      // In development mode, create or find user based on dev token
+      try {
+        const devUser = JSON.parse(devToken);
+        const clerkUserId = devUser.id;
+
+        user = await User.findOne({ clerkUserId });
+
+        if (!user) {
+          // Create user from dev data
+          user = new User({
+            clerkUserId,
+            email: devUser.emailAddresses?.[0]?.emailAddress || devUser.email,
+            role: devUser.publicMetadata?.role || 'alumni',
+            oauthProvider: 'dev',
+          });
+          await user.save();
+          logger.info('Dev user created:', { clerkUserId, email: user.email });
+        }
+
+        req.clerkUserId = clerkUserId;
+      } catch (error) {
+        logger.error('Error parsing dev token:', error);
+        return res.status(401).json({ error: 'Invalid development token' });
+      }
+    } else {
+      // Production mode - find existing user
+      const clerkUserId = req.auth.userId;
+      req.clerkUserId = clerkUserId;
+
+      user = await User.findOne({ clerkUserId });
+      if (!user) {
+        logger.warn('User not found in database:', clerkUserId);
+        return res.status(404).json({ error: 'User not found' });
+      }
     }
 
     req.user = user;

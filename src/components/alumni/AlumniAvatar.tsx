@@ -11,17 +11,18 @@ interface AlumniAvatarProps extends Omit<AvatarProps, 'src' | 'alt'> {
   showTooltip?: boolean;
 }
 
-export function AlumniAvatar({ 
-  alumni, 
+export function AlumniAvatar({
+  alumni,
   showPrivacyIndicator = false,
   showTooltip = false,
-  ...props 
+  ...props
 }: AlumniAvatarProps) {
   const [imageError, setImageError] = useState(false);
-  
+
   const fullName = `${alumni.firstName} ${alumni.lastName}`;
-  const initials = `${alumni.firstName.charAt(0)}${alumni.lastName.charAt(0)}`.toUpperCase();
-  
+  const initials =
+    `${alumni.firstName.charAt(0)}${alumni.lastName.charAt(0)}`.toUpperCase();
+
   // Handle image loading error
   const handleImageError = () => {
     setImageError(true);
@@ -30,8 +31,18 @@ export function AlumniAvatar({
   // Generate a consistent color based on the alumni's name
   const getAvatarColor = (name: string) => {
     const colors = [
-      'blue', 'cyan', 'teal', 'green', 'lime', 'yellow', 
-      'orange', 'red', 'pink', 'grape', 'violet', 'indigo'
+      'blue',
+      'cyan',
+      'teal',
+      'green',
+      'lime',
+      'yellow',
+      'orange',
+      'red',
+      'pink',
+      'grape',
+      'violet',
+      'indigo',
     ];
     let hash = 0;
     for (let i = 0; i < name.length; i++) {
@@ -51,7 +62,7 @@ export function AlumniAvatar({
       >
         {!alumni.profileImage || imageError ? initials : null}
       </Avatar>
-      
+
       {showPrivacyIndicator && !alumni.isPublic && (
         <div
           style={{
@@ -64,7 +75,7 @@ export function AlumniAvatar({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            border: '2px solid white'
+            border: '2px solid white',
           }}
         >
           <IconEyeOff size={10} color="white" />
@@ -74,11 +85,7 @@ export function AlumniAvatar({
   );
 
   if (showTooltip) {
-    return (
-      <Tooltip label={fullName}>
-        {avatarElement}
-      </Tooltip>
-    );
+    return <Tooltip label={fullName}>{avatarElement}</Tooltip>;
   }
 
   return avatarElement;
@@ -92,11 +99,11 @@ interface AlumniAvatarGroupProps {
   showTooltips?: boolean;
 }
 
-export function AlumniAvatarGroup({ 
-  alumni, 
-  limit = 5, 
+export function AlumniAvatarGroup({
+  alumni,
+  limit = 5,
   size = 'md',
-  showTooltips = true 
+  showTooltips = true,
 }: AlumniAvatarGroupProps) {
   const displayedAlumni = alumni.slice(0, limit);
   const remainingCount = alumni.length - limit;
@@ -108,7 +115,7 @@ export function AlumniAvatarGroup({
           key={alumniProfile.id}
           style={{
             zIndex: displayedAlumni.length - index,
-            marginLeft: index > 0 ? -8 : 0
+            marginLeft: index > 0 ? -8 : 0,
           }}
         >
           <AlumniAvatar
@@ -117,12 +124,12 @@ export function AlumniAvatarGroup({
             showTooltip={showTooltips}
             style={{
               border: '2px solid white',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
             }}
           />
         </div>
       ))}
-      
+
       {remainingCount > 0 && (
         <Avatar
           size={size}
@@ -131,7 +138,7 @@ export function AlumniAvatarGroup({
             marginLeft: -8,
             border: '2px solid white',
             boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-            zIndex: 0
+            zIndex: 0,
           }}
         >
           +{remainingCount}

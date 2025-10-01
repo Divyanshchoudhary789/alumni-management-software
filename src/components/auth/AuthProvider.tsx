@@ -15,13 +15,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     <ClerkProvider
       appearance={{
         elements: {
-          formButtonPrimary: 'bg-blue-600 hover:bg-blue-700 text-white font-medium',
+          formButtonPrimary:
+            'bg-blue-600 hover:bg-blue-700 text-white font-medium',
           card: 'shadow-lg border border-gray-200 rounded-lg',
           headerTitle: 'text-2xl font-bold text-gray-900',
           headerSubtitle: 'text-gray-600',
-          socialButtonsBlockButton: 'border border-gray-300 hover:bg-gray-50 text-gray-700',
+          socialButtonsBlockButton:
+            'border border-gray-300 hover:bg-gray-50 text-gray-700',
           socialButtonsBlockButtonText: 'font-medium',
-          formFieldInput: 'border border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md',
+          formFieldInput:
+            'border border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md',
           footerActionLink: 'text-blue-600 hover:text-blue-700 font-medium',
           dividerLine: 'bg-gray-300',
           dividerText: 'text-gray-500',

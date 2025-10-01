@@ -21,11 +21,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 const renderWithMantine = (component: React.ReactElement) => {
-  return render(
-    <MantineProvider>
-      {component}
-    </MantineProvider>
-  );
+  return render(<MantineProvider>{component}</MantineProvider>);
 };
 
 describe('Authentication Components', () => {
@@ -111,7 +107,11 @@ describe('Authentication Components', () => {
     it('renders without specific error message', () => {
       renderWithMantine(<AuthError />);
       expect(screen.getByText('Authentication Error')).toBeInTheDocument();
-      expect(screen.getByText('There was a problem with your authentication. Please try again.')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'There was a problem with your authentication. Please try again.'
+        )
+      ).toBeInTheDocument();
     });
   });
 });

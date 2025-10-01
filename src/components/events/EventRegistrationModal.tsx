@@ -10,7 +10,7 @@ import {
   Divider,
   Badge,
   Image,
-  rem
+  rem,
 } from '@mantine/core';
 import {
   IconCalendar,
@@ -18,7 +18,7 @@ import {
   IconUsers,
   IconClock,
   IconAlertCircle,
-  IconCheck
+  IconCheck,
 } from '@tabler/icons-react';
 import { Event } from '@/types';
 import { format } from 'date-fns';
@@ -38,24 +38,27 @@ export function EventRegistrationModal({
   onClose,
   onConfirm,
   loading = false,
-  isRegistered = false
+  isRegistered = false,
 }: EventRegistrationModalProps) {
   if (!event) return null;
 
-  const registeredCount = event.registrations?.filter(r => r.status === 'registered').length || 0;
-  const attendedCount = event.registrations?.filter(r => r.status === 'attended').length || 0;
+  const registeredCount =
+    event.registrations?.filter(r => r.status === 'registered').length || 0;
+  const attendedCount =
+    event.registrations?.filter(r => r.status === 'attended').length || 0;
   const totalRegistrations = registeredCount + attendedCount;
   const availableSpots = event.capacity - totalRegistrations;
-  
+
   const isUpcoming = event.eventDate > new Date();
   const isPastDeadline = event.registrationDeadline < new Date();
   const isAtCapacity = totalRegistrations >= event.capacity;
-  
-  const canRegister = event.status === 'published' && 
-                     isUpcoming && 
-                     !isPastDeadline && 
-                     !isAtCapacity && 
-                     !isRegistered;
+
+  const canRegister =
+    event.status === 'published' &&
+    isUpcoming &&
+    !isPastDeadline &&
+    !isAtCapacity &&
+    !isRegistered;
 
   return (
     <Modal
@@ -80,19 +83,15 @@ export function EventRegistrationModal({
           <Text fw={600} size="lg">
             {event.title}
           </Text>
-          
+
           <Group gap="xs">
             <IconCalendar style={{ width: rem(16), height: rem(16) }} />
-            <Text size="sm">
-              {format(event.eventDate, 'PPP p')}
-            </Text>
+            <Text size="sm">{format(event.eventDate, 'PPP p')}</Text>
           </Group>
 
           <Group gap="xs">
             <IconMapPin style={{ width: rem(16), height: rem(16) }} />
-            <Text size="sm">
-              {event.location}
-            </Text>
+            <Text size="sm">{event.location}</Text>
           </Group>
 
           <Group gap="xs">
@@ -115,12 +114,14 @@ export function EventRegistrationModal({
         {/* Registration Status */}
         {isRegistered ? (
           <Alert icon={<IconCheck />} color="green" title="Already Registered">
-            You are already registered for this event. We'll send you updates and reminders as the event approaches.
+            You are already registered for this event. We'll send you updates
+            and reminders as the event approaches.
           </Alert>
         ) : canRegister ? (
           <Alert color="blue" title="Confirm Registration">
             <Text size="sm">
-              By registering for this event, you confirm your attendance. Please make sure you can attend before registering.
+              By registering for this event, you confirm your attendance. Please
+              make sure you can attend before registering.
             </Text>
             {availableSpots <= 5 && (
               <Text size="sm" mt="xs" c="orange" fw={500}>
@@ -129,11 +130,18 @@ export function EventRegistrationModal({
             )}
           </Alert>
         ) : (
-          <Alert icon={<IconAlertCircle />} color="red" title="Registration Unavailable">
+          <Alert
+            icon={<IconAlertCircle />}
+            color="red"
+            title="Registration Unavailable"
+          >
             {isPastDeadline && 'Registration deadline has passed.'}
-            {isAtCapacity && !isPastDeadline && 'This event is at full capacity.'}
+            {isAtCapacity &&
+              !isPastDeadline &&
+              'This event is at full capacity.'}
             {!isUpcoming && 'This event has already occurred.'}
-            {event.status !== 'published' && 'This event is not currently accepting registrations.'}
+            {event.status !== 'published' &&
+              'This event is not currently accepting registrations.'}
           </Alert>
         )}
 
@@ -144,7 +152,13 @@ export function EventRegistrationModal({
           </Text>
           <Group gap="xs">
             <Badge
-              color={availableSpots <= 5 ? 'red' : availableSpots <= 15 ? 'yellow' : 'green'}
+              color={
+                availableSpots <= 5
+                  ? 'red'
+                  : availableSpots <= 15
+                    ? 'yellow'
+                    : 'green'
+              }
               variant="light"
               size="sm"
             >
@@ -158,7 +172,7 @@ export function EventRegistrationModal({
           <Button variant="light" onClick={onClose} disabled={loading}>
             {isRegistered ? 'Close' : 'Cancel'}
           </Button>
-          
+
           {!isRegistered && canRegister && (
             <Button onClick={onConfirm} loading={loading}>
               Confirm Registration

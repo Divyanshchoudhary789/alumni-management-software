@@ -66,14 +66,12 @@ const CommunicationSchema = new Schema<ICommunication>({
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true,
-    index: true,
   },
   status: {
     type: String,
     enum: ['draft', 'scheduled', 'sent', 'failed'],
     default: 'draft',
     required: true,
-    index: true,
   },
   scheduledDate: {
     type: Date,
@@ -141,12 +139,10 @@ const CommunicationTemplateSchema = new Schema<ICommunicationTemplate>({
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true,
-    index: true,
   },
   isActive: {
     type: Boolean,
     default: true,
-    index: true,
   },
 }, {
   timestamps: true,

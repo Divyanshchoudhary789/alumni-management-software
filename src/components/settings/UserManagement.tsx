@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Stack,
   Group,
@@ -21,7 +21,9 @@ import {
   Switch,
   Checkbox,
   Grid,
-  Divider
+  Divider,
+  Loader,
+  Flex,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
@@ -36,32 +38,42 @@ import {
   IconMail,
   IconCheck,
   IconX,
-  IconAlertCircle
+  IconAlertCircle,
+  IconExternalLink,
+  IconUsers,
 } from '@tabler/icons-react';
-import { settingsService } from '@/lib/mock-services/settingsService';
+import { useAuth } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 import { User, UserPermission } from '@/types';
 
 export function UserManagement() {
+  const { getToken } = useAuth();
+  const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [permissions, setPermissions] = useState<UserPermission | null>(null);
   const [loading, setLoading] = useState(false);
+  const [usersLoading, setUsersLoading] = useState(true);
   const [activePage, setActivePage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [opened, { open, close }] = useDisclosure(false);
-  const [permissionsOpened, { open: openPermissions, close: closePermissions }] = useDisclosure(false);
+  const [
+    permissionsOpened,
+    { open: openPermissions, close: closePermissions },
+  ] = useDisclosure(false);
 
   const userForm = useForm({
     initialValues: {
       email: '',
       role: 'alumni' as 'admin' | 'alumni',
       firstName: '',
-      lastName: ''
+      lastName: '',
     },
     validate: {
-      email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
-      firstName: (value) => (!value ? 'First name is required' : null),
-      lastName: (value) => (!value ? 'Last name is required' : null)
-    }
+      email: value => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
+      firstName: value => (!value ? 'First name is required' : null),
+      lastName: value => (!value ? 'Last name is required' : null),
+    },
   });
 
   const permissionForm = useForm({
@@ -70,78 +82,109 @@ export function UserManagement() {
         view: false,
         create: false,
         edit: false,
-        delete: false
+        delete: false,
       },
       events: {
         view: false,
         create: false,
         edit: false,
         delete: false,
-        manageRegistrations: false
+        manageRegistrations: false,
       },
       communications: {
         view: false,
         create: false,
         edit: false,
         delete: false,
-        send: false
+        send: false,
       },
       donations: {
         view: false,
         create: false,
         edit: false,
         delete: false,
-        viewReports: false
+        viewReports: false,
       },
       mentorship: {
         view: false,
         create: false,
         edit: false,
         delete: false,
-        manageConnections: false
+        manageConnections: false,
       },
       analytics: {
         view: false,
         export: false,
-        viewSensitiveData: false
+        viewSensitiveData: false,
       },
       settings: {
         view: false,
         edit: false,
         manageUsers: false,
-        manageIntegrations: false
-      }
-    }
+        manageIntegrations: false,
+      },
+    },
   });
+
+  const fetchUsers = async () => {
+    try {
+      setUsersLoading(true);
+      const token = await getToken();
+      
+      const response = await fetch(`/api/auth/users?page=${activePage}&limit=5`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+
+      const data = await response.json();
+      setUsers(data.users);
+      setTotalPages(data.pagination.pages);
+    } catch (error) {
+      notifications.show({
+        title: 'Error',
+        message: 'Failed to load users',
+        color: 'red',
+        icon: <IconAlertCircle size={16} />,
+      });
+    } finally {
+      setUsersLoading(false);
+    }
+  };
 
   const handleCreateUser = async (values: typeof userForm.values) => {
     setLoading(true);
     try {
-      await settingsService.createUser(values);
+      // For now, redirect to Clerk dashboard for user creation
       notifications.show({
-        title: 'User Created',
-        message: 'New user has been created successfully',
-        color: 'green',
-        icon: <IconCheck size={16} />
+        title: 'Info',
+        message: 'Please use the dedicated User Management page for full user operations',
+        color: 'blue',
+        icon: <IconAlertCircle size={16} />,
       });
-      userForm.reset();
       close();
-      // Refresh users list
     } catch (error) {
       notifications.show({
         title: 'Error',
         message: 'Failed to create user',
         color: 'red',
-        icon: <IconAlertCircle size={16} />
+        icon: <IconAlertCircle size={16} />,
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleUpdatePermissions = async (values: typeof permissionForm.values) => {
+  const handleUpdatePermissions = async (
+    values: typeof permissionForm.values
+  ) => {
     if (!selectedUser) return;
-    
+
     setLoading(true);
     try {
       await settingsService.updateUserPermissions(selectedUser.id, values);
@@ -149,7 +192,7 @@ export function UserManagement() {
         title: 'Permissions Updated',
         message: 'User permissions have been updated successfully',
         color: 'green',
-        icon: <IconCheck size={16} />
+        icon: <IconCheck size={16} />,
       });
       closePermissions();
     } catch (error) {
@@ -157,7 +200,7 @@ export function UserManagement() {
         title: 'Error',
         message: 'Failed to update permissions',
         color: 'red',
-        icon: <IconAlertCircle size={16} />
+        icon: <IconAlertCircle size={16} />,
       });
     } finally {
       setLoading(false);
@@ -167,57 +210,54 @@ export function UserManagement() {
   const openUserPermissions = async (user: User) => {
     setSelectedUser(user);
     try {
-      const userPermissions = await settingsService.getUserPermissions(user.id);
-      if (userPermissions) {
-        permissionForm.setValues(userPermissions.permissions);
-      }
-      openPermissions();
+      // For now, show info about using dedicated page
+      notifications.show({
+        title: 'Info',
+        message: 'Advanced permission management is available in the dedicated User Management page',
+        color: 'blue',
+        icon: <IconAlertCircle size={16} />,
+      });
     } catch (error) {
       notifications.show({
         title: 'Error',
         message: 'Failed to load user permissions',
-        color: 'red'
+        color: 'red',
       });
     }
   };
 
-  const mockUsers: User[] = [
-    {
-      id: '1',
-      email: 'admin@university.edu',
-      role: 'admin',
-      createdAt: new Date('2024-01-15'),
-      updatedAt: new Date('2024-01-15')
-    },
-    {
-      id: '2',
-      email: 'john.doe@alumni.edu',
-      role: 'alumni',
-      createdAt: new Date('2024-02-01'),
-      updatedAt: new Date('2024-02-01')
-    },
-    {
-      id: '3',
-      email: 'jane.smith@alumni.edu',
-      role: 'alumni',
-      createdAt: new Date('2024-02-15'),
-      updatedAt: new Date('2024-02-15')
-    }
-  ];
+  const navigateToUserManagement = () => {
+    router.push('/settings/users');
+  };
 
-  const PermissionSection = ({ title, permissions, prefix }: { 
-    title: string; 
-    permissions: Record<string, boolean>; 
+  useEffect(() => {
+    fetchUsers();
+  }, [activePage]);
+
+  const PermissionSection = ({
+    title,
+    permissions,
+    prefix,
+  }: {
+    title: string;
+    permissions: Record<string, boolean>;
     prefix: string;
   }) => (
     <Card withBorder>
-      <Title order={5} mb="sm">{title}</Title>
+      <Title order={5} mb="sm">
+        {title}
+      </Title>
       <Grid>
         {Object.entries(permissions).map(([key, value]) => (
           <Grid.Col span={6} key={key}>
             <Checkbox
-              label={key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
-              {...permissionForm.getInputProps(`${prefix}.${key}`, { type: 'checkbox' })}
+              label={
+                key.charAt(0).toUpperCase() +
+                key.slice(1).replace(/([A-Z])/g, ' $1')
+              }
+              {...permissionForm.getInputProps(`${prefix}.${key}`, {
+                type: 'checkbox',
+              })}
             />
           </Grid.Col>
         ))}
@@ -234,92 +274,121 @@ export function UserManagement() {
             Manage user accounts and their access permissions
           </Text>
         </div>
-        <Button leftSection={<IconPlus size={16} />} onClick={open}>
-          Add User
-        </Button>
+        <Group>
+          <Button 
+            leftSection={<IconUsers size={16} />} 
+            onClick={navigateToUserManagement}
+            variant="outline"
+          >
+            Full User Management
+          </Button>
+          <Button leftSection={<IconPlus size={16} />} onClick={open}>
+            Add User
+          </Button>
+        </Group>
       </Group>
 
       <Alert icon={<IconShield size={16} />} color="blue">
-        User permissions control access to different sections of the system. Admin users have full access by default.
+        User permissions control access to different sections of the system.
+        Admin users have full access by default. Use the "Full User Management" page for complete user administration.
       </Alert>
 
       <Card withBorder>
-        <Table>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>User</Table.Th>
-              <Table.Th>Email</Table.Th>
-              <Table.Th>Role</Table.Th>
-              <Table.Th>Created</Table.Th>
-              <Table.Th>Actions</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {mockUsers.map((user) => (
-              <Table.Tr key={user.id}>
-                <Table.Td>
-                  <Group gap="sm">
-                    <Avatar size="sm" color="blue">
-                      <IconUser size={16} />
-                    </Avatar>
-                    <Text size="sm" fw={500}>
-                      {user.email.split('@')[0]}
-                    </Text>
-                  </Group>
-                </Table.Td>
-                <Table.Td>
-                  <Text size="sm">{user.email}</Text>
-                </Table.Td>
-                <Table.Td>
-                  <Badge color={user.role === 'admin' ? 'red' : 'blue'} variant="light">
-                    {user.role}
-                  </Badge>
-                </Table.Td>
-                <Table.Td>
-                  <Text size="sm" c="dimmed">
-                    {user.createdAt.toLocaleDateString()}
-                  </Text>
-                </Table.Td>
-                <Table.Td>
-                  <Menu shadow="md" width={200}>
-                    <Menu.Target>
-                      <ActionIcon variant="subtle">
-                        <IconDots size={16} />
-                      </ActionIcon>
-                    </Menu.Target>
-                    <Menu.Dropdown>
-                      <Menu.Item
-                        leftSection={<IconShield size={14} />}
-                        onClick={() => openUserPermissions(user)}
+        {usersLoading ? (
+          <Flex justify="center" py="xl">
+            <Loader />
+          </Flex>
+        ) : (
+          <>
+            <Table>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>User</Table.Th>
+                  <Table.Th>Email</Table.Th>
+                  <Table.Th>Role</Table.Th>
+                  <Table.Th>Created</Table.Th>
+                  <Table.Th>Actions</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {users.map(user => (
+                  <Table.Tr key={user.id}>
+                    <Table.Td>
+                      <Group gap="sm">
+                        <Avatar size="sm" color="blue">
+                          <IconUser size={16} />
+                        </Avatar>
+                        <Text size="sm" fw={500}>
+                          {user.email.split('@')[0]}
+                        </Text>
+                      </Group>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="sm">{user.email}</Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Badge
+                        color={user.role === 'admin' ? 'red' : 'blue'}
+                        variant="light"
                       >
-                        Manage Permissions
-                      </Menu.Item>
-                      <Menu.Item leftSection={<IconEdit size={14} />}>
-                        Edit User
-                      </Menu.Item>
-                      <Menu.Divider />
-                      <Menu.Item
-                        leftSection={<IconTrash size={14} />}
-                        color="red"
-                        disabled={user.role === 'admin'}
-                      >
-                        Delete User
-                      </Menu.Item>
-                    </Menu.Dropdown>
-                  </Menu>
-                </Table.Td>
-              </Table.Tr>
-            ))}
-          </Table.Tbody>
-        </Table>
+                        {user.role}
+                      </Badge>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="sm" c="dimmed">
+                        {new Date(user.createdAt).toLocaleDateString()}
+                      </Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Menu shadow="md" width={200}>
+                        <Menu.Target>
+                          <ActionIcon variant="subtle">
+                            <IconDots size={16} />
+                          </ActionIcon>
+                        </Menu.Target>
+                        <Menu.Dropdown>
+                          <Menu.Item
+                            leftSection={<IconExternalLink size={14} />}
+                            onClick={navigateToUserManagement}
+                          >
+                            Full Management
+                          </Menu.Item>
+                          <Menu.Item
+                            leftSection={<IconShield size={14} />}
+                            onClick={() => openUserPermissions(user)}
+                          >
+                            Manage Permissions
+                          </Menu.Item>
+                          <Menu.Item leftSection={<IconEdit size={14} />}>
+                            Edit User
+                          </Menu.Item>
+                          <Menu.Divider />
+                          <Menu.Item
+                            leftSection={<IconTrash size={14} />}
+                            color="red"
+                            disabled={user.role === 'admin'}
+                          >
+                            Delete User
+                          </Menu.Item>
+                        </Menu.Dropdown>
+                      </Menu>
+                    </Table.Td>
+                  </Table.Tr>
+                ))}
+              </Table.Tbody>
+            </Table>
 
-        <Group justify="center" mt="md">
-          <Pagination
-            value={activePage}
-            onChange={setActivePage}
-            total={Math.ceil(mockUsers.length / 10)}
-          />
-        </Group>
+            {totalPages > 1 && (
+              <Group justify="center" mt="md">
+                <Pagination
+                  value={activePage}
+                  onChange={setActivePage}
+                  total={totalPages}
+                />
+              </Group>
+            )}
+          </>
+        )}
       </Card>
 
       {/* Add User Modal */}
@@ -354,7 +423,7 @@ export function UserManagement() {
               label="Role"
               data={[
                 { value: 'alumni', label: 'Alumni' },
-                { value: 'admin', label: 'Administrator' }
+                { value: 'admin', label: 'Administrator' },
               ]}
               {...userForm.getInputProps('role')}
             />
@@ -371,9 +440,9 @@ export function UserManagement() {
       </Modal>
 
       {/* Permissions Modal */}
-      <Modal 
-        opened={permissionsOpened} 
-        onClose={closePermissions} 
+      <Modal
+        opened={permissionsOpened}
+        onClose={closePermissions}
         title={`Manage Permissions - ${selectedUser?.email}`}
         size="xl"
       >

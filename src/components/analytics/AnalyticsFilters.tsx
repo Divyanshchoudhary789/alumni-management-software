@@ -1,19 +1,24 @@
 'use client';
 
-import { 
-  Card, 
-  Group, 
-  Select, 
-  MultiSelect, 
-  Button, 
-  Text, 
+import {
+  Card,
+  Group,
+  Select,
+  MultiSelect,
+  Button,
+  Text,
   Collapse,
   ActionIcon,
   Badge,
-  Stack
+  Stack,
 } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
-import { IconFilter, IconX, IconDownload, IconRefresh } from '@tabler/icons-react';
+import {
+  IconFilter,
+  IconX,
+  IconDownload,
+  IconRefresh,
+} from '@tabler/icons-react';
 import { useState } from 'react';
 import { AnalyticsFilters as FilterType } from '@/lib/mock-services/analyticsService';
 
@@ -25,12 +30,12 @@ interface AnalyticsFiltersProps {
   loading?: boolean;
 }
 
-export function AnalyticsFilters({ 
-  filters, 
-  onFiltersChange, 
-  onExport, 
+export function AnalyticsFilters({
+  filters,
+  onFiltersChange,
+  onExport,
   onRefresh,
-  loading = false 
+  loading = false,
 }: AnalyticsFiltersProps) {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -40,26 +45,79 @@ export function AnalyticsFilters({
   });
 
   const locationOptions = [
-    'New York, NY', 'Los Angeles, CA', 'Chicago, IL', 'Houston, TX', 'Phoenix, AZ',
-    'Philadelphia, PA', 'San Antonio, TX', 'San Diego, CA', 'Dallas, TX', 'San Jose, CA',
-    'Austin, TX', 'Jacksonville, FL', 'Fort Worth, TX', 'Columbus, OH', 'Charlotte, NC',
-    'San Francisco, CA', 'Indianapolis, IN', 'Seattle, WA', 'Denver, CO', 'Washington, DC'
+    'New York, NY',
+    'Los Angeles, CA',
+    'Chicago, IL',
+    'Houston, TX',
+    'Phoenix, AZ',
+    'Philadelphia, PA',
+    'San Antonio, TX',
+    'San Diego, CA',
+    'Dallas, TX',
+    'San Jose, CA',
+    'Austin, TX',
+    'Jacksonville, FL',
+    'Fort Worth, TX',
+    'Columbus, OH',
+    'Charlotte, NC',
+    'San Francisco, CA',
+    'Indianapolis, IN',
+    'Seattle, WA',
+    'Denver, CO',
+    'Washington, DC',
   ].map(location => ({ value: location, label: location }));
 
   const companyOptions = [
-    'Google', 'Microsoft', 'Apple', 'Amazon', 'Meta', 'Tesla', 'Netflix', 'Adobe',
-    'Salesforce', 'Oracle', 'IBM', 'Intel', 'Cisco', 'Uber', 'Airbnb', 'Spotify',
-    'Twitter', 'LinkedIn', 'Dropbox', 'Slack', 'Zoom', 'Shopify', 'Square', 'PayPal'
+    'Google',
+    'Microsoft',
+    'Apple',
+    'Amazon',
+    'Meta',
+    'Tesla',
+    'Netflix',
+    'Adobe',
+    'Salesforce',
+    'Oracle',
+    'IBM',
+    'Intel',
+    'Cisco',
+    'Uber',
+    'Airbnb',
+    'Spotify',
+    'Twitter',
+    'LinkedIn',
+    'Dropbox',
+    'Slack',
+    'Zoom',
+    'Shopify',
+    'Square',
+    'PayPal',
   ].map(company => ({ value: company, label: company }));
 
   const eventTypeOptions = [
-    'Networking', 'Workshop', 'Social', 'Career', 'Fundraising', 'Alumni Reunion',
-    'Professional Development', 'Mentorship', 'Volunteer', 'Sports'
+    'Networking',
+    'Workshop',
+    'Social',
+    'Career',
+    'Fundraising',
+    'Alumni Reunion',
+    'Professional Development',
+    'Mentorship',
+    'Volunteer',
+    'Sports',
   ].map(type => ({ value: type, label: type }));
 
   const donationPurposeOptions = [
-    'General Fund', 'Scholarship Fund', 'Building Fund', 'Research Fund', 'Athletic Fund',
-    'Library Fund', 'Emergency Fund', 'Student Activities', 'Faculty Support', 'Technology Fund'
+    'General Fund',
+    'Scholarship Fund',
+    'Building Fund',
+    'Research Fund',
+    'Athletic Fund',
+    'Library Fund',
+    'Emergency Fund',
+    'Student Activities',
+    'Faculty Support',
+    'Technology Fund',
   ].map(purpose => ({ value: purpose, label: purpose }));
 
   const handleDateRangeChange = (dates: [Date | null, Date | null]) => {
@@ -67,7 +125,7 @@ export function AnalyticsFilters({
     if (start && end) {
       onFiltersChange({
         ...filters,
-        dateRange: { start, end }
+        dateRange: { start, end },
       });
     } else {
       const { dateRange, ...restFilters } = filters;
@@ -79,7 +137,7 @@ export function AnalyticsFilters({
     if (years.length > 0) {
       onFiltersChange({
         ...filters,
-        graduationYears: years.map(year => parseInt(year))
+        graduationYears: years.map(year => parseInt(year)),
       });
     } else {
       const { graduationYears, ...restFilters } = filters;
@@ -91,7 +149,7 @@ export function AnalyticsFilters({
     if (locations.length > 0) {
       onFiltersChange({
         ...filters,
-        locations
+        locations,
       });
     } else {
       const { locations, ...restFilters } = filters;
@@ -103,7 +161,7 @@ export function AnalyticsFilters({
     if (companies.length > 0) {
       onFiltersChange({
         ...filters,
-        companies
+        companies,
       });
     } else {
       const { companies, ...restFilters } = filters;
@@ -115,7 +173,7 @@ export function AnalyticsFilters({
     if (eventTypes.length > 0) {
       onFiltersChange({
         ...filters,
-        eventTypes
+        eventTypes,
       });
     } else {
       const { eventTypes, ...restFilters } = filters;
@@ -127,7 +185,7 @@ export function AnalyticsFilters({
     if (donationPurposes.length > 0) {
       onFiltersChange({
         ...filters,
-        donationPurposes
+        donationPurposes,
       });
     } else {
       const { donationPurposes, ...restFilters } = filters;
@@ -170,7 +228,7 @@ export function AnalyticsFilters({
           >
             Filters
           </Button>
-          
+
           {activeFiltersCount > 0 && (
             <Button
               variant="subtle"
@@ -194,7 +252,7 @@ export function AnalyticsFilters({
               <IconRefresh size={16} />
             </ActionIcon>
           )}
-          
+
           {onExport && (
             <Group gap="xs">
               <Button
@@ -236,7 +294,11 @@ export function AnalyticsFilters({
               type="range"
               label="Date Range"
               placeholder="Select date range"
-              value={filters.dateRange ? [filters.dateRange.start, filters.dateRange.end] : [null, null]}
+              value={
+                filters.dateRange
+                  ? [filters.dateRange.start, filters.dateRange.end]
+                  : [null, null]
+              }
               onChange={handleDateRangeChange}
               clearable
             />
@@ -247,7 +309,9 @@ export function AnalyticsFilters({
               label="Graduation Years"
               placeholder="Select graduation years"
               data={graduationYearOptions}
-              value={filters.graduationYears?.map(year => year.toString()) || []}
+              value={
+                filters.graduationYears?.map(year => year.toString()) || []
+              }
               onChange={handleGraduationYearsChange}
               searchable
               clearable
@@ -308,38 +372,41 @@ export function AnalyticsFilters({
       {/* Active Filters Display */}
       {activeFiltersCount > 0 && (
         <Group mt="md" gap="xs">
-          <Text size="sm" c="dimmed">Active filters:</Text>
-          
+          <Text size="sm" c="dimmed">
+            Active filters:
+          </Text>
+
           {filters.dateRange && (
             <Badge variant="light" color="blue">
-              {filters.dateRange.start.toLocaleDateString()} - {filters.dateRange.end.toLocaleDateString()}
+              {filters.dateRange.start.toLocaleDateString()} -{' '}
+              {filters.dateRange.end.toLocaleDateString()}
             </Badge>
           )}
-          
+
           {filters.graduationYears?.map(year => (
             <Badge key={year} variant="light" color="green">
               Class of {year}
             </Badge>
           ))}
-          
+
           {filters.locations?.map(location => (
             <Badge key={location} variant="light" color="orange">
               {location}
             </Badge>
           ))}
-          
+
           {filters.companies?.map(company => (
             <Badge key={company} variant="light" color="purple">
               {company}
             </Badge>
           ))}
-          
+
           {filters.eventTypes?.map(type => (
             <Badge key={type} variant="light" color="teal">
               {type}
             </Badge>
           ))}
-          
+
           {filters.donationPurposes?.map(purpose => (
             <Badge key={purpose} variant="light" color="red">
               {purpose}

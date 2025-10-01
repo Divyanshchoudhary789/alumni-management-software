@@ -6,7 +6,7 @@ import { Center, Loader, Alert } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { AlumniProfile as AlumniProfileComponent } from '@/components/alumni/AlumniProfile';
 import { AlumniProfile } from '@/types';
-import { mockAlumniService } from '@/lib/mock-services/alumniService';
+import { alumniProfileService } from '@/services/alumniProfileService';
 
 export default function AlumniProfilePage() {
   const router = useRouter();
@@ -22,10 +22,18 @@ export default function AlumniProfilePage() {
       try {
         setLoading(true);
         setError(null);
-        const response = await mockAlumniService.getAlumniById(alumniId);
+        
+        // Validate profile ID first
+        if (!alumniProfileService.validateProfileId(alumniId)) {
+          throw new Error('Invalid profile ID');
+        }
+        
+        const response = await alumniProfileService.getAlumniById(alumniId);
         setAlumni(response.data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load alumni profile');
+        setError(
+          err instanceof Error ? err.message : 'Failed to load alumni profile'
+        );
       } finally {
         setLoading(false);
       }

@@ -21,7 +21,7 @@ import {
   Divider,
   Code,
   CopyButton,
-  Tooltip
+  Tooltip,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
@@ -38,7 +38,7 @@ import {
   IconSettings,
   IconCopy,
   IconExternalLink,
-  IconRefresh
+  IconRefresh,
 } from '@tabler/icons-react';
 import { settingsService } from '@/lib/mock-services/settingsService';
 
@@ -93,7 +93,9 @@ interface IntegrationSettings {
 
 export function IntegrationSettings() {
   const [loading, setLoading] = useState(false);
-  const [testingConnection, setTestingConnection] = useState<string | null>(null);
+  const [testingConnection, setTestingConnection] = useState<string | null>(
+    null
+  );
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedIntegration, setSelectedIntegration] = useState<string>('');
 
@@ -103,37 +105,37 @@ export function IntegrationSettings() {
         enabled: false,
         clientId: '',
         clientSecret: '',
-        redirectUri: `${window.location.origin}/auth/callback/google`
+        redirectUri: `${window.location.origin}/auth/callback/google`,
       },
       linkedinOAuth: {
         enabled: false,
         clientId: '',
         clientSecret: '',
-        redirectUri: `${window.location.origin}/auth/callback/linkedin`
+        redirectUri: `${window.location.origin}/auth/callback/linkedin`,
       },
       emailProvider: {
-        provider: 'smtp'
+        provider: 'smtp',
       },
       paymentProcessor: {
-        provider: 'none'
+        provider: 'none',
       },
       analytics: {
         googleAnalytics: {
-          enabled: false
+          enabled: false,
         },
         mixpanel: {
-          enabled: false
-        }
+          enabled: false,
+        },
       },
       socialMedia: {
         facebook: {
-          enabled: false
+          enabled: false,
         },
         twitter: {
-          enabled: false
-        }
-      }
-    }
+          enabled: false,
+        },
+      },
+    },
   });
 
   const handleSubmit = async (values: IntegrationSettings) => {
@@ -144,14 +146,14 @@ export function IntegrationSettings() {
         title: 'Integrations Updated',
         message: 'Integration settings have been saved successfully',
         color: 'green',
-        icon: <IconCheck size={16} />
+        icon: <IconCheck size={16} />,
       });
     } catch (error) {
       notifications.show({
         title: 'Error',
         message: 'Failed to update integration settings',
         color: 'red',
-        icon: <IconAlertCircle size={16} />
+        icon: <IconAlertCircle size={16} />,
       });
     } finally {
       setLoading(false);
@@ -166,28 +168,28 @@ export function IntegrationSettings() {
         title: 'Connection Successful',
         message: `${integration} integration is working correctly`,
         color: 'green',
-        icon: <IconCheck size={16} />
+        icon: <IconCheck size={16} />,
       });
     } catch (error) {
       notifications.show({
         title: 'Connection Failed',
         message: `Failed to connect to ${integration}`,
         color: 'red',
-        icon: <IconAlertCircle size={16} />
+        icon: <IconAlertCircle size={16} />,
       });
     } finally {
       setTestingConnection(null);
     }
   };
 
-  const IntegrationCard = ({ 
-    title, 
-    description, 
-    icon, 
-    enabled, 
-    onToggle, 
+  const IntegrationCard = ({
+    title,
+    description,
+    icon,
+    enabled,
+    onToggle,
     onConfigure,
-    status = 'disconnected'
+    status = 'disconnected',
   }: {
     title: string;
     description: string;
@@ -203,12 +205,20 @@ export function IntegrationSettings() {
           {icon}
           <div>
             <Text fw={500}>{title}</Text>
-            <Text size="sm" c="dimmed">{description}</Text>
+            <Text size="sm" c="dimmed">
+              {description}
+            </Text>
           </div>
         </Group>
         <Group gap="sm">
-          <Badge 
-            color={status === 'connected' ? 'green' : status === 'error' ? 'red' : 'gray'}
+          <Badge
+            color={
+              status === 'connected'
+                ? 'green'
+                : status === 'error'
+                  ? 'red'
+                  : 'gray'
+            }
             variant="light"
           >
             {status}
@@ -238,19 +248,28 @@ export function IntegrationSettings() {
 
         {/* Authentication Providers */}
         <div>
-          <Title order={3} mb="md">Authentication Providers</Title>
+          <Title order={3} mb="md">
+            Authentication Providers
+          </Title>
           <Stack gap="md">
             <IntegrationCard
               title="Google OAuth"
               description="Allow users to sign in with their Google accounts"
               icon={<IconBrandGoogle size={20} color="#4285f4" />}
               enabled={form.values.googleOAuth.enabled}
-              onToggle={() => form.setFieldValue('googleOAuth.enabled', !form.values.googleOAuth.enabled)}
+              onToggle={() =>
+                form.setFieldValue(
+                  'googleOAuth.enabled',
+                  !form.values.googleOAuth.enabled
+                )
+              }
               onConfigure={() => {
                 setSelectedIntegration('google');
                 open();
               }}
-              status={form.values.googleOAuth.clientId ? 'connected' : 'disconnected'}
+              status={
+                form.values.googleOAuth.clientId ? 'connected' : 'disconnected'
+              }
             />
 
             <IntegrationCard
@@ -258,26 +277,39 @@ export function IntegrationSettings() {
               description="Allow users to sign in with their LinkedIn accounts"
               icon={<IconBrandLinkedin size={20} color="#0077b5" />}
               enabled={form.values.linkedinOAuth.enabled}
-              onToggle={() => form.setFieldValue('linkedinOAuth.enabled', !form.values.linkedinOAuth.enabled)}
+              onToggle={() =>
+                form.setFieldValue(
+                  'linkedinOAuth.enabled',
+                  !form.values.linkedinOAuth.enabled
+                )
+              }
               onConfigure={() => {
                 setSelectedIntegration('linkedin');
                 open();
               }}
-              status={form.values.linkedinOAuth.clientId ? 'connected' : 'disconnected'}
+              status={
+                form.values.linkedinOAuth.clientId
+                  ? 'connected'
+                  : 'disconnected'
+              }
             />
           </Stack>
         </div>
 
         {/* Email Services */}
         <div>
-          <Title order={3} mb="md">Email Services</Title>
+          <Title order={3} mb="md">
+            Email Services
+          </Title>
           <Card withBorder>
             <Group justify="space-between" mb="md">
               <Group gap="sm">
                 <IconMail size={20} />
                 <div>
                   <Text fw={500}>Email Provider</Text>
-                  <Text size="sm" c="dimmed">Configure email delivery service</Text>
+                  <Text size="sm" c="dimmed">
+                    Configure email delivery service
+                  </Text>
                 </div>
               </Group>
             </Group>
@@ -289,7 +321,7 @@ export function IntegrationSettings() {
                     { value: 'smtp', label: 'SMTP' },
                     { value: 'sendgrid', label: 'SendGrid' },
                     { value: 'mailgun', label: 'Mailgun' },
-                    { value: 'ses', label: 'Amazon SES' }
+                    { value: 'ses', label: 'Amazon SES' },
                   ]}
                   {...form.getInputProps('emailProvider.provider')}
                 />
@@ -317,9 +349,12 @@ export function IntegrationSettings() {
                       <Select
                         label="Region"
                         data={[
-                          { value: 'us-east-1', label: 'US East (N. Virginia)' },
+                          {
+                            value: 'us-east-1',
+                            label: 'US East (N. Virginia)',
+                          },
                           { value: 'us-west-2', label: 'US West (Oregon)' },
-                          { value: 'eu-west-1', label: 'Europe (Ireland)' }
+                          { value: 'eu-west-1', label: 'Europe (Ireland)' },
                         ]}
                         {...form.getInputProps('emailProvider.region')}
                       />
@@ -343,14 +378,18 @@ export function IntegrationSettings() {
 
         {/* Payment Processors */}
         <div>
-          <Title order={3} mb="md">Payment Processors</Title>
+          <Title order={3} mb="md">
+            Payment Processors
+          </Title>
           <Card withBorder>
             <Group justify="space-between" mb="md">
               <Group gap="sm">
                 <IconBrandStripe size={20} />
                 <div>
                   <Text fw={500}>Payment Processing</Text>
-                  <Text size="sm" c="dimmed">Configure donation payment processing</Text>
+                  <Text size="sm" c="dimmed">
+                    Configure donation payment processing
+                  </Text>
                 </div>
               </Group>
             </Group>
@@ -361,7 +400,7 @@ export function IntegrationSettings() {
                   data={[
                     { value: 'none', label: 'None (Disable Payments)' },
                     { value: 'stripe', label: 'Stripe' },
-                    { value: 'paypal', label: 'PayPal' }
+                    { value: 'paypal', label: 'PayPal' },
                   ]}
                   {...form.getInputProps('paymentProcessor.provider')}
                 />
@@ -397,14 +436,19 @@ export function IntegrationSettings() {
 
         {/* Analytics */}
         <div>
-          <Title order={3} mb="md">Analytics & Tracking</Title>
+          <Title order={3} mb="md">
+            Analytics & Tracking
+          </Title>
           <Stack gap="md">
             <Card withBorder>
               <Group justify="space-between" mb="sm">
                 <Group gap="sm">
                   <Text fw={500}>Google Analytics</Text>
                   <Switch
-                    {...form.getInputProps('analytics.googleAnalytics.enabled', { type: 'checkbox' })}
+                    {...form.getInputProps(
+                      'analytics.googleAnalytics.enabled',
+                      { type: 'checkbox' }
+                    )}
                   />
                 </Group>
               </Group>
@@ -412,7 +456,9 @@ export function IntegrationSettings() {
                 <TextInput
                   label="Tracking ID"
                   placeholder="GA-XXXXXXXXX-X"
-                  {...form.getInputProps('analytics.googleAnalytics.trackingId')}
+                  {...form.getInputProps(
+                    'analytics.googleAnalytics.trackingId'
+                  )}
                 />
               )}
             </Card>
@@ -422,7 +468,9 @@ export function IntegrationSettings() {
                 <Group gap="sm">
                   <Text fw={500}>Mixpanel</Text>
                   <Switch
-                    {...form.getInputProps('analytics.mixpanel.enabled', { type: 'checkbox' })}
+                    {...form.getInputProps('analytics.mixpanel.enabled', {
+                      type: 'checkbox',
+                    })}
                   />
                 </Group>
               </Group>
@@ -478,7 +526,10 @@ export function IntegrationSettings() {
                   <CopyButton value={form.values.googleOAuth.redirectUri}>
                     {({ copied, copy }) => (
                       <Tooltip label={copied ? 'Copied' : 'Copy'}>
-                        <ActionIcon color={copied ? 'teal' : 'gray'} onClick={copy}>
+                        <ActionIcon
+                          color={copied ? 'teal' : 'gray'}
+                          onClick={copy}
+                        >
                           <IconCopy size={16} />
                         </ActionIcon>
                       </Tooltip>
@@ -509,7 +560,10 @@ export function IntegrationSettings() {
                   <CopyButton value={form.values.linkedinOAuth.redirectUri}>
                     {({ copied, copy }) => (
                       <Tooltip label={copied ? 'Copied' : 'Copy'}>
-                        <ActionIcon color={copied ? 'teal' : 'gray'} onClick={copy}>
+                        <ActionIcon
+                          color={copied ? 'teal' : 'gray'}
+                          onClick={copy}
+                        >
                           <IconCopy size={16} />
                         </ActionIcon>
                       </Tooltip>
@@ -525,9 +579,10 @@ export function IntegrationSettings() {
               variant="light"
               leftSection={<IconExternalLink size={16} />}
               onClick={() => {
-                const url = selectedIntegration === 'google' 
-                  ? 'https://console.developers.google.com/'
-                  : 'https://www.linkedin.com/developers/';
+                const url =
+                  selectedIntegration === 'google'
+                    ? 'https://console.developers.google.com/'
+                    : 'https://www.linkedin.com/developers/';
                 window.open(url, '_blank');
               }}
             >
@@ -537,9 +592,7 @@ export function IntegrationSettings() {
               <Button variant="subtle" onClick={close}>
                 Cancel
               </Button>
-              <Button onClick={close}>
-                Save Configuration
-              </Button>
+              <Button onClick={close}>Save Configuration</Button>
             </Group>
           </Group>
         </Stack>

@@ -21,7 +21,7 @@ import {
   Pagination,
   rem,
   Loader,
-  Center
+  Center,
 } from '@mantine/core';
 import {
   IconSearch,
@@ -31,11 +31,11 @@ import {
   IconMail,
   IconDownload,
   IconFilter,
-  IconAlertCircle
+  IconAlertCircle,
 } from '@tabler/icons-react';
 import { Event, EventRegistration, AlumniProfile } from '@/types';
 import { mockEventService } from '@/lib/mock-services/eventService';
-import { mockAlumniService } from '@/lib/mock-services/alumniService';
+import { alumniProfileService } from '@/services/alumniProfileService';
 import { notifications } from '@mantine/notifications';
 import { modals } from '@mantine/modals';
 import { format } from 'date-fns';
@@ -49,7 +49,10 @@ interface AttendeeManagementProps {
   onEventUpdate?: () => void;
 }
 
-export function AttendeeManagement({ event, onEventUpdate }: AttendeeManagementProps) {
+export function AttendeeManagement({
+  event,
+  onEventUpdate,
+}: AttendeeManagementProps) {
   const [attendees, setAttendees] = useState<AttendeeWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -63,19 +66,20 @@ export function AttendeeManagement({ event, onEventUpdate }: AttendeeManagementP
   const loadAttendees = async () => {
     try {
       setLoading(true);
-      
+
       // Get event registrations
-      const registrationsResponse = await mockEventService.getEventRegistrations(event.id);
+      const registrationsResponse =
+        await mockEventService.getEventRegistrations(event.id);
       const registrations = registrationsResponse.data;
 
       // Get alumni profiles for attendees
-      const alumniResponse = await mockAlumniService.getAlumni();
+      const alumniResponse = await alumniProfileService.getAlumni();
       const allAlumni = alumniResponse.data;
 
       // Combine registration data with alumni profiles
       const attendeesWithProfiles = registrations.map(registration => ({
         ...registration,
-        profile: allAlumni.find(alumni => alumni.id === registration.alumniId)
+        profile: allAlumni.find(alumni => alumni.id === registration.alumniId),
       }));
 
       setAttendees(attendeesWithProfiles);
@@ -83,7 +87,7 @@ export function AttendeeManagement({ event, onEventUpdate }: AttendeeManagementP
       notifications.show({
         title: 'Error',
         message: 'Failed to load attendees',
-        color: 'red'
+        color: 'red',
       });
     } finally {
       setLoading(false);
@@ -96,14 +100,19 @@ export function AttendeeManagement({ event, onEventUpdate }: AttendeeManagementP
 
   // Filter attendees
   const filteredAttendees = attendees.filter(attendee => {
-    const matchesSearch = !searchQuery || 
-      (attendee.profile && (
-        `${attendee.profile.firstName} ${attendee.profile.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        attendee.profile.currentCompany?.toLowerCase().includes(searchQuery.toLowerCase())
-      ));
-    
-    const matchesStatus = statusFilter === 'all' || attendee.status === statusFilter;
-    
+    const matchesSearch =
+      !searchQuery ||
+      (attendee.profile &&
+        (`${attendee.profile.firstName} ${attendee.profile.lastName}`
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+          attendee.profile.currentCompany
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase())));
+
+    const matchesStatus =
+      statusFilter === 'all' || attendee.status === statusFilter;
+
     return matchesSearch && matchesStatus;
   });
 
@@ -128,7 +137,7 @@ export function AttendeeManagement({ event, onEventUpdate }: AttendeeManagementP
       notifications.show({
         title: 'Success',
         message: 'Attendee checked in successfully',
-        color: 'green'
+        color: 'green',
       });
 
       onEventUpdate?.();
@@ -136,12 +145,15 @@ export function AttendeeManagement({ event, onEventUpdate }: AttendeeManagementP
       notifications.show({
         title: 'Error',
         message: 'Failed to check in attendee',
-        color: 'red'
+        color: 'red',
       });
     }
   };
 
-  const handleCancelRegistration = (attendeeId: string, attendeeName: string) => {
+  const handleCancelRegistration = (
+    attendeeId: string,
+    attendeeName: string
+  ) => {
     modals.openConfirmModal({
       title: 'Cancel Registration',
       children: (
@@ -163,7 +175,7 @@ export function AttendeeManagement({ event, onEventUpdate }: AttendeeManagementP
           notifications.show({
             title: 'Success',
             message: 'Registration cancelled successfully',
-            color: 'green'
+            color: 'green',
           });
 
           onEventUpdate?.();
@@ -171,10 +183,10 @@ export function AttendeeManagement({ event, onEventUpdate }: AttendeeManagementP
           notifications.show({
             title: 'Error',
             message: 'Failed to cancel registration',
-            color: 'red'
+            color: 'red',
           });
         }
-      }
+      },
     });
   };
 
@@ -183,7 +195,8 @@ export function AttendeeManagement({ event, onEventUpdate }: AttendeeManagementP
       title: 'Bulk Check-in',
       children: (
         <Text size="sm">
-          Are you sure you want to check in {selectedAttendees.length} selected attendees?
+          Are you sure you want to check in {selectedAttendees.length} selected
+          attendees?
         </Text>
       ),
       labels: { confirm: 'Check In All', cancel: 'Cancel' },
@@ -200,7 +213,7 @@ export function AttendeeManagement({ event, onEventUpdate }: AttendeeManagementP
           notifications.show({
             title: 'Success',
             message: `${selectedAttendees.length} attendees checked in successfully`,
-            color: 'green'
+            color: 'green',
           });
 
           onEventUpdate?.();
@@ -208,26 +221,38 @@ export function AttendeeManagement({ event, onEventUpdate }: AttendeeManagementP
           notifications.show({
             title: 'Error',
             message: 'Failed to check in attendees',
-            color: 'red'
+            color: 'red',
           });
         }
-      }
+      },
     });
   };
 
   const handleExportAttendees = () => {
     // In a real implementation, this would generate and download a CSV/Excel file
     const csvContent = [
-      ['Name', 'Email', 'Company', 'Position', 'Graduation Year', 'Registration Date', 'Status'].join(','),
-      ...filteredAttendees.map(attendee => [
-        attendee.profile ? `${attendee.profile.firstName} ${attendee.profile.lastName}` : 'Unknown',
-        attendee.profile?.userId || 'N/A', // In real app, this would be email
-        attendee.profile?.currentCompany || 'N/A',
-        attendee.profile?.currentPosition || 'N/A',
-        attendee.profile?.graduationYear || 'N/A',
-        format(attendee.registrationDate, 'PPP'),
-        attendee.status
-      ].join(','))
+      [
+        'Name',
+        'Email',
+        'Company',
+        'Position',
+        'Graduation Year',
+        'Registration Date',
+        'Status',
+      ].join(','),
+      ...filteredAttendees.map(attendee =>
+        [
+          attendee.profile
+            ? `${attendee.profile.firstName} ${attendee.profile.lastName}`
+            : 'Unknown',
+          attendee.profile?.userId || 'N/A', // In real app, this would be email
+          attendee.profile?.currentCompany || 'N/A',
+          attendee.profile?.currentPosition || 'N/A',
+          attendee.profile?.graduationYear || 'N/A',
+          format(attendee.registrationDate, 'PPP'),
+          attendee.status,
+        ].join(',')
+      ),
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -241,7 +266,7 @@ export function AttendeeManagement({ event, onEventUpdate }: AttendeeManagementP
     notifications.show({
       title: 'Success',
       message: 'Attendee list exported successfully',
-      color: 'green'
+      color: 'green',
     });
   };
 
@@ -249,18 +274,22 @@ export function AttendeeManagement({ event, onEventUpdate }: AttendeeManagementP
     { value: 'all', label: 'All Statuses' },
     { value: 'registered', label: 'Registered' },
     { value: 'attended', label: 'Attended' },
-    { value: 'cancelled', label: 'Cancelled' }
+    { value: 'cancelled', label: 'Cancelled' },
   ];
 
   const getStatusBadge = (status: EventRegistration['status']) => {
     const config = {
       registered: { color: 'blue', label: 'Registered' },
       attended: { color: 'green', label: 'Attended' },
-      cancelled: { color: 'red', label: 'Cancelled' }
+      cancelled: { color: 'red', label: 'Cancelled' },
     };
-    
+
     const { color, label } = config[status];
-    return <Badge color={color} variant="light" size="sm">{label}</Badge>;
+    return (
+      <Badge color={color} variant="light" size="sm">
+        {label}
+      </Badge>
+    );
   };
 
   if (loading) {
@@ -284,7 +313,7 @@ export function AttendeeManagement({ event, onEventUpdate }: AttendeeManagementP
               {filteredAttendees.length} attendees
             </Text>
           </div>
-          
+
           <Group>
             {selectedAttendees.length > 0 && (
               <Button
@@ -295,7 +324,7 @@ export function AttendeeManagement({ event, onEventUpdate }: AttendeeManagementP
                 Check In Selected ({selectedAttendees.length})
               </Button>
             )}
-            
+
             <Button
               size="sm"
               variant="light"
@@ -311,18 +340,22 @@ export function AttendeeManagement({ event, onEventUpdate }: AttendeeManagementP
         <Group>
           <TextInput
             placeholder="Search attendees..."
-            leftSection={<IconSearch style={{ width: rem(16), height: rem(16) }} />}
+            leftSection={
+              <IconSearch style={{ width: rem(16), height: rem(16) }} />
+            }
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={e => setSearchQuery(e.target.value)}
             style={{ flex: 1 }}
           />
-          
+
           <Select
             placeholder="Filter by status"
             data={statusOptions}
             value={statusFilter}
-            onChange={(value) => setStatusFilter(value || 'all')}
-            leftSection={<IconFilter style={{ width: rem(16), height: rem(16) }} />}
+            onChange={value => setStatusFilter(value || 'all')}
+            leftSection={
+              <IconFilter style={{ width: rem(16), height: rem(16) }} />
+            }
             w={150}
           />
         </Group>
@@ -330,10 +363,9 @@ export function AttendeeManagement({ event, onEventUpdate }: AttendeeManagementP
         {/* Attendees Table */}
         {filteredAttendees.length === 0 ? (
           <Alert icon={<IconAlertCircle />} title="No attendees found">
-            {attendees.length === 0 
+            {attendees.length === 0
               ? 'No one has registered for this event yet.'
-              : 'No attendees match your current filters.'
-            }
+              : 'No attendees match your current filters.'}
           </Alert>
         ) : (
           <>
@@ -342,11 +374,18 @@ export function AttendeeManagement({ event, onEventUpdate }: AttendeeManagementP
                 <Table.Tr>
                   <Table.Th>
                     <Checkbox
-                      checked={selectedAttendees.length === paginatedAttendees.length}
-                      indeterminate={selectedAttendees.length > 0 && selectedAttendees.length < paginatedAttendees.length}
-                      onChange={(e) => {
+                      checked={
+                        selectedAttendees.length === paginatedAttendees.length
+                      }
+                      indeterminate={
+                        selectedAttendees.length > 0 &&
+                        selectedAttendees.length < paginatedAttendees.length
+                      }
+                      onChange={e => {
                         if (e.target.checked) {
-                          setSelectedAttendees(paginatedAttendees.map(a => a.id));
+                          setSelectedAttendees(
+                            paginatedAttendees.map(a => a.id)
+                          );
                         } else {
                           setSelectedAttendees([]);
                         }
@@ -366,11 +405,16 @@ export function AttendeeManagement({ event, onEventUpdate }: AttendeeManagementP
                     <Table.Td>
                       <Checkbox
                         checked={selectedAttendees.includes(attendee.id)}
-                        onChange={(e) => {
+                        onChange={e => {
                           if (e.target.checked) {
-                            setSelectedAttendees([...selectedAttendees, attendee.id]);
+                            setSelectedAttendees([
+                              ...selectedAttendees,
+                              attendee.id,
+                            ]);
                           } else {
-                            setSelectedAttendees(selectedAttendees.filter(id => id !== attendee.id));
+                            setSelectedAttendees(
+                              selectedAttendees.filter(id => id !== attendee.id)
+                            );
                           }
                         }}
                       />
@@ -379,15 +423,18 @@ export function AttendeeManagement({ event, onEventUpdate }: AttendeeManagementP
                       <Group gap="sm">
                         <Avatar
                           src={attendee.profile?.profileImage}
-                          alt={attendee.profile ? `${attendee.profile.firstName} ${attendee.profile.lastName}` : 'Unknown'}
+                          alt={
+                            attendee.profile
+                              ? `${attendee.profile.firstName} ${attendee.profile.lastName}`
+                              : 'Unknown'
+                          }
                           size="sm"
                         />
                         <div>
                           <Text size="sm" fw={500}>
-                            {attendee.profile 
+                            {attendee.profile
                               ? `${attendee.profile.firstName} ${attendee.profile.lastName}`
-                              : 'Unknown User'
-                            }
+                              : 'Unknown User'}
                           </Text>
                           <Text size="xs" c="dimmed">
                             Class of {attendee.profile?.graduationYear || 'N/A'}
@@ -408,51 +455,66 @@ export function AttendeeManagement({ event, onEventUpdate }: AttendeeManagementP
                         {format(attendee.registrationDate, 'PPP')}
                       </Text>
                     </Table.Td>
-                    <Table.Td>
-                      {getStatusBadge(attendee.status)}
-                    </Table.Td>
+                    <Table.Td>{getStatusBadge(attendee.status)}</Table.Td>
                     <Table.Td>
                       <Menu shadow="md" width={200}>
                         <Menu.Target>
                           <ActionIcon variant="subtle" color="gray">
-                            <IconDots style={{ width: rem(16), height: rem(16) }} />
+                            <IconDots
+                              style={{ width: rem(16), height: rem(16) }}
+                            />
                           </ActionIcon>
                         </Menu.Target>
 
                         <Menu.Dropdown>
                           {attendee.status === 'registered' && (
                             <Menu.Item
-                              leftSection={<IconUserCheck style={{ width: rem(14), height: rem(14) }} />}
+                              leftSection={
+                                <IconUserCheck
+                                  style={{ width: rem(14), height: rem(14) }}
+                                />
+                              }
                               onClick={() => handleCheckIn(attendee.id)}
                             >
                               Check In
                             </Menu.Item>
                           )}
-                          
+
                           <Menu.Item
-                            leftSection={<IconMail style={{ width: rem(14), height: rem(14) }} />}
+                            leftSection={
+                              <IconMail
+                                style={{ width: rem(14), height: rem(14) }}
+                              />
+                            }
                             onClick={() => {
                               // In real implementation, this would open email composer
                               notifications.show({
                                 title: 'Feature Coming Soon',
-                                message: 'Email functionality will be implemented in future updates',
-                                color: 'blue'
+                                message:
+                                  'Email functionality will be implemented in future updates',
+                                color: 'blue',
                               });
                             }}
                           >
                             Send Email
                           </Menu.Item>
-                          
+
                           {attendee.status !== 'cancelled' && (
                             <Menu.Item
                               color="red"
-                              leftSection={<IconUserX style={{ width: rem(14), height: rem(14) }} />}
-                              onClick={() => handleCancelRegistration(
-                                attendee.id,
-                                attendee.profile 
-                                  ? `${attendee.profile.firstName} ${attendee.profile.lastName}`
-                                  : 'Unknown User'
-                              )}
+                              leftSection={
+                                <IconUserX
+                                  style={{ width: rem(14), height: rem(14) }}
+                                />
+                              }
+                              onClick={() =>
+                                handleCancelRegistration(
+                                  attendee.id,
+                                  attendee.profile
+                                    ? `${attendee.profile.firstName} ${attendee.profile.lastName}`
+                                    : 'Unknown User'
+                                )
+                              }
                             >
                               Cancel Registration
                             </Menu.Item>

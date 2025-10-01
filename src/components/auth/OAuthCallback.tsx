@@ -2,7 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Container, Paper, Stack, Title, Text, Alert, Button } from '@mantine/core';
+import {
+  Container,
+  Paper,
+  Stack,
+  Title,
+  Text,
+  Alert,
+  Button,
+} from '@mantine/core';
 import { IconAlertCircle, IconCheck, IconLoader } from '@tabler/icons-react';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -10,7 +18,9 @@ export function OAuthCallback() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isLoaded, isSignedIn, error: authError } = useAuth();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>(
+    'loading'
+  );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -68,7 +78,8 @@ export function OAuthCallback() {
               Welcome!
             </Title>
             <Text c="dimmed" ta="center">
-              You have been successfully signed in. Redirecting to your dashboard...
+              You have been successfully signed in. Redirecting to your
+              dashboard...
             </Text>
           </>
         );

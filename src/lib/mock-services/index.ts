@@ -39,7 +39,7 @@ export const mockApiClient: MockApiClient = {
   dashboard: mockDashboardService,
   mentorship: mockMentorshipService,
   analytics: mockAnalyticsService,
-  settings: settingsService
+  settings: settingsService,
 };
 
 // Utility functions for testing and development
@@ -58,13 +58,17 @@ export const enableMockErrors = (enabled: boolean = true) => {
 // Mock API configuration
 export const mockApiConfig = {
   baseDelay: 200, // Base delay in milliseconds
-  maxDelay: 800,  // Maximum delay in milliseconds
+  maxDelay: 800, // Maximum delay in milliseconds
   errorRate: 0.02, // Default error rate (2%)
-  enableLogging: process.env.NODE_ENV === 'development'
+  enableLogging: process.env.NODE_ENV === 'development',
 };
 
 // Development utilities
-export const logMockApiCall = (service: string, method: string, params?: any) => {
+export const logMockApiCall = (
+  service: string,
+  method: string,
+  params?: any
+) => {
   if (mockApiConfig.enableLogging) {
     console.log(`[Mock API] ${service}.${method}`, params);
   }

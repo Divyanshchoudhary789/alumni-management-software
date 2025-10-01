@@ -76,7 +76,6 @@ const DonationSchema = new Schema<IDonation>({
   transactionId: {
     type: String,
     trim: true,
-    index: true,
   },
 }, {
   timestamps: true,
@@ -146,7 +145,6 @@ const CampaignSchema = new Schema<ICampaign>({
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true,
-    index: true,
   },
 }, {
   timestamps: true,

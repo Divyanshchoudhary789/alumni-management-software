@@ -1,5 +1,10 @@
 import { SimpleGrid, Skeleton } from '@mantine/core';
-import { IconUsers, IconCalendarEvent, IconCurrencyDollar, IconUserCheck } from '@tabler/icons-react';
+import {
+  IconUsers,
+  IconCalendarEvent,
+  IconCurrencyDollar,
+  IconUserCheck,
+} from '@tabler/icons-react';
 import { StatsCard } from '@/components/ui/StatsCard';
 import { DashboardMetrics } from '@/types';
 
@@ -42,7 +47,7 @@ export function MetricsGrid({ metrics, loading = false }: MetricsGridProps) {
         icon={<IconUsers size={20} />}
         color="blue"
       />
-      
+
       <StatsCard
         title="Active Members"
         value={formatNumber(metrics.activeMembers)}
@@ -54,7 +59,7 @@ export function MetricsGrid({ metrics, loading = false }: MetricsGridProps) {
         progressValue={(metrics.activeMembers / metrics.totalAlumni) * 100}
         progressColor="green"
       />
-      
+
       <StatsCard
         title="Upcoming Events"
         value={metrics.upcomingEvents}
@@ -63,7 +68,7 @@ export function MetricsGrid({ metrics, loading = false }: MetricsGridProps) {
         icon={<IconCalendarEvent size={20} />}
         color="orange"
       />
-      
+
       <StatsCard
         title="Monthly Donations"
         value={formatCurrency(metrics.monthlyDonations)}

@@ -32,7 +32,7 @@ export function useAuthGuard(options: UseAuthGuardOptions = {}) {
           color: 'red',
         });
       }
-      
+
       if (redirectTo === '/sign-in') {
         redirectToSignIn();
       } else {
@@ -52,7 +52,16 @@ export function useAuthGuard(options: UseAuthGuardOptions = {}) {
       router.push('/dashboard');
       return;
     }
-  }, [isLoaded, isSignedIn, user, requireRole, redirectTo, showNotification, router, redirectToSignIn]);
+  }, [
+    isLoaded,
+    isSignedIn,
+    user,
+    requireRole,
+    redirectTo,
+    showNotification,
+    router,
+    redirectToSignIn,
+  ]);
 
   return {
     isLoaded,
@@ -66,7 +75,9 @@ export function useRequireAuth(options?: UseAuthGuardOptions) {
   return useAuthGuard({ ...options, showNotification: true });
 }
 
-export function useRequireAdmin(options?: Omit<UseAuthGuardOptions, 'requireRole'>) {
+export function useRequireAdmin(
+  options?: Omit<UseAuthGuardOptions, 'requireRole'>
+) {
   return useAuthGuard({ ...options, requireRole: 'admin' });
 }
 

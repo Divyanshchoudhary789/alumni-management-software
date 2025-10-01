@@ -1,6 +1,16 @@
 'use client';
 
-import { Card, Title, Stack, Text, Progress, Group, Badge, Button, Skeleton } from '@mantine/core';
+import {
+  Card,
+  Title,
+  Stack,
+  Text,
+  Progress,
+  Group,
+  Badge,
+  Button,
+  Skeleton,
+} from '@mantine/core';
 import { IconTarget, IconCalendar, IconTrendingUp } from '@tabler/icons-react';
 
 interface CampaignProgressProps {
@@ -8,11 +18,16 @@ interface CampaignProgressProps {
   loading: boolean;
 }
 
-export function CampaignProgress({ campaigns, loading }: CampaignProgressProps) {
+export function CampaignProgress({
+  campaigns,
+  loading,
+}: CampaignProgressProps) {
   if (loading) {
     return (
       <Card padding="lg" radius="md" withBorder>
-        <Title order={3} mb="md">Campaign Progress</Title>
+        <Title order={3} mb="md">
+          Campaign Progress
+        </Title>
         <Stack gap="md">
           {[...Array(3)].map((_, index) => (
             <Skeleton key={index} height={80} />
@@ -33,11 +48,16 @@ export function CampaignProgress({ campaigns, loading }: CampaignProgressProps) 
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'green';
-      case 'completed': return 'blue';
-      case 'paused': return 'yellow';
-      case 'ended': return 'gray';
-      default: return 'gray';
+      case 'active':
+        return 'green';
+      case 'completed':
+        return 'blue';
+      case 'paused':
+        return 'yellow';
+      case 'ended':
+        return 'gray';
+      default:
+        return 'gray';
     }
   };
 
@@ -59,18 +79,18 @@ export function CampaignProgress({ campaigns, loading }: CampaignProgressProps) 
       </Group>
 
       <Stack gap="lg">
-        {campaigns.slice(0, 3).map((campaign) => {
+        {campaigns.slice(0, 3).map(campaign => {
           const progressPercentage = (campaign.raised / campaign.goal) * 100;
           const daysRemaining = getDaysRemaining(campaign.endDate);
-          
+
           return (
             <Card key={campaign.id} padding="md" radius="sm" withBorder>
               <Group justify="space-between" mb="xs">
                 <Text fw={500} size="sm" lineClamp={1}>
                   {campaign.name}
                 </Text>
-                <Badge 
-                  color={getStatusColor(campaign.status)} 
+                <Badge
+                  color={getStatusColor(campaign.status)}
                   size="xs"
                   variant="light"
                 >
@@ -82,12 +102,18 @@ export function CampaignProgress({ campaigns, loading }: CampaignProgressProps) 
                 {campaign.description}
               </Text>
 
-              <Progress 
-                value={progressPercentage} 
-                size="lg" 
+              <Progress
+                value={progressPercentage}
+                size="lg"
                 radius="sm"
                 mb="xs"
-                color={progressPercentage >= 100 ? 'green' : progressPercentage >= 75 ? 'blue' : 'orange'}
+                color={
+                  progressPercentage >= 100
+                    ? 'green'
+                    : progressPercentage >= 75
+                      ? 'blue'
+                      : 'orange'
+                }
               />
 
               <Group justify="space-between" mb="xs">
@@ -106,7 +132,7 @@ export function CampaignProgress({ campaigns, loading }: CampaignProgressProps) 
                     {progressPercentage.toFixed(1)}% complete
                   </Text>
                 </Group>
-                
+
                 {daysRemaining > 0 ? (
                   <Group gap="xs">
                     <IconCalendar size={14} />

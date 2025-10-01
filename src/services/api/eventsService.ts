@@ -37,66 +37,51 @@ export interface EventStats {
 class EventsApiService {
   // Get all events with filters
   async getEvents(filters: EventFilters = {}): Promise<EventsListResponse> {
-    const queryParams = new URLSearchParams();
-    
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        queryParams.append(key, value.toString());
-      }
-    });
-
-    const endpoint = `/api/events${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-    return apiClient.get<EventsListResponse>(endpoint);
+    return apiClient.get<EventsListResponse>('/events', filters);
   }
 
   // Get single event
   async getEventById(id: string): Promise<Event> {
-    return apiClient.get<Event>(`/api/events/${id}`);
+    return apiClient.get<Event>(`/events/${id}`);
   }
 
   // Create event (admin only)
   async createEvent(data: Partial<Event>): Promise<Event> {
-    return apiClient.post<Event>('/api/events', data);
+    return apiClient.post<Event>('/events', data);
   }
 
   // Update event (admin only)
   async updateEvent(id: string, data: Partial<Event>): Promise<Event> {
-    return apiClient.put<Event>(`/api/events/${id}`, data);
+    return apiClient.put<Event>(`/events/${id}`, data);
   }
 
   // Delete event (admin only)
   async deleteEvent(id: string): Promise<{ message: string }> {
-    return apiClient.delete<{ message: string }>(`/api/events/${id}`);
+    return apiClient.delete<{ message: string }>(`/events/${id}`);
   }
 
   // Register for event
-  async registerForEvent(eventId: string): Promise<{ message: string; registration: EventRegistration }> {
-    return apiClient.post<{ message: string; registration: EventRegistration }>(`/api/events/${eventId}/register`);
+  async registerForEvent(
+    eventId: string
+  ): Promise<{ message: string; registration: EventRegistration }> {
+    return apiClient.post<{ message: string; registration: EventRegistration }>(
+      `/events/${eventId}/register`
+    );
   }
 
   // Unregister from event
   async unregisterFromEvent(eventId: string): Promise<{ message: string }> {
-    return apiClient.delete<{ message: string }>(`/api/events/${eventId}/register`);
+    return apiClient.delete<{ message: string }>(`/events/${eventId}/register`);
   }
 
   // Get event attendees (admin only)
-  async getEventAttendees(eventId: string): Promise<{
-    attendees: Array<{
-      registration: EventRegistration;
-      alumni: any;
-    }>;
-    stats: {
-      totalRegistered: number;
-      attended: number;
-      cancelled: number;
-    };
-  }> {
-    return apiClient.get(`/api/events/${eventId}/attendees`);
+  async getEventAttendees(eventId: string): Promise<EventRegistration[]> {
+    return apiClient.get<EventRegistration[]>(`/events/${eventId}/attendees`);
   }
 
   // Get events statistics (admin only)
   async getEventsStats(): Promise<EventStats> {
-    return apiClient.get<EventStats>('/api/events/stats/overview');
+    return apiClient.get<EventStats>('/events/stats/overview');
   }
 
   // Search events

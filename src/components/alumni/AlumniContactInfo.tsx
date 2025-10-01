@@ -1,17 +1,17 @@
 'use client';
 
-import { 
-  Group, 
-  Stack, 
-  Text, 
-  ActionIcon, 
-  Tooltip, 
-  Anchor, 
+import {
+  Group,
+  Stack,
+  Text,
+  ActionIcon,
+  Tooltip,
+  Anchor,
   Card,
   Title,
   Divider,
   Button,
-  CopyButton
+  CopyButton,
 } from '@mantine/core';
 import {
   IconMail,
@@ -22,7 +22,7 @@ import {
   IconCopy,
   IconCheck,
   IconMessage,
-  IconShare
+  IconShare,
 } from '@tabler/icons-react';
 import { AlumniProfile } from '@/types';
 
@@ -34,12 +34,12 @@ interface AlumniContactInfoProps {
   onShare?: () => void;
 }
 
-export function AlumniContactInfo({ 
-  alumni, 
+export function AlumniContactInfo({
+  alumni,
   variant = 'full',
   showActions = true,
   onMessage,
-  onShare 
+  onShare,
 }: AlumniContactInfoProps) {
   const email = `${alumni.firstName.toLowerCase()}.${alumni.lastName.toLowerCase()}@example.com`;
 
@@ -70,11 +70,7 @@ export function AlumniContactInfo({
         </Tooltip>
         {onMessage && (
           <Tooltip label="Message">
-            <ActionIcon
-              variant="light"
-              size="lg"
-              onClick={onMessage}
-            >
+            <ActionIcon variant="light" size="lg" onClick={onMessage}>
               <IconMessage size={18} />
             </ActionIcon>
           </Tooltip>
@@ -109,11 +105,7 @@ export function AlumniContactInfo({
         )}
         {onShare && (
           <Tooltip label="Share">
-            <ActionIcon
-              variant="light"
-              size="lg"
-              onClick={onShare}
-            >
+            <ActionIcon variant="light" size="lg" onClick={onShare}>
               <IconShare size={18} />
             </ActionIcon>
           </Tooltip>
@@ -184,7 +176,7 @@ export function AlumniContactInfo({
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Stack gap="md">
         <Title order={4}>Contact Information</Title>
-        
+
         <Stack gap="sm">
           {/* Email */}
           <Group justify="space-between">
@@ -197,11 +189,7 @@ export function AlumniContactInfo({
             <CopyButton value={email}>
               {({ copied, copy }) => (
                 <Tooltip label={copied ? 'Copied!' : 'Copy email'}>
-                  <ActionIcon
-                    variant="subtle"
-                    size="sm"
-                    onClick={copy}
-                  >
+                  <ActionIcon variant="subtle" size="sm" onClick={copy}>
                     {copied ? <IconCheck size={14} /> : <IconCopy size={14} />}
                   </ActionIcon>
                 </Tooltip>
@@ -221,12 +209,12 @@ export function AlumniContactInfo({
               <CopyButton value={alumni.phone}>
                 {({ copied, copy }) => (
                   <Tooltip label={copied ? 'Copied!' : 'Copy phone'}>
-                    <ActionIcon
-                      variant="subtle"
-                      size="sm"
-                      onClick={copy}
-                    >
-                      {copied ? <IconCheck size={14} /> : <IconCopy size={14} />}
+                    <ActionIcon variant="subtle" size="sm" onClick={copy}>
+                      {copied ? (
+                        <IconCheck size={14} />
+                      ) : (
+                        <IconCopy size={14} />
+                      )}
                     </ActionIcon>
                   </Tooltip>
                 )}
@@ -248,7 +236,9 @@ export function AlumniContactInfo({
           <>
             <Divider />
             <Stack gap="sm">
-              <Text size="sm" fw={500}>Social Links</Text>
+              <Text size="sm" fw={500}>
+                Social Links
+              </Text>
               {alumni.linkedinUrl && (
                 <Group gap="md">
                   <IconBrandLinkedin size={16} color="gray" />
@@ -333,7 +323,7 @@ interface QuickContactProps {
 
 export function QuickContact({ alumni, size = 'sm' }: QuickContactProps) {
   const email = `${alumni.firstName.toLowerCase()}.${alumni.lastName.toLowerCase()}@example.com`;
-  
+
   return (
     <Group gap="xs">
       <Tooltip label="Send Email">
@@ -346,7 +336,7 @@ export function QuickContact({ alumni, size = 'sm' }: QuickContactProps) {
           <IconMail size={size === 'xs' ? 12 : size === 'sm' ? 14 : 16} />
         </ActionIcon>
       </Tooltip>
-      
+
       {alumni.phone && (
         <Tooltip label="Call">
           <ActionIcon
@@ -359,7 +349,7 @@ export function QuickContact({ alumni, size = 'sm' }: QuickContactProps) {
           </ActionIcon>
         </Tooltip>
       )}
-      
+
       {alumni.linkedinUrl && (
         <Tooltip label="LinkedIn">
           <ActionIcon
@@ -370,7 +360,9 @@ export function QuickContact({ alumni, size = 'sm' }: QuickContactProps) {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <IconBrandLinkedin size={size === 'xs' ? 12 : size === 'sm' ? 14 : 16} />
+            <IconBrandLinkedin
+              size={size === 'xs' ? 12 : size === 'sm' ? 14 : 16}
+            />
           </ActionIcon>
         </Tooltip>
       )}

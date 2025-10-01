@@ -14,17 +14,25 @@ export default function CommunicationsPage() {
 
   return (
     <Container size="xl" py="md">
-      <Title order={1} mb="xl">Communications</Title>
-      
+      <Title order={1} mb="xl">
+        Communications
+      </Title>
+
       <Tabs value={activeTab} onChange={setActiveTab}>
         <Tabs.List>
           <Tabs.Tab value="create" leftSection={<IconPlus style={iconStyle} />}>
             Create Communication
           </Tabs.Tab>
-          <Tabs.Tab value="history" leftSection={<IconHistory style={iconStyle} />}>
+          <Tabs.Tab
+            value="history"
+            leftSection={<IconHistory style={iconStyle} />}
+          >
             Communication History
           </Tabs.Tab>
-          <Tabs.Tab value="templates" leftSection={<IconTemplate style={iconStyle} />}>
+          <Tabs.Tab
+            value="templates"
+            leftSection={<IconTemplate style={iconStyle} />}
+          >
             Templates
           </Tabs.Tab>
         </Tabs.List>

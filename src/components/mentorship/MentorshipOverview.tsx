@@ -15,7 +15,7 @@ import {
   ThemeIcon,
   Alert,
   ActionIcon,
-  Tooltip
+  Tooltip,
 } from '@mantine/core';
 import {
   IconUsers,
@@ -24,7 +24,7 @@ import {
   IconClock,
   IconTrendingUp,
   IconRefresh,
-  IconInfoCircle
+  IconInfoCircle,
 } from '@tabler/icons-react';
 import { mockMentorshipService } from '@/lib/mock-services/mentorshipService';
 
@@ -33,7 +33,10 @@ interface MentorshipOverviewProps {
   onRefresh: () => void;
 }
 
-export function MentorshipOverview({ stats, onRefresh }: MentorshipOverviewProps) {
+export function MentorshipOverview({
+  stats,
+  onRefresh,
+}: MentorshipOverviewProps) {
   const [recentConnections, setRecentConnections] = useState<any[]>([]);
   const [menteeRequests, setMenteeRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -43,18 +46,20 @@ export function MentorshipOverview({ stats, onRefresh }: MentorshipOverviewProps
     try {
       setLoading(true);
       setError(null);
-      
+
       // Load recent connections
-      const connectionsResponse = await mockMentorshipService.getMentorshipConnections(
-        undefined,
-        { field: 'createdAt', direction: 'desc' },
-        1,
-        5
-      );
+      const connectionsResponse =
+        await mockMentorshipService.getMentorshipConnections(
+          undefined,
+          { field: 'createdAt', direction: 'desc' },
+          1,
+          5
+        );
       setRecentConnections(connectionsResponse.data);
 
       // Load pending mentee requests
-      const requestsResponse = await mockMentorshipService.getMenteeRequests('pending');
+      const requestsResponse =
+        await mockMentorshipService.getMenteeRequests('pending');
       setMenteeRequests(requestsResponse.data.slice(0, 5));
     } catch (err: any) {
       setError(err.message || 'Failed to load recent data');
@@ -69,12 +74,18 @@ export function MentorshipOverview({ stats, onRefresh }: MentorshipOverviewProps
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'green';
-      case 'completed': return 'blue';
-      case 'pending': return 'orange';
-      case 'paused': return 'yellow';
-      case 'cancelled': return 'red';
-      default: return 'gray';
+      case 'active':
+        return 'green';
+      case 'completed':
+        return 'blue';
+      case 'pending':
+        return 'orange';
+      case 'paused':
+        return 'yellow';
+      case 'cancelled':
+        return 'red';
+      default:
+        return 'gray';
     }
   };
 
@@ -82,7 +93,7 @@ export function MentorshipOverview({ stats, onRefresh }: MentorshipOverviewProps
     return new Date(date).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric',
     });
   };
 
@@ -123,17 +134,23 @@ export function MentorshipOverview({ stats, onRefresh }: MentorshipOverviewProps
             </ActionIcon>
           </Tooltip>
         </Group>
-        
+
         <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="md">
           <div>
             <Group gap="xs" mb="xs">
               <ThemeIcon size="sm" variant="light" color="blue">
                 <IconUsers size={14} />
               </ThemeIcon>
-              <Text size="sm" fw={500}>Total Connections</Text>
+              <Text size="sm" fw={500}>
+                Total Connections
+              </Text>
             </Group>
-            <Text size="xl" fw={700}>{stats.totalConnections}</Text>
-            <Text size="xs" c="dimmed">All time</Text>
+            <Text size="xl" fw={700}>
+              {stats.totalConnections}
+            </Text>
+            <Text size="xs" c="dimmed">
+              All time
+            </Text>
           </div>
 
           <div>
@@ -141,10 +158,19 @@ export function MentorshipOverview({ stats, onRefresh }: MentorshipOverviewProps
               <ThemeIcon size="sm" variant="light" color="green">
                 <IconUserCheck size={14} />
               </ThemeIcon>
-              <Text size="sm" fw={500}>Completion Rate</Text>
+              <Text size="sm" fw={500}>
+                Completion Rate
+              </Text>
             </Group>
-            <Text size="xl" fw={700}>{stats.successRate}%</Text>
-            <Progress value={stats.successRate} size="xs" mt="xs" color="green" />
+            <Text size="xl" fw={700}>
+              {stats.successRate}%
+            </Text>
+            <Progress
+              value={stats.successRate}
+              size="xs"
+              mt="xs"
+              color="green"
+            />
           </div>
 
           <div>
@@ -152,10 +178,16 @@ export function MentorshipOverview({ stats, onRefresh }: MentorshipOverviewProps
               <ThemeIcon size="sm" variant="light" color="orange">
                 <IconClock size={14} />
               </ThemeIcon>
-              <Text size="sm" fw={500}>Avg Duration</Text>
+              <Text size="sm" fw={500}>
+                Avg Duration
+              </Text>
             </Group>
-            <Text size="xl" fw={700}>{stats.averageDurationDays}</Text>
-            <Text size="xs" c="dimmed">days</Text>
+            <Text size="xl" fw={700}>
+              {stats.averageDurationDays}
+            </Text>
+            <Text size="xs" c="dimmed">
+              days
+            </Text>
           </div>
 
           <div>
@@ -163,10 +195,16 @@ export function MentorshipOverview({ stats, onRefresh }: MentorshipOverviewProps
               <ThemeIcon size="sm" variant="light" color="teal">
                 <IconTrendingUp size={14} />
               </ThemeIcon>
-              <Text size="sm" fw={500}>Active Now</Text>
+              <Text size="sm" fw={500}>
+                Active Now
+              </Text>
             </Group>
-            <Text size="xl" fw={700}>{stats.activeConnections}</Text>
-            <Text size="xs" c="dimmed">ongoing</Text>
+            <Text size="xl" fw={700}>
+              {stats.activeConnections}
+            </Text>
+            <Text size="xs" c="dimmed">
+              ongoing
+            </Text>
           </div>
         </SimpleGrid>
       </Card>
@@ -181,17 +219,23 @@ export function MentorshipOverview({ stats, onRefresh }: MentorshipOverviewProps
                 View All
               </Button>
             </Group>
-            
+
             <Stack gap="sm">
               {recentConnections.length > 0 ? (
-                recentConnections.map((connection) => (
-                  <Group key={connection.id} justify="space-between" p="sm" style={{
-                    border: '1px solid var(--mantine-color-gray-3)',
-                    borderRadius: 'var(--mantine-radius-sm)'
-                  }}>
+                recentConnections.map(connection => (
+                  <Group
+                    key={connection.id}
+                    justify="space-between"
+                    p="sm"
+                    style={{
+                      border: '1px solid var(--mantine-color-gray-3)',
+                      borderRadius: 'var(--mantine-radius-sm)',
+                    }}
+                  >
                     <div>
                       <Text size="sm" fw={500}>
-                        Mentor #{connection.mentorId} → Mentee #{connection.menteeId}
+                        Mentor #{connection.mentorId} → Mentee #
+                        {connection.menteeId}
                       </Text>
                       <Text size="xs" c="dimmed">
                         Started {formatDate(connection.startDate)}
@@ -220,14 +264,19 @@ export function MentorshipOverview({ stats, onRefresh }: MentorshipOverviewProps
                 View All
               </Button>
             </Group>
-            
+
             <Stack gap="sm">
               {menteeRequests.length > 0 ? (
-                menteeRequests.map((request) => (
-                  <Group key={request.id} justify="space-between" p="sm" style={{
-                    border: '1px solid var(--mantine-color-gray-3)',
-                    borderRadius: 'var(--mantine-radius-sm)'
-                  }}>
+                menteeRequests.map(request => (
+                  <Group
+                    key={request.id}
+                    justify="space-between"
+                    p="sm"
+                    style={{
+                      border: '1px solid var(--mantine-color-gray-3)',
+                      borderRadius: 'var(--mantine-radius-sm)',
+                    }}
+                  >
                     <div>
                       <Text size="sm" fw={500}>
                         Alumni #{request.alumniId}
@@ -256,7 +305,9 @@ export function MentorshipOverview({ stats, onRefresh }: MentorshipOverviewProps
 
       {/* Quick Actions */}
       <Card withBorder>
-        <Title order={4} mb="md">Quick Actions</Title>
+        <Title order={4} mb="md">
+          Quick Actions
+        </Title>
         <Group>
           <Button leftSection={<IconUserPlus size={16} />} variant="light">
             Create Connection

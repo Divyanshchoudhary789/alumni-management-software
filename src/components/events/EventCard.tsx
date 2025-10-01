@@ -12,7 +12,7 @@ import {
   ActionIcon,
   Menu,
   rem,
-  Tooltip
+  Tooltip,
 } from '@mantine/core';
 import {
   IconCalendar,
@@ -22,7 +22,7 @@ import {
   IconEdit,
   IconTrash,
   IconEye,
-  IconClock
+  IconClock,
 } from '@tabler/icons-react';
 import { Event } from '@/types';
 import { EventStatusBadge } from './EventStatusBadge';
@@ -45,22 +45,25 @@ export function EventCard({
   onView,
   onRegister,
   showActions = true,
-  isRegistered = false
+  isRegistered = false,
 }: EventCardProps) {
-  const registeredCount = event.registrations?.filter(r => r.status === 'registered').length || 0;
-  const attendedCount = event.registrations?.filter(r => r.status === 'attended').length || 0;
+  const registeredCount =
+    event.registrations?.filter(r => r.status === 'registered').length || 0;
+  const attendedCount =
+    event.registrations?.filter(r => r.status === 'attended').length || 0;
   const totalRegistrations = registeredCount + attendedCount;
   const capacityPercentage = (totalRegistrations / event.capacity) * 100;
-  
+
   const isUpcoming = event.eventDate > new Date();
   const isPastDeadline = event.registrationDeadline < new Date();
   const isAtCapacity = totalRegistrations >= event.capacity;
-  
-  const canRegister = event.status === 'published' && 
-                     isUpcoming && 
-                     !isPastDeadline && 
-                     !isAtCapacity && 
-                     !isRegistered;
+
+  const canRegister =
+    event.status === 'published' &&
+    isUpcoming &&
+    !isPastDeadline &&
+    !isAtCapacity &&
+    !isRegistered;
 
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
@@ -89,7 +92,9 @@ export function EventCard({
               <Menu.Dropdown>
                 {onView && (
                   <Menu.Item
-                    leftSection={<IconEye style={{ width: rem(14), height: rem(14) }} />}
+                    leftSection={
+                      <IconEye style={{ width: rem(14), height: rem(14) }} />
+                    }
                     onClick={() => onView(event)}
                   >
                     View Details
@@ -97,7 +102,9 @@ export function EventCard({
                 )}
                 {onEdit && (
                   <Menu.Item
-                    leftSection={<IconEdit style={{ width: rem(14), height: rem(14) }} />}
+                    leftSection={
+                      <IconEdit style={{ width: rem(14), height: rem(14) }} />
+                    }
                     onClick={() => onEdit(event)}
                   >
                     Edit Event
@@ -106,7 +113,9 @@ export function EventCard({
                 {onDelete && (
                   <Menu.Item
                     color="red"
-                    leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
+                    leftSection={
+                      <IconTrash style={{ width: rem(14), height: rem(14) }} />
+                    }
                     onClick={() => onDelete(event)}
                   >
                     Delete Event
@@ -118,7 +127,18 @@ export function EventCard({
         </Group>
 
         <Group justify="space-between">
-          <EventStatusBadge status={event.status} />
+          <Group gap="xs">
+            <EventStatusBadge status={event.status} />
+            {event.eventType && (
+              <Badge
+                color={event.eventType === 'free' ? 'green' : 'orange'}
+                variant="light"
+                size="sm"
+              >
+                {event.eventType === 'free' ? 'Free' : `$${event.ticketPrice}`}
+              </Badge>
+            )}
+          </Group>
           {isRegistered && (
             <Badge color="blue" variant="light" size="sm">
               Registered
@@ -133,9 +153,7 @@ export function EventCard({
         <Stack gap="xs">
           <Group gap="xs">
             <IconCalendar style={{ width: rem(16), height: rem(16) }} />
-            <Text size="sm">
-              {format(event.eventDate, 'PPP p')}
-            </Text>
+            <Text size="sm">{format(event.eventDate, 'PPP p')}</Text>
           </Group>
 
           <Group gap="xs">
@@ -156,7 +174,8 @@ export function EventCard({
             <Group gap="xs">
               <IconClock style={{ width: rem(16), height: rem(16) }} />
               <Text size="sm" c={isPastDeadline ? 'red' : 'dimmed'}>
-                Registration deadline: {format(event.registrationDeadline, 'PPP')}
+                Registration deadline:{' '}
+                {format(event.registrationDeadline, 'PPP')}
               </Text>
             </Group>
           )}
@@ -172,9 +191,15 @@ export function EventCard({
                 {Math.round(capacityPercentage)}%
               </Text>
             </Group>
-            <Progress 
-              value={capacityPercentage} 
-              color={capacityPercentage > 90 ? 'red' : capacityPercentage > 70 ? 'yellow' : 'blue'}
+            <Progress
+              value={capacityPercentage}
+              color={
+                capacityPercentage > 90
+                  ? 'red'
+                  : capacityPercentage > 70
+                    ? 'yellow'
+                    : 'blue'
+              }
               size="sm"
             />
           </Stack>
@@ -184,16 +209,20 @@ export function EventCard({
           <Group justify="space-between" mt="md">
             <div>
               {isPastDeadline && (
-                <Text size="xs" c="red">Registration closed</Text>
+                <Text size="xs" c="red">
+                  Registration closed
+                </Text>
               )}
               {isAtCapacity && !isPastDeadline && (
-                <Text size="xs" c="orange">Event at capacity</Text>
+                <Text size="xs" c="orange">
+                  Event at capacity
+                </Text>
               )}
             </div>
-            
+
             <Button
-              variant={isRegistered ? "light" : "filled"}
-              color={isRegistered ? "gray" : "blue"}
+              variant={isRegistered ? 'light' : 'filled'}
+              color={isRegistered ? 'gray' : 'blue'}
               disabled={!canRegister || isRegistered}
               onClick={() => onRegister(event)}
               size="sm"

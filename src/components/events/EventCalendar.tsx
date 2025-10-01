@@ -11,12 +11,22 @@ import {
   Tooltip,
   rem,
   Box,
-  ScrollArea
+  ScrollArea,
 } from '@mantine/core';
 import { Calendar } from '@mantine/dates';
-import { IconChevronLeft, IconChevronRight, IconCalendar } from '@tabler/icons-react';
+import {
+  IconChevronLeft,
+  IconChevronRight,
+  IconCalendar,
+} from '@tabler/icons-react';
 import { Event } from '@/types';
-import { format, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
+import {
+  format,
+  isSameDay,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+} from 'date-fns';
 import { EventStatusBadge } from './EventStatusBadge';
 
 interface EventCalendarProps {
@@ -25,14 +35,18 @@ interface EventCalendarProps {
   onDateSelect?: (date: Date) => void;
 }
 
-export function EventCalendar({ events, onEventClick, onDateSelect }: EventCalendarProps) {
+export function EventCalendar({
+  events,
+  onEventClick,
+  onDateSelect,
+}: EventCalendarProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [viewDate, setViewDate] = useState<Date>(new Date());
 
   // Group events by date
   const eventsByDate = useMemo(() => {
     const grouped: Record<string, Event[]> = {};
-    
+
     events.forEach(event => {
       const dateKey = format(event.eventDate, 'yyyy-MM-dd');
       if (!grouped[dateKey]) {
@@ -40,7 +54,7 @@ export function EventCalendar({ events, onEventClick, onDateSelect }: EventCalen
       }
       grouped[dateKey].push(event);
     });
-    
+
     return grouped;
   }, [events]);
 
@@ -58,7 +72,11 @@ export function EventCalendar({ events, onEventClick, onDateSelect }: EventCalen
 
     return (
       <Tooltip
-        label={hasEvents ? `${dayEvents.length} event${dayEvents.length > 1 ? 's' : ''}` : ''}
+        label={
+          hasEvents
+            ? `${dayEvents.length} event${dayEvents.length > 1 ? 's' : ''}`
+            : ''
+        }
         disabled={!hasEvents}
       >
         <div style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -72,7 +90,7 @@ export function EventCalendar({ events, onEventClick, onDateSelect }: EventCalen
                 height: 6,
                 borderRadius: '50%',
                 backgroundColor: 'var(--mantine-color-blue-6)',
-                zIndex: 1
+                zIndex: 1,
               }}
             />
           )}
@@ -95,7 +113,9 @@ export function EventCalendar({ events, onEventClick, onDateSelect }: EventCalen
         <Stack gap="md">
           <Group justify="space-between">
             <Text fw={500} size="lg">
-              <IconCalendar style={{ width: rem(20), height: rem(20), marginRight: rem(8) }} />
+              <IconCalendar
+                style={{ width: rem(20), height: rem(20), marginRight: rem(8) }}
+              />
               Event Calendar
             </Text>
           </Group>
@@ -116,7 +136,7 @@ export function EventCalendar({ events, onEventClick, onDateSelect }: EventCalen
                 width: 8,
                 height: 8,
                 borderRadius: '50%',
-                backgroundColor: 'var(--mantine-color-blue-6)'
+                backgroundColor: 'var(--mantine-color-blue-6)',
               }}
             />
             <Text size="xs" c="dimmed">
@@ -166,13 +186,17 @@ export function EventCalendar({ events, onEventClick, onDateSelect }: EventCalen
 
                       <Group gap="xs">
                         <Badge size="xs" variant="light">
-                          {event.registrations?.filter(r => r.status === 'registered').length || 0} / {event.capacity}
+                          {event.registrations?.filter(
+                            r => r.status === 'registered'
+                          ).length || 0}{' '}
+                          / {event.capacity}
                         </Badge>
-                        {event.registrationDeadline < new Date() && event.status === 'published' && (
-                          <Badge size="xs" color="red" variant="light">
-                            Registration Closed
-                          </Badge>
-                        )}
+                        {event.registrationDeadline < new Date() &&
+                          event.status === 'published' && (
+                            <Badge size="xs" color="red" variant="light">
+                              Registration Closed
+                            </Badge>
+                          )}
                       </Group>
                     </Stack>
                   </Paper>

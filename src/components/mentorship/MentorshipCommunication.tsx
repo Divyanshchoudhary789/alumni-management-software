@@ -22,7 +22,7 @@ import {
   Tabs,
   SimpleGrid,
   ThemeIcon,
-  LoadingOverlay
+  LoadingOverlay,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import {
@@ -39,7 +39,7 @@ import {
   IconUsers,
   IconNotes,
   IconTrendingUp,
-  IconInfoCircle
+  IconInfoCircle,
 } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
@@ -58,7 +58,12 @@ interface CommunicationMessage {
   senderRole: 'mentor' | 'mentee' | 'admin';
   message: string;
   timestamp: Date;
-  type: 'message' | 'meeting_scheduled' | 'goal_set' | 'milestone_reached' | 'note';
+  type:
+    | 'message'
+    | 'meeting_scheduled'
+    | 'goal_set'
+    | 'milestone_reached'
+    | 'note';
 }
 
 interface MentorshipGoal {
@@ -85,7 +90,7 @@ export function MentorshipCommunication({
   connectionId,
   mentorName,
   menteeName,
-  connectionStatus
+  connectionStatus,
 }: MentorshipCommunicationProps) {
   const [activeTab, setActiveTab] = useState<string>('messages');
   const [messages, setMessages] = useState<CommunicationMessage[]>([]);
@@ -94,9 +99,16 @@ export function MentorshipCommunication({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [messageModalOpened, { open: openMessageModal, close: closeMessageModal }] = useDisclosure(false);
-  const [goalModalOpened, { open: openGoalModal, close: closeGoalModal }] = useDisclosure(false);
-  const [meetingModalOpened, { open: openMeetingModal, close: closeMeetingModal }] = useDisclosure(false);
+  const [
+    messageModalOpened,
+    { open: openMessageModal, close: closeMessageModal },
+  ] = useDisclosure(false);
+  const [goalModalOpened, { open: openGoalModal, close: closeGoalModal }] =
+    useDisclosure(false);
+  const [
+    meetingModalOpened,
+    { open: openMeetingModal, close: closeMeetingModal },
+  ] = useDisclosure(false);
 
   // Mock data for demonstration
   useEffect(() => {
@@ -107,7 +119,7 @@ export function MentorshipCommunication({
     try {
       setLoading(true);
       setError(null);
-      
+
       // Mock data - in real app, this would come from API
       const mockMessages: CommunicationMessage[] = [
         {
@@ -115,58 +127,64 @@ export function MentorshipCommunication({
           senderId: 'mentor1',
           senderName: mentorName,
           senderRole: 'mentor',
-          message: 'Welcome to our mentorship! I\'m excited to work with you on your career goals.',
+          message:
+            "Welcome to our mentorship! I'm excited to work with you on your career goals.",
           timestamp: new Date('2024-02-01T10:00:00'),
-          type: 'message'
+          type: 'message',
         },
         {
           id: '2',
           senderId: 'mentee1',
           senderName: menteeName,
           senderRole: 'mentee',
-          message: 'Thank you! I\'m looking forward to learning from your experience.',
+          message:
+            "Thank you! I'm looking forward to learning from your experience.",
           timestamp: new Date('2024-02-01T14:30:00'),
-          type: 'message'
+          type: 'message',
         },
         {
           id: '3',
           senderId: 'mentor1',
           senderName: mentorName,
           senderRole: 'mentor',
-          message: 'I\'ve scheduled our first meeting for next week. Let\'s discuss your career objectives.',
+          message:
+            "I've scheduled our first meeting for next week. Let's discuss your career objectives.",
           timestamp: new Date('2024-02-02T09:15:00'),
-          type: 'meeting_scheduled'
-        }
+          type: 'meeting_scheduled',
+        },
       ];
 
       const mockGoals: MentorshipGoal[] = [
         {
           id: '1',
           title: 'Complete Technical Skills Assessment',
-          description: 'Evaluate current technical skills and identify areas for improvement',
+          description:
+            'Evaluate current technical skills and identify areas for improvement',
           targetDate: new Date('2024-03-01'),
           status: 'completed',
           progress: 100,
-          createdAt: new Date('2024-02-01')
+          createdAt: new Date('2024-02-01'),
         },
         {
           id: '2',
           title: 'Build Portfolio Website',
-          description: 'Create a professional portfolio showcasing projects and skills',
+          description:
+            'Create a professional portfolio showcasing projects and skills',
           targetDate: new Date('2024-04-15'),
           status: 'in_progress',
           progress: 65,
-          createdAt: new Date('2024-02-05')
+          createdAt: new Date('2024-02-05'),
         },
         {
           id: '3',
           title: 'Network with Industry Professionals',
-          description: 'Attend 3 networking events and connect with 10 professionals',
+          description:
+            'Attend 3 networking events and connect with 10 professionals',
           targetDate: new Date('2024-05-30'),
           status: 'pending',
           progress: 0,
-          createdAt: new Date('2024-02-10')
-        }
+          createdAt: new Date('2024-02-10'),
+        },
       ];
 
       const mockMeetings: MeetingRecord[] = [
@@ -175,18 +193,20 @@ export function MentorshipCommunication({
           scheduledDate: new Date('2024-02-08T15:00:00'),
           duration: 60,
           topics: ['Career Goals', 'Skill Assessment', 'Action Plan'],
-          notes: 'Great first meeting. Discussed career objectives and created initial action plan.',
+          notes:
+            'Great first meeting. Discussed career objectives and created initial action plan.',
           attendees: [mentorName, menteeName],
-          status: 'completed'
+          status: 'completed',
         },
         {
           id: '2',
           scheduledDate: new Date('2024-02-22T15:00:00'),
           duration: 45,
           topics: ['Portfolio Review', 'Technical Interview Prep'],
-          notes: 'Reviewed portfolio progress and practiced technical interview questions.',
+          notes:
+            'Reviewed portfolio progress and practiced technical interview questions.',
           attendees: [mentorName, menteeName],
-          status: 'completed'
+          status: 'completed',
         },
         {
           id: '3',
@@ -195,8 +215,8 @@ export function MentorshipCommunication({
           topics: ['Networking Strategy', 'Industry Insights'],
           notes: '',
           attendees: [mentorName, menteeName],
-          status: 'scheduled'
-        }
+          status: 'scheduled',
+        },
       ];
 
       setMessages(mockMessages);
@@ -211,12 +231,18 @@ export function MentorshipCommunication({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'green';
-      case 'in_progress': return 'blue';
-      case 'pending': return 'orange';
-      case 'cancelled': return 'red';
-      case 'scheduled': return 'blue';
-      default: return 'gray';
+      case 'completed':
+        return 'green';
+      case 'in_progress':
+        return 'blue';
+      case 'pending':
+        return 'orange';
+      case 'cancelled':
+        return 'red';
+      case 'scheduled':
+        return 'blue';
+      default:
+        return 'gray';
     }
   };
 
@@ -226,17 +252,22 @@ export function MentorshipCommunication({
       day: 'numeric',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
   const getMessageIcon = (type: string) => {
     switch (type) {
-      case 'meeting_scheduled': return <IconCalendar size={16} />;
-      case 'goal_set': return <IconTarget size={16} />;
-      case 'milestone_reached': return <IconTrendingUp size={16} />;
-      case 'note': return <IconNotes size={16} />;
-      default: return <IconMessage size={16} />;
+      case 'meeting_scheduled':
+        return <IconCalendar size={16} />;
+      case 'goal_set':
+        return <IconTarget size={16} />;
+      case 'milestone_reached':
+        return <IconTrendingUp size={16} />;
+      case 'note':
+        return <IconNotes size={16} />;
+      default:
+        return <IconMessage size={16} />;
     }
   };
 
@@ -304,8 +335,12 @@ export function MentorshipCommunication({
               </Group>
 
               <Card withBorder>
-                <Timeline active={messages.length} bulletSize={24} lineWidth={2}>
-                  {messages.map((message) => (
+                <Timeline
+                  active={messages.length}
+                  bulletSize={24}
+                  lineWidth={2}
+                >
+                  {messages.map(message => (
                     <Timeline.Item
                       key={message.id}
                       bullet={getMessageIcon(message.type)}
@@ -346,7 +381,7 @@ export function MentorshipCommunication({
               </Group>
 
               <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
-                {goals.map((goal) => (
+                {goals.map(goal => (
                   <Card key={goal.id} withBorder>
                     <Group justify="space-between" mb="sm">
                       <Text fw={500}>{goal.title}</Text>
@@ -360,7 +395,10 @@ export function MentorshipCommunication({
                           <Menu.Item leftSection={<IconEdit size={14} />}>
                             Edit Goal
                           </Menu.Item>
-                          <Menu.Item leftSection={<IconTrash size={14} />} color="red">
+                          <Menu.Item
+                            leftSection={<IconTrash size={14} />}
+                            color="red"
+                          >
                             Delete Goal
                           </Menu.Item>
                         </Menu.Dropdown>
@@ -373,9 +411,15 @@ export function MentorshipCommunication({
 
                     <Group justify="space-between" mb="xs">
                       <Text size="sm">Progress</Text>
-                      <Text size="sm" fw={500}>{goal.progress}%</Text>
+                      <Text size="sm" fw={500}>
+                        {goal.progress}%
+                      </Text>
                     </Group>
-                    <Progress value={goal.progress} mb="sm" color={getStatusColor(goal.status)} />
+                    <Progress
+                      value={goal.progress}
+                      mb="sm"
+                      color={getStatusColor(goal.status)}
+                    />
 
                     <Group justify="space-between">
                       <Badge color={getStatusColor(goal.status)} size="sm">
@@ -406,18 +450,25 @@ export function MentorshipCommunication({
               </Group>
 
               <Stack gap="sm">
-                {meetings.map((meeting) => (
+                {meetings.map(meeting => (
                   <Card key={meeting.id} withBorder>
                     <Grid>
                       <Grid.Col span={{ base: 12, md: 8 }}>
                         <Group mb="sm">
-                          <ThemeIcon size="sm" variant="light" color={getStatusColor(meeting.status)}>
+                          <ThemeIcon
+                            size="sm"
+                            variant="light"
+                            color={getStatusColor(meeting.status)}
+                          >
                             <IconCalendar size={14} />
                           </ThemeIcon>
                           <Text fw={500}>
                             {formatDate(meeting.scheduledDate)}
                           </Text>
-                          <Badge color={getStatusColor(meeting.status)} size="sm">
+                          <Badge
+                            color={getStatusColor(meeting.status)}
+                            size="sm"
+                          >
                             {meeting.status}
                           </Badge>
                         </Group>
@@ -427,7 +478,9 @@ export function MentorshipCommunication({
                         </Text>
 
                         <Group gap="xs" mb="sm">
-                          <Text size="sm" fw={500}>Topics:</Text>
+                          <Text size="sm" fw={500}>
+                            Topics:
+                          </Text>
                           {meeting.topics.map((topic, index) => (
                             <Badge key={index} size="xs" variant="light">
                               {topic}
@@ -441,7 +494,9 @@ export function MentorshipCommunication({
                       </Grid.Col>
 
                       <Grid.Col span={{ base: 12, md: 4 }}>
-                        <Text size="sm" fw={500} mb="xs">Attendees</Text>
+                        <Text size="sm" fw={500} mb="xs">
+                          Attendees
+                        </Text>
                         <Stack gap="xs">
                           {meeting.attendees.map((attendee, index) => (
                             <Group key={index} gap="xs">
@@ -463,15 +518,22 @@ export function MentorshipCommunication({
             <Grid>
               <Grid.Col span={{ base: 12, md: 6 }}>
                 <Card withBorder>
-                  <Title order={5} mb="md">Goal Progress Overview</Title>
+                  <Title order={5} mb="md">
+                    Goal Progress Overview
+                  </Title>
                   <Stack gap="md">
-                    {goals.map((goal) => (
+                    {goals.map(goal => (
                       <div key={goal.id}>
                         <Group justify="space-between" mb="xs">
                           <Text size="sm">{goal.title}</Text>
-                          <Text size="sm" fw={500}>{goal.progress}%</Text>
+                          <Text size="sm" fw={500}>
+                            {goal.progress}%
+                          </Text>
                         </Group>
-                        <Progress value={goal.progress} color={getStatusColor(goal.status)} />
+                        <Progress
+                          value={goal.progress}
+                          color={getStatusColor(goal.status)}
+                        />
                       </div>
                     ))}
                   </Stack>
@@ -480,14 +542,18 @@ export function MentorshipCommunication({
 
               <Grid.Col span={{ base: 12, md: 6 }}>
                 <Card withBorder>
-                  <Title order={5} mb="md">Mentorship Statistics</Title>
+                  <Title order={5} mb="md">
+                    Mentorship Statistics
+                  </Title>
                   <SimpleGrid cols={2} spacing="md">
                     <div>
                       <Group gap="xs" mb="xs">
                         <IconUsers size={16} />
                         <Text size="sm">Total Meetings</Text>
                       </Group>
-                      <Text size="xl" fw={700}>{meetings.length}</Text>
+                      <Text size="xl" fw={700}>
+                        {meetings.length}
+                      </Text>
                     </div>
 
                     <div>
@@ -495,7 +561,9 @@ export function MentorshipCommunication({
                         <IconTarget size={16} />
                         <Text size="sm">Goals Set</Text>
                       </Group>
-                      <Text size="xl" fw={700}>{goals.length}</Text>
+                      <Text size="xl" fw={700}>
+                        {goals.length}
+                      </Text>
                     </div>
 
                     <div>
@@ -514,7 +582,9 @@ export function MentorshipCommunication({
                         <Text size="sm">Total Hours</Text>
                       </Group>
                       <Text size="xl" fw={700}>
-                        {Math.round(meetings.reduce((sum, m) => sum + m.duration, 0) / 60)}
+                        {Math.round(
+                          meetings.reduce((sum, m) => sum + m.duration, 0) / 60
+                        )}
                       </Text>
                     </div>
                   </SimpleGrid>
@@ -526,7 +596,11 @@ export function MentorshipCommunication({
       </Tabs>
 
       {/* Modals */}
-      <Modal opened={messageModalOpened} onClose={closeMessageModal} title="Add Message">
+      <Modal
+        opened={messageModalOpened}
+        onClose={closeMessageModal}
+        title="Add Message"
+      >
         <MessageForm onSave={closeMessageModal} onCancel={closeMessageModal} />
       </Modal>
 
@@ -534,7 +608,11 @@ export function MentorshipCommunication({
         <GoalForm onSave={closeGoalModal} onCancel={closeGoalModal} />
       </Modal>
 
-      <Modal opened={meetingModalOpened} onClose={closeMeetingModal} title="Schedule Meeting">
+      <Modal
+        opened={meetingModalOpened}
+        onClose={closeMeetingModal}
+        title="Schedule Meeting"
+      >
         <MeetingForm onSave={closeMeetingModal} onCancel={closeMeetingModal} />
       </Modal>
     </Stack>
@@ -542,15 +620,21 @@ export function MentorshipCommunication({
 }
 
 // Message Form Component
-function MessageForm({ onSave, onCancel }: { onSave: () => void; onCancel: () => void }) {
+function MessageForm({
+  onSave,
+  onCancel,
+}: {
+  onSave: () => void;
+  onCancel: () => void;
+}) {
   const form = useForm({
     initialValues: {
       message: '',
-      type: 'message'
+      type: 'message',
     },
     validate: {
-      message: (value) => value.length < 1 ? 'Message is required' : null
-    }
+      message: value => (value.length < 1 ? 'Message is required' : null),
+    },
   });
 
   const handleSubmit = (values: typeof form.values) => {
@@ -569,7 +653,7 @@ function MessageForm({ onSave, onCancel }: { onSave: () => void; onCancel: () =>
             { value: 'meeting_scheduled', label: 'Meeting Scheduled' },
             { value: 'goal_set', label: 'Goal Set' },
             { value: 'milestone_reached', label: 'Milestone Reached' },
-            { value: 'note', label: 'Note' }
+            { value: 'note', label: 'Note' },
           ]}
           {...form.getInputProps('type')}
         />
@@ -586,9 +670,7 @@ function MessageForm({ onSave, onCancel }: { onSave: () => void; onCancel: () =>
           <Button variant="light" onClick={onCancel}>
             Cancel
           </Button>
-          <Button type="submit">
-            Send Message
-          </Button>
+          <Button type="submit">Send Message</Button>
         </Group>
       </Stack>
     </form>
@@ -596,18 +678,25 @@ function MessageForm({ onSave, onCancel }: { onSave: () => void; onCancel: () =>
 }
 
 // Goal Form Component
-function GoalForm({ onSave, onCancel }: { onSave: () => void; onCancel: () => void }) {
+function GoalForm({
+  onSave,
+  onCancel,
+}: {
+  onSave: () => void;
+  onCancel: () => void;
+}) {
   const form = useForm({
     initialValues: {
       title: '',
       description: '',
-      targetDate: null as Date | null
+      targetDate: null as Date | null,
     },
     validate: {
-      title: (value) => value.length < 1 ? 'Title is required' : null,
-      description: (value) => value.length < 1 ? 'Description is required' : null,
-      targetDate: (value) => !value ? 'Target date is required' : null
-    }
+      title: value => (value.length < 1 ? 'Title is required' : null),
+      description: value =>
+        value.length < 1 ? 'Description is required' : null,
+      targetDate: value => (!value ? 'Target date is required' : null),
+    },
   });
 
   const handleSubmit = (values: typeof form.values) => {
@@ -645,9 +734,7 @@ function GoalForm({ onSave, onCancel }: { onSave: () => void; onCancel: () => vo
           <Button variant="light" onClick={onCancel}>
             Cancel
           </Button>
-          <Button type="submit">
-            Create Goal
-          </Button>
+          <Button type="submit">Create Goal</Button>
         </Group>
       </Stack>
     </form>
@@ -655,18 +742,25 @@ function GoalForm({ onSave, onCancel }: { onSave: () => void; onCancel: () => vo
 }
 
 // Meeting Form Component
-function MeetingForm({ onSave, onCancel }: { onSave: () => void; onCancel: () => void }) {
+function MeetingForm({
+  onSave,
+  onCancel,
+}: {
+  onSave: () => void;
+  onCancel: () => void;
+}) {
   const form = useForm({
     initialValues: {
       scheduledDate: null as Date | null,
       duration: 60,
       topics: [] as string[],
-      notes: ''
+      notes: '',
     },
     validate: {
-      scheduledDate: (value) => !value ? 'Meeting date is required' : null,
-      duration: (value) => value < 15 ? 'Duration must be at least 15 minutes' : null
-    }
+      scheduledDate: value => (!value ? 'Meeting date is required' : null),
+      duration: value =>
+        value < 15 ? 'Duration must be at least 15 minutes' : null,
+    },
   });
 
   const handleSubmit = (values: typeof form.values) => {
@@ -691,10 +785,12 @@ function MeetingForm({ onSave, onCancel }: { onSave: () => void; onCancel: () =>
             { value: '30', label: '30 minutes' },
             { value: '45', label: '45 minutes' },
             { value: '60', label: '60 minutes' },
-            { value: '90', label: '90 minutes' }
+            { value: '90', label: '90 minutes' },
           ]}
           value={form.values.duration.toString()}
-          onChange={(value) => form.setFieldValue('duration', parseInt(value || '60'))}
+          onChange={value =>
+            form.setFieldValue('duration', parseInt(value || '60'))
+          }
         />
 
         <Textarea
@@ -708,9 +804,7 @@ function MeetingForm({ onSave, onCancel }: { onSave: () => void; onCancel: () =>
           <Button variant="light" onClick={onCancel}>
             Cancel
           </Button>
-          <Button type="submit">
-            Schedule Meeting
-          </Button>
+          <Button type="submit">Schedule Meeting</Button>
         </Group>
       </Stack>
     </form>

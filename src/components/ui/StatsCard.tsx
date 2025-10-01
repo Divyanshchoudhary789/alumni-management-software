@@ -1,5 +1,9 @@
 import { Card, Text, Group, Stack, ThemeIcon, Progress } from '@mantine/core';
-import { IconTrendingUp, IconTrendingDown, IconMinus } from '@tabler/icons-react';
+import {
+  IconTrendingUp,
+  IconTrendingDown,
+  IconMinus,
+} from '@tabler/icons-react';
 import classes from './StatsCard.module.css';
 
 interface StatsCardProps {
@@ -25,11 +29,11 @@ export function StatsCard({
   loading = false,
   showProgress = false,
   progressValue,
-  progressColor
+  progressColor,
 }: StatsCardProps) {
   const getTrendIcon = () => {
     if (trend === undefined) return null;
-    
+
     if (trend > 0) {
       return <IconTrendingUp size={16} className={classes.trendUp} />;
     } else if (trend < 0) {
@@ -51,11 +55,15 @@ export function StatsCard({
   };
 
   return (
-    <Card 
-      withBorder 
-      radius="md" 
+    <Card
+      withBorder
+      radius="md"
       className={classes.card}
-      style={{ '--card-color': `var(--mantine-color-${color}-6)` } as React.CSSProperties}
+      style={
+        {
+          '--card-color': `var(--mantine-color-${color}-6)`,
+        } as React.CSSProperties
+      }
     >
       <Group justify="space-between" align="flex-start">
         <Stack gap={4} style={{ flex: 1 }}>
@@ -82,8 +90,8 @@ export function StatsCard({
             </Group>
           )}
           {showProgress && progressValue !== undefined && (
-            <Progress 
-              value={progressValue} 
+            <Progress
+              value={progressValue}
               color={progressColor || color}
               size="sm"
               radius="xl"
@@ -92,10 +100,10 @@ export function StatsCard({
           )}
         </Stack>
         {icon && (
-          <ThemeIcon 
-            size="lg" 
-            radius="md" 
-            variant="light" 
+          <ThemeIcon
+            size="lg"
+            radius="md"
+            variant="light"
             color={color}
             className={classes.icon}
           >

@@ -20,7 +20,7 @@ import {
   Alert,
   LoadingOverlay,
   Box,
-  Divider
+  Divider,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
@@ -39,7 +39,7 @@ import {
   IconClock,
   IconRobot,
   IconCalendar,
-  IconSettings
+  IconSettings,
 } from '@tabler/icons-react';
 import { mockCommunicationService } from '@/lib/mock-services/communicationService';
 import { mockCommunicationTemplates } from '@/lib/mock-data/communications';
@@ -70,7 +70,7 @@ const templateTypes = [
   { value: 'program_launch', label: 'Program Launch' },
   { value: 'donation_receipt', label: 'Donation Receipt' },
   { value: 'welcome', label: 'Welcome Message' },
-  { value: 'reminder', label: 'Reminder' }
+  { value: 'reminder', label: 'Reminder' },
 ];
 
 const audienceOptions = [
@@ -80,18 +80,28 @@ const audienceOptions = [
   { value: 'business', label: 'Business Alumni' },
   { value: 'engineering', label: 'Engineering Alumni' },
   { value: 'donors', label: 'Donors' },
-  { value: 'entrepreneurs', label: 'Entrepreneurs' }
+  { value: 'entrepreneurs', label: 'Entrepreneurs' },
 ];
 
 export function CommunicationTemplates() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
-  
-  const [previewOpened, { open: openPreview, close: closePreview }] = useDisclosure(false);
-  const [useTemplateOpened, { open: openUseTemplate, close: closeUseTemplate }] = useDisclosure(false);
-  const [createTemplateOpened, { open: openCreateTemplate, close: closeCreateTemplate }] = useDisclosure(false);
-  const [automationOpened, { open: openAutomation, close: closeAutomation }] = useDisclosure(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
+    null
+  );
+
+  const [previewOpened, { open: openPreview, close: closePreview }] =
+    useDisclosure(false);
+  const [
+    useTemplateOpened,
+    { open: openUseTemplate, close: closeUseTemplate },
+  ] = useDisclosure(false);
+  const [
+    createTemplateOpened,
+    { open: openCreateTemplate, close: closeCreateTemplate },
+  ] = useDisclosure(false);
+  const [automationOpened, { open: openAutomation, close: closeAutomation }] =
+    useDisclosure(false);
 
   const useTemplateForm = useForm<TemplateFormData>({
     initialValues: {
@@ -100,13 +110,14 @@ export function CommunicationTemplates() {
       content: '',
       type: '',
       targetAudience: [],
-      variables: {}
+      variables: {},
     },
     validate: {
-      name: (value) => (!value ? 'Communication title is required' : null),
-      type: (value) => (!value ? 'Communication type is required' : null),
-      targetAudience: (value) => (value.length === 0 ? 'At least one target audience is required' : null)
-    }
+      name: value => (!value ? 'Communication title is required' : null),
+      type: value => (!value ? 'Communication type is required' : null),
+      targetAudience: value =>
+        value.length === 0 ? 'At least one target audience is required' : null,
+    },
   });
 
   useEffect(() => {
@@ -122,7 +133,7 @@ export function CommunicationTemplates() {
       notifications.show({
         title: 'Error',
         message: error.message || 'Failed to load templates',
-        color: 'red'
+        color: 'red',
       });
     } finally {
       setLoading(false);
@@ -131,14 +142,17 @@ export function CommunicationTemplates() {
 
   const handleUseTemplate = (template: Template) => {
     setSelectedTemplate(template);
-    
+
     // Extract variables from template content
     const variableMatches = template.content.match(/\[([^\]]+)\]/g) || [];
-    const variables = variableMatches.reduce((acc, match) => {
-      const variable = match.slice(1, -1); // Remove brackets
-      acc[variable] = '';
-      return acc;
-    }, {} as Record<string, string>);
+    const variables = variableMatches.reduce(
+      (acc, match) => {
+        const variable = match.slice(1, -1); // Remove brackets
+        acc[variable] = '';
+        return acc;
+      },
+      {} as Record<string, string>
+    );
 
     useTemplateForm.setValues({
       name: template.subject,
@@ -146,9 +160,9 @@ export function CommunicationTemplates() {
       content: template.content,
       type: template.type,
       targetAudience: [],
-      variables
+      variables,
     });
-    
+
     openUseTemplate();
   };
 
@@ -160,14 +174,14 @@ export function CommunicationTemplates() {
           {
             title: useTemplateForm.values.name,
             targetAudience: useTemplateForm.values.targetAudience,
-            variables: useTemplateForm.values.variables
+            variables: useTemplateForm.values.variables,
           }
         );
 
         notifications.show({
           title: 'Success',
           message: 'Communication created from template',
-          color: 'green'
+          color: 'green',
         });
 
         closeUseTemplate();
@@ -176,7 +190,7 @@ export function CommunicationTemplates() {
         notifications.show({
           title: 'Error',
           message: error.message || 'Failed to create communication',
-          color: 'red'
+          color: 'red',
         });
       }
     }
@@ -195,17 +209,19 @@ export function CommunicationTemplates() {
     program_launch: 'purple',
     donation_receipt: 'teal',
     welcome: 'cyan',
-    reminder: 'yellow'
+    reminder: 'yellow',
   };
 
   return (
     <Stack gap="md">
       <Paper p="md" withBorder>
         <LoadingOverlay visible={loading} />
-        
+
         <Stack gap="md">
           <Group justify="space-between">
-            <Text size="lg" fw={600}>Communication Templates</Text>
+            <Text size="lg" fw={600}>
+              Communication Templates
+            </Text>
             <Group gap="xs">
               <Button
                 leftSection={<IconRobot size={16} />}
@@ -224,9 +240,9 @@ export function CommunicationTemplates() {
           </Group>
 
           <SimpleGrid cols={{ base: 1, md: 2, lg: 3 }} spacing="md">
-            {templates.map((template) => {
+            {templates.map(template => {
               const variables = getVariablesFromContent(template.content);
-              
+
               return (
                 <Card key={template.id} withBorder shadow="sm" padding="md">
                   <Stack gap="sm">
@@ -239,7 +255,7 @@ export function CommunicationTemplates() {
                           {template.subject}
                         </Text>
                       </div>
-                      
+
                       <Menu shadow="md" width={200}>
                         <Menu.Target>
                           <ActionIcon variant="light" size="sm">
@@ -282,18 +298,27 @@ export function CommunicationTemplates() {
                         variant="light"
                         size="sm"
                       >
-                        {templateTypes.find(t => t.value === template.type)?.label || template.type}
+                        {templateTypes.find(t => t.value === template.type)
+                          ?.label || template.type}
                       </Badge>
-                      
+
                       {variables.length > 0 && (
-                        <Badge variant="outline" size="sm" leftSection={<IconVariable size={12} />}>
-                          {variables.length} variable{variables.length !== 1 ? 's' : ''}
+                        <Badge
+                          variant="outline"
+                          size="sm"
+                          leftSection={<IconVariable size={12} />}
+                        >
+                          {variables.length} variable
+                          {variables.length !== 1 ? 's' : ''}
                         </Badge>
                       )}
                     </Group>
 
                     <Text size="xs" c="dimmed" lineClamp={3}>
-                      {template.content.replace(/<[^>]*>/g, '').substring(0, 100)}...
+                      {template.content
+                        .replace(/<[^>]*>/g, '')
+                        .substring(0, 100)}
+                      ...
                     </Text>
 
                     <Group gap="xs" mt="auto">
@@ -323,9 +348,14 @@ export function CommunicationTemplates() {
           </SimpleGrid>
 
           {templates.length === 0 && !loading && (
-            <Alert icon={<IconTemplate size={16} />} color="blue" variant="light">
+            <Alert
+              icon={<IconTemplate size={16} />}
+              color="blue"
+              variant="light"
+            >
               <Text size="sm">
-                No templates available. Create your first template to get started with consistent communications.
+                No templates available. Create your first template to get
+                started with consistent communications.
               </Text>
             </Alert>
           )}
@@ -343,27 +373,37 @@ export function CommunicationTemplates() {
           <Stack gap="md">
             <Group justify="space-between">
               <div>
-                <Text fw={600} size="lg">{selectedTemplate.name}</Text>
-                <Text size="sm" c="dimmed">{selectedTemplate.subject}</Text>
+                <Text fw={600} size="lg">
+                  {selectedTemplate.name}
+                </Text>
+                <Text size="sm" c="dimmed">
+                  {selectedTemplate.subject}
+                </Text>
               </div>
               <Badge
                 color={typeColors[selectedTemplate.type] || 'gray'}
                 variant="light"
               >
-                {templateTypes.find(t => t.value === selectedTemplate.type)?.label || selectedTemplate.type}
+                {templateTypes.find(t => t.value === selectedTemplate.type)
+                  ?.label || selectedTemplate.type}
               </Badge>
             </Group>
-            
+
             {getVariablesFromContent(selectedTemplate.content).length > 0 && (
-              <Alert icon={<IconVariable size={16} />} color="blue" variant="light">
+              <Alert
+                icon={<IconVariable size={16} />}
+                color="blue"
+                variant="light"
+              >
                 <Text size="sm">
-                  <strong>Variables:</strong> {getVariablesFromContent(selectedTemplate.content).join(', ')}
+                  <strong>Variables:</strong>{' '}
+                  {getVariablesFromContent(selectedTemplate.content).join(', ')}
                 </Text>
               </Alert>
             )}
-            
+
             <Divider />
-            
+
             <Box
               style={{
                 border: '1px solid var(--mantine-color-gray-3)',
@@ -371,7 +411,7 @@ export function CommunicationTemplates() {
                 padding: 'var(--mantine-spacing-md)',
                 minHeight: '200px',
                 maxHeight: '400px',
-                overflow: 'auto'
+                overflow: 'auto',
               }}
               dangerouslySetInnerHTML={{ __html: selectedTemplate.content }}
             />
@@ -415,24 +455,38 @@ export function CommunicationTemplates() {
 
               {Object.keys(useTemplateForm.values.variables).length > 0 && (
                 <Stack gap="xs">
-                  <Text size="sm" fw={500}>Template Variables</Text>
-                  <Alert icon={<IconVariable size={16} />} color="blue" variant="light">
+                  <Text size="sm" fw={500}>
+                    Template Variables
+                  </Text>
+                  <Alert
+                    icon={<IconVariable size={16} />}
+                    color="blue"
+                    variant="light"
+                  >
                     <Text size="sm">
-                      Fill in the variables below to customize your communication.
+                      Fill in the variables below to customize your
+                      communication.
                     </Text>
                   </Alert>
-                  
-                  {Object.keys(useTemplateForm.values.variables).map((variable) => (
-                    <TextInput
-                      key={variable}
-                      label={variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                      placeholder={`Enter ${variable.toLowerCase()}`}
-                      value={useTemplateForm.values.variables[variable]}
-                      onChange={(e) => 
-                        useTemplateForm.setFieldValue(`variables.${variable}`, e.target.value)
-                      }
-                    />
-                  ))}
+
+                  {Object.keys(useTemplateForm.values.variables).map(
+                    variable => (
+                      <TextInput
+                        key={variable}
+                        label={variable
+                          .replace(/_/g, ' ')
+                          .replace(/\b\w/g, l => l.toUpperCase())}
+                        placeholder={`Enter ${variable.toLowerCase()}`}
+                        value={useTemplateForm.values.variables[variable]}
+                        onChange={e =>
+                          useTemplateForm.setFieldValue(
+                            `variables.${variable}`,
+                            e.target.value
+                          )
+                        }
+                      />
+                    )
+                  )}
                 </Stack>
               )}
 
@@ -442,10 +496,7 @@ export function CommunicationTemplates() {
                 <Button variant="light" onClick={closeUseTemplate}>
                   Cancel
                 </Button>
-                <Button
-                  type="submit"
-                  leftSection={<IconMail size={16} />}
-                >
+                <Button type="submit" leftSection={<IconMail size={16} />}>
                   Create Communication
                 </Button>
               </Group>
@@ -463,8 +514,9 @@ export function CommunicationTemplates() {
       >
         <Alert color="blue" variant="light" mb="md">
           <Text size="sm">
-            Template creation functionality would be implemented here. 
-            This would include a form to create custom templates with variables and rich text editing.
+            Template creation functionality would be implemented here. This
+            would include a form to create custom templates with variables and
+            rich text editing.
           </Text>
         </Alert>
       </Modal>
@@ -485,16 +537,22 @@ export function CommunicationTemplates() {
                 New Campaign
               </Button>
             </Group>
-            
+
             <Stack gap="sm">
               <Paper p="sm" withBorder>
                 <Group justify="space-between">
                   <div>
-                    <Text size="sm" fw={500}>Welcome Series</Text>
-                    <Text size="xs" c="dimmed">Triggered when new alumni join</Text>
+                    <Text size="sm" fw={500}>
+                      Welcome Series
+                    </Text>
+                    <Text size="xs" c="dimmed">
+                      Triggered when new alumni join
+                    </Text>
                   </div>
                   <Group gap="xs">
-                    <Badge color="green" variant="light" size="sm">Active</Badge>
+                    <Badge color="green" variant="light" size="sm">
+                      Active
+                    </Badge>
                     <ActionIcon size="sm" variant="light">
                       <IconSettings size={12} />
                     </ActionIcon>
@@ -505,11 +563,17 @@ export function CommunicationTemplates() {
               <Paper p="sm" withBorder>
                 <Group justify="space-between">
                   <div>
-                    <Text size="sm" fw={500}>Event Reminders</Text>
-                    <Text size="xs" c="dimmed">Sent 3 days before registered events</Text>
+                    <Text size="sm" fw={500}>
+                      Event Reminders
+                    </Text>
+                    <Text size="xs" c="dimmed">
+                      Sent 3 days before registered events
+                    </Text>
                   </div>
                   <Group gap="xs">
-                    <Badge color="blue" variant="light" size="sm">Active</Badge>
+                    <Badge color="blue" variant="light" size="sm">
+                      Active
+                    </Badge>
                     <ActionIcon size="sm" variant="light">
                       <IconSettings size={12} />
                     </ActionIcon>
@@ -520,11 +584,17 @@ export function CommunicationTemplates() {
               <Paper p="sm" withBorder>
                 <Group justify="space-between">
                   <div>
-                    <Text size="sm" fw={500}>Donation Thank You</Text>
-                    <Text size="xs" c="dimmed">Triggered after donation completion</Text>
+                    <Text size="sm" fw={500}>
+                      Donation Thank You
+                    </Text>
+                    <Text size="xs" c="dimmed">
+                      Triggered after donation completion
+                    </Text>
                   </div>
                   <Group gap="xs">
-                    <Badge color="gray" variant="light" size="sm">Paused</Badge>
+                    <Badge color="gray" variant="light" size="sm">
+                      Paused
+                    </Badge>
                     <ActionIcon size="sm" variant="light">
                       <IconSettings size={12} />
                     </ActionIcon>
@@ -542,19 +612,25 @@ export function CommunicationTemplates() {
                 Schedule New
               </Button>
             </Group>
-            
+
             <Stack gap="sm">
               <Paper p="sm" withBorder>
                 <Group justify="space-between">
                   <div>
-                    <Text size="sm" fw={500}>Monthly Newsletter - March</Text>
+                    <Text size="sm" fw={500}>
+                      Monthly Newsletter - March
+                    </Text>
                     <Group gap="xs">
                       <IconClock size={12} />
-                      <Text size="xs" c="dimmed">Scheduled for March 1, 2024 at 9:00 AM</Text>
+                      <Text size="xs" c="dimmed">
+                        Scheduled for March 1, 2024 at 9:00 AM
+                      </Text>
                     </Group>
                   </div>
                   <Group gap="xs">
-                    <Badge color="blue" variant="light" size="sm">Scheduled</Badge>
+                    <Badge color="blue" variant="light" size="sm">
+                      Scheduled
+                    </Badge>
                     <ActionIcon size="sm" variant="light">
                       <IconEdit size={12} />
                     </ActionIcon>
@@ -565,14 +641,20 @@ export function CommunicationTemplates() {
               <Paper p="sm" withBorder>
                 <Group justify="space-between">
                   <div>
-                    <Text size="sm" fw={500}>Alumni Gala Invitation</Text>
+                    <Text size="sm" fw={500}>
+                      Alumni Gala Invitation
+                    </Text>
                     <Group gap="xs">
                       <IconClock size={12} />
-                      <Text size="xs" c="dimmed">Scheduled for April 15, 2024 at 10:00 AM</Text>
+                      <Text size="xs" c="dimmed">
+                        Scheduled for April 15, 2024 at 10:00 AM
+                      </Text>
                     </Group>
                   </div>
                   <Group gap="xs">
-                    <Badge color="blue" variant="light" size="sm">Scheduled</Badge>
+                    <Badge color="blue" variant="light" size="sm">
+                      Scheduled
+                    </Badge>
                     <ActionIcon size="sm" variant="light">
                       <IconEdit size={12} />
                     </ActionIcon>
@@ -590,16 +672,22 @@ export function CommunicationTemplates() {
                 New Recurring
               </Button>
             </Group>
-            
+
             <Stack gap="sm">
               <Paper p="sm" withBorder>
                 <Group justify="space-between">
                   <div>
-                    <Text size="sm" fw={500}>Monthly Newsletter</Text>
-                    <Text size="xs" c="dimmed">Every 1st of the month at 9:00 AM</Text>
+                    <Text size="sm" fw={500}>
+                      Monthly Newsletter
+                    </Text>
+                    <Text size="xs" c="dimmed">
+                      Every 1st of the month at 9:00 AM
+                    </Text>
                   </div>
                   <Group gap="xs">
-                    <Badge color="green" variant="light" size="sm">Active</Badge>
+                    <Badge color="green" variant="light" size="sm">
+                      Active
+                    </Badge>
                     <ActionIcon size="sm" variant="light">
                       <IconSettings size={12} />
                     </ActionIcon>
@@ -610,11 +698,17 @@ export function CommunicationTemplates() {
               <Paper p="sm" withBorder>
                 <Group justify="space-between">
                   <div>
-                    <Text size="sm" fw={500}>Weekly Job Board Digest</Text>
-                    <Text size="xs" c="dimmed">Every Friday at 2:00 PM</Text>
+                    <Text size="sm" fw={500}>
+                      Weekly Job Board Digest
+                    </Text>
+                    <Text size="xs" c="dimmed">
+                      Every Friday at 2:00 PM
+                    </Text>
                   </div>
                   <Group gap="xs">
-                    <Badge color="green" variant="light" size="sm">Active</Badge>
+                    <Badge color="green" variant="light" size="sm">
+                      Active
+                    </Badge>
                     <ActionIcon size="sm" variant="light">
                       <IconSettings size={12} />
                     </ActionIcon>
@@ -626,20 +720,26 @@ export function CommunicationTemplates() {
 
           {/* Automation Rules */}
           <Card withBorder p="md">
-            <Text fw={600} mb="md">Automation Rules</Text>
+            <Text fw={600} mb="md">
+              Automation Rules
+            </Text>
             <Alert color="blue" variant="light">
               <Stack gap="xs">
                 <Text size="sm">
-                  <strong>🤖 Smart Timing:</strong> Communications are automatically optimized for best engagement times
+                  <strong>🤖 Smart Timing:</strong> Communications are
+                  automatically optimized for best engagement times
                 </Text>
                 <Text size="sm">
-                  <strong>📊 A/B Testing:</strong> Subject lines are automatically tested for better open rates
+                  <strong>📊 A/B Testing:</strong> Subject lines are
+                  automatically tested for better open rates
                 </Text>
                 <Text size="sm">
-                  <strong>🎯 Audience Segmentation:</strong> Content is personalized based on alumni preferences
+                  <strong>🎯 Audience Segmentation:</strong> Content is
+                  personalized based on alumni preferences
                 </Text>
                 <Text size="sm">
-                  <strong>📈 Performance Monitoring:</strong> Low-performing campaigns are automatically flagged
+                  <strong>📈 Performance Monitoring:</strong> Low-performing
+                  campaigns are automatically flagged
                 </Text>
               </Stack>
             </Alert>

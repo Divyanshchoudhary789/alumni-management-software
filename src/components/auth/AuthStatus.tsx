@@ -1,7 +1,12 @@
 'use client';
 
 import { Group, Text, Badge, Tooltip } from '@mantine/core';
-import { IconUser, IconUserCheck, IconUserX, IconLoader } from '@tabler/icons-react';
+import {
+  IconUser,
+  IconUserCheck,
+  IconUserX,
+  IconLoader,
+} from '@tabler/icons-react';
 import { useAuth } from '@/hooks/useAuth';
 
 interface AuthStatusProps {
@@ -9,7 +14,10 @@ interface AuthStatusProps {
   size?: 'xs' | 'sm' | 'md' | 'lg';
 }
 
-export function AuthStatus({ showDetails = false, size = 'sm' }: AuthStatusProps) {
+export function AuthStatus({
+  showDetails = false,
+  size = 'sm',
+}: AuthStatusProps) {
   const { isLoaded, isSignedIn, user, isLoading, error } = useAuth();
 
   if (isLoading || !isLoaded) {

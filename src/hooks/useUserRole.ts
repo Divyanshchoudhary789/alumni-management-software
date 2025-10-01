@@ -10,7 +10,8 @@ export function useUserRole() {
     if (isLoaded) {
       // Check user role from Clerk metadata or database
       // For now, we'll use a simple check based on email or metadata
-      const userRole = user?.publicMetadata?.role as 'admin' | 'alumni' || 'alumni';
+      const userRole =
+        (user?.publicMetadata?.role as 'admin' | 'alumni') || 'alumni';
       setRole(userRole);
       setLoading(false);
     }

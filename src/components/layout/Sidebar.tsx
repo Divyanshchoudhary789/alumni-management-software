@@ -53,7 +53,12 @@ const navigationItems: NavItem[] = [
     href: '/alumni',
     children: [
       { label: 'Directory', icon: IconUsers, href: '/alumni' },
-      { label: 'Add Alumni', icon: IconUser, href: '/alumni/add', roles: ['admin'] },
+      {
+        label: 'Add Alumni',
+        icon: IconUser,
+        href: '/alumni/add',
+        roles: ['admin'],
+      },
     ],
   },
   {
@@ -62,7 +67,12 @@ const navigationItems: NavItem[] = [
     href: '/events',
     children: [
       { label: 'All Events', icon: IconCalendarEvent, href: '/events' },
-      { label: 'Create Event', icon: IconCalendarEvent, href: '/events/create', roles: ['admin'] },
+      {
+        label: 'Create Event',
+        icon: IconCalendarEvent,
+        href: '/events/create',
+        roles: ['admin'],
+      },
     ],
   },
   {
@@ -72,7 +82,11 @@ const navigationItems: NavItem[] = [
     roles: ['admin'],
     children: [
       { label: 'All Messages', icon: IconMail, href: '/communications' },
-      { label: 'Create Message', icon: IconMail, href: '/communications/create' },
+      {
+        label: 'Create Message',
+        icon: IconMail,
+        href: '/communications/create',
+      },
     ],
   },
   {
@@ -139,10 +153,11 @@ export function Sidebar() {
   }, [pathname]);
 
   // Use dev user or default to admin role
-  const user = isClient && devUser ? devUser : { publicMetadata: { role: 'admin' } };
+  const user =
+    isClient && devUser ? devUser : { publicMetadata: { role: 'admin' } };
 
   // Get user role from user metadata or default to 'admin'
-  const userRole = user?.publicMetadata?.role as string || 'admin';
+  const userRole = (user?.publicMetadata?.role as string) || 'admin';
 
   const toggleSection = (label: string) => {
     setOpenSections(prev =>
@@ -168,7 +183,7 @@ export function Sidebar() {
     const { setIsNavigating } = useNavigationStore.getState();
     setIsNavigating(true);
     router.push(href);
-    
+
     // Reset navigation state after a short delay
     setTimeout(() => setIsNavigating(false), 500);
   };
@@ -179,7 +194,7 @@ export function Sidebar() {
     const hasChildren = item.children && item.children.length > 0;
     const isOpen = openSections.includes(item.label);
     const active = isActive(item.href);
-    
+
     // Safety check for icon component
     const IconComponent = item.icon;
     if (!IconComponent) {
@@ -192,7 +207,9 @@ export function Sidebar() {
         <div key={item.label}>
           <NavLink
             label={item.label}
-            leftSection={<IconComponent style={{ width: rem(18), height: rem(18) }} />}
+            leftSection={
+              <IconComponent style={{ width: rem(18), height: rem(18) }} />
+            }
             rightSection={
               <IconChevronRight
                 style={{
@@ -221,7 +238,9 @@ export function Sidebar() {
       <NavLink
         key={item.label}
         label={item.label}
-        leftSection={<IconComponent style={{ width: rem(18), height: rem(18) }} />}
+        leftSection={
+          <IconComponent style={{ width: rem(18), height: rem(18) }} />
+        }
         onClick={() => handleNavigation(item.href)}
         active={active}
         className={classes.navLink}
@@ -237,11 +256,14 @@ export function Sidebar() {
   };
 
   // Use dev user or default user
-  const currentUser = isClient && devUser ? devUser : {
-    fullName: 'Guest User',
-    emailAddresses: [{ emailAddress: 'guest@example.com' }],
-    imageUrl: 'https://via.placeholder.com/40',
-  };
+  const currentUser =
+    isClient && devUser
+      ? devUser
+      : {
+          fullName: 'Guest User',
+          emailAddresses: [{ emailAddress: 'guest@example.com' }],
+          imageUrl: 'https://via.placeholder.com/40',
+        };
 
   return (
     <div className={classes.sidebar}>
@@ -253,7 +275,7 @@ export function Sidebar() {
 
       <div className={classes.footer}>
         <Divider my="sm" />
-        
+
         {/* User Profile Menu */}
         <Menu shadow="md" width={200} position="top-start">
           <Menu.Target>
@@ -285,20 +307,26 @@ export function Sidebar() {
 
           <Menu.Dropdown>
             <Menu.Item
-              leftSection={<IconUser style={{ width: rem(16), height: rem(16) }} />}
+              leftSection={
+                <IconUser style={{ width: rem(16), height: rem(16) }} />
+              }
               onClick={() => router.push('/profile')}
             >
               Profile
             </Menu.Item>
             <Menu.Item
-              leftSection={<IconSettings style={{ width: rem(16), height: rem(16) }} />}
+              leftSection={
+                <IconSettings style={{ width: rem(16), height: rem(16) }} />
+              }
               onClick={() => router.push('/settings')}
             >
               Settings
             </Menu.Item>
             <Menu.Divider />
             <Menu.Item
-              leftSection={<IconLogout style={{ width: rem(16), height: rem(16) }} />}
+              leftSection={
+                <IconLogout style={{ width: rem(16), height: rem(16) }} />
+              }
               onClick={handleSignOut}
               color="red"
             >

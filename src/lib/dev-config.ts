@@ -1,15 +1,16 @@
 // Development configuration for when Clerk keys are not available
 // Only check client-side environment variables to avoid hydration mismatch
-export const isDevelopmentMode = typeof window !== 'undefined' ? 
-  process.env.NODE_ENV === 'development' && 
-  (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.includes('your-') || 
-   !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) :
-  false;
+export const isDevelopmentMode =
+  typeof window !== 'undefined'
+    ? process.env.NODE_ENV === 'development' &&
+      (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.includes('your-') ||
+        !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
+    : false;
 
 // Get development user from localStorage or use default
 export const getDevUser = () => {
   if (typeof window === 'undefined') return null;
-  
+
   try {
     const storedUser = localStorage.getItem('dev-user');
     if (storedUser) {
@@ -18,7 +19,7 @@ export const getDevUser = () => {
   } catch (error) {
     console.warn('Failed to parse stored dev user:', error);
   }
-  
+
   // Default mock user if none stored
   return {
     id: 'dev-user-id',

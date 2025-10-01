@@ -19,9 +19,10 @@ export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
   useEffect(() => {
     setIsClient(true);
     // Check if we're in development mode with invalid Clerk keys
-    const devMode = process.env.NODE_ENV === 'development' && 
-      (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.includes('your-') || 
-       !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+    const devMode =
+      process.env.NODE_ENV === 'development' &&
+      (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.includes('your-') ||
+        !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
     setIsDevMode(devMode);
   }, []);
 
@@ -29,7 +30,10 @@ export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
   if (!isClient) {
     return (
       <Container size="xl" style={{ position: 'relative', minHeight: '100vh' }}>
-        <LoadingOverlay visible={true} overlayProps={{ radius: 'sm', blur: 2 }} />
+        <LoadingOverlay
+          visible={true}
+          overlayProps={{ radius: 'sm', blur: 2 }}
+        />
       </Container>
     );
   }
@@ -52,7 +56,10 @@ export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
   if (!isLoaded) {
     return (
       <Container size="xl" style={{ position: 'relative', minHeight: '100vh' }}>
-        <LoadingOverlay visible={true} overlayProps={{ radius: 'sm', blur: 2 }} />
+        <LoadingOverlay
+          visible={true}
+          overlayProps={{ radius: 'sm', blur: 2 }}
+        />
       </Container>
     );
   }

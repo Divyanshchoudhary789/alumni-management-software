@@ -1,6 +1,17 @@
 'use client';
 
-import { Card, Title, Table, Text, Badge, Group, Avatar, Button, Skeleton, Stack } from '@mantine/core';
+import {
+  Card,
+  Title,
+  Table,
+  Text,
+  Badge,
+  Group,
+  Avatar,
+  Button,
+  Skeleton,
+  Stack,
+} from '@mantine/core';
 import { IconExternalLink } from '@tabler/icons-react';
 import { mockData } from '@/lib/mock-data';
 
@@ -13,7 +24,9 @@ export function RecentDonations({ donations, loading }: RecentDonationsProps) {
   if (loading) {
     return (
       <Card padding="lg" radius="md" withBorder>
-        <Title order={3} mb="md">Recent Donations</Title>
+        <Title order={3} mb="md">
+          Recent Donations
+        </Title>
         <Stack gap="sm">
           {[...Array(5)].map((_, index) => (
             <Skeleton key={index} height={60} />
@@ -34,31 +47,41 @@ export function RecentDonations({ donations, loading }: RecentDonationsProps) {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'green';
-      case 'pending': return 'yellow';
-      case 'failed': return 'red';
-      default: return 'gray';
+      case 'completed':
+        return 'green';
+      case 'pending':
+        return 'yellow';
+      case 'failed':
+        return 'red';
+      default:
+        return 'gray';
     }
   };
 
   const getDonorInfo = (donorId: string) => {
     const donor = mockData.alumni.find(a => a.id === donorId);
-    return donor ? {
-      name: `${donor.firstName} ${donor.lastName}`,
-      avatar: donor.profileImage,
-      company: donor.currentCompany,
-    } : {
-      name: 'Anonymous Donor',
-      avatar: null,
-      company: null,
-    };
+    return donor
+      ? {
+          name: `${donor.firstName} ${donor.lastName}`,
+          avatar: donor.profileImage,
+          company: donor.currentCompany,
+        }
+      : {
+          name: 'Anonymous Donor',
+          avatar: null,
+          company: null,
+        };
   };
 
   return (
     <Card padding="lg" radius="md" withBorder>
       <Group justify="space-between" mb="md">
         <Title order={3}>Recent Donations</Title>
-        <Button variant="light" size="xs" rightSection={<IconExternalLink size={14} />}>
+        <Button
+          variant="light"
+          size="xs"
+          rightSection={<IconExternalLink size={14} />}
+        >
           View All
         </Button>
       </Group>
@@ -76,19 +99,18 @@ export function RecentDonations({ donations, loading }: RecentDonationsProps) {
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {donations.map((donation) => {
+              {donations.map(donation => {
                 const donorInfo = getDonorInfo(donation.donorId);
-                
+
                 return (
                   <Table.Tr key={donation.id}>
                     <Table.Td>
                       <Group gap="sm">
-                        <Avatar 
-                          src={donorInfo.avatar} 
-                          size="sm" 
-                          radius="xl"
-                        >
-                          {donorInfo.name.split(' ').map(n => n[0]).join('')}
+                        <Avatar src={donorInfo.avatar} size="sm" radius="xl">
+                          {donorInfo.name
+                            .split(' ')
+                            .map(n => n[0])
+                            .join('')}
                         </Avatar>
                         <div>
                           <Text size="sm" fw={500}>
@@ -108,9 +130,7 @@ export function RecentDonations({ donations, loading }: RecentDonationsProps) {
                       </Text>
                     </Table.Td>
                     <Table.Td>
-                      <Text size="sm">
-                        {donation.purpose}
-                      </Text>
+                      <Text size="sm">{donation.purpose}</Text>
                     </Table.Td>
                     <Table.Td>
                       <Text size="sm" c="dimmed">
@@ -118,8 +138,8 @@ export function RecentDonations({ donations, loading }: RecentDonationsProps) {
                       </Text>
                     </Table.Td>
                     <Table.Td>
-                      <Badge 
-                        color={getStatusColor(donation.status)} 
+                      <Badge
+                        color={getStatusColor(donation.status)}
                         variant="light"
                         size="sm"
                       >

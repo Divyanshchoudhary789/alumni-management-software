@@ -1,5 +1,11 @@
 import express from 'express';
-import { getDashboardMetrics, getRecentActivities } from '../controllers/dashboardController';
+import { 
+  getDashboardMetrics, 
+  getRecentActivities,
+  getAlumniGrowthData,
+  getEventAttendanceData,
+  getDonationTrendsData
+} from '../controllers/dashboardController';
 import { requireAuth } from '../middleware/auth';
 
 const router = express.Router();
@@ -12,5 +18,10 @@ router.get('/metrics', getDashboardMetrics);
 
 // Recent activities endpoint
 router.get('/activities', getRecentActivities);
+
+// Chart data endpoints
+router.get('/charts/alumni-growth', getAlumniGrowthData);
+router.get('/charts/event-attendance', getEventAttendanceData);
+router.get('/charts/donation-trends', getDonationTrendsData);
 
 export default router;

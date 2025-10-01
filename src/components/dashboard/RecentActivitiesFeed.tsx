@@ -1,44 +1,43 @@
-import { Card, Title, Stack, Text, Button, Skeleton, ScrollArea, Group } from '@mantine/core';
+import {
+  Card,
+  Title,
+  Stack,
+  Text,
+  Button,
+  Skeleton,
+  ScrollArea,
+  Group,
+} from '@mantine/core';
 import { IconRefresh, IconActivity } from '@tabler/icons-react';
-import { useState, useEffect } from 'react';
 import { ActivityCard } from '@/components/ui/ActivityCard';
-import { mockDashboardService } from '@/lib/mock-services';
-import { RecentActivity } from '@/types';
+import { useApi } from '@/hooks/useApi';
+import { useCallback } from 'react';
+import { mockDashboardService } from '@/lib/mock-services/dashboardService';
+import { RecentActivity } from '@/services/api';
 
 interface RecentActivitiesFeedProps {
   height?: number;
   maxItems?: number;
 }
 
-export function RecentActivitiesFeed({ height = 400, maxItems = 10 }: RecentActivitiesFeedProps) {
-  const [activities, setActivities] = useState<RecentActivity[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+export function RecentActivitiesFeed({
+  height = 400,
+  maxItems = 10,
+}: RecentActivitiesFeedProps) {
+  const apiCall = useCallback(() => mockDashboardService.getRecentActivities(maxItems).then(res => res.data), [maxItems]);
 
-  const loadActivities = async (isRefresh = false) => {
-    try {
-      if (isRefresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
-      
-      const response = await mockDashboardService.getRecentActivities(maxItems);
-      setActivities(response.data);
-    } catch (error) {
-      console.error('Failed to load recent activities:', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  useEffect(() => {
-    loadActivities();
-  }, [maxItems]);
+  const {
+    data: activities,
+    loading,
+    error,
+    refetch,
+  } = useApi(apiCall, {
+    showErrorNotification: false, // Don't show notifications for this component
+    immediate: true,
+  });
 
   const handleRefresh = () => {
-    loadActivities(true);
+    refetch();
   };
 
   if (loading) {
@@ -80,13 +79,13 @@ export function RecentActivitiesFeed({ height = 400, maxItems = 10 }: RecentActi
           size="sm"
           leftSection={<IconRefresh size={16} />}
           onClick={handleRefresh}
-          loading={refreshing}
+          loading={loading}
         >
           Refresh
         </Button>
       </Group>
 
-      {activities.length === 0 ? (
+      {!activities || activities.length === 0 ? (
         <Stack align="center" justify="center" h="60%">
           <IconActivity size={48} color="var(--mantine-color-gray-5)" />
           <Text c="dimmed" ta="center">
@@ -99,7 +98,7 @@ export function RecentActivitiesFeed({ height = 400, maxItems = 10 }: RecentActi
       ) : (
         <ScrollArea h={height - 100}>
           <Stack gap="xs">
-            {activities.map((activity) => (
+            {activities?.map(activity => (
               <ActivityCard key={activity.id} activity={activity} />
             ))}
           </Stack>

@@ -21,14 +21,16 @@ const testUsers = [
     name: 'Admin User',
     email: 'admin@alumni-dashboard.com',
     role: 'admin',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
+    avatar:
+      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
   },
   {
     id: 'alumni-1',
     name: 'John Smith',
     email: 'john.smith@example.com',
     role: 'alumni',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
+    avatar:
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
     graduationYear: 2020,
     company: 'Tech Corp',
   },
@@ -37,7 +39,8 @@ const testUsers = [
     name: 'Sarah Johnson',
     email: 'sarah.johnson@example.com',
     role: 'alumni',
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face',
+    avatar:
+      'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face',
     graduationYear: 2018,
     company: 'Marketing Solutions Inc',
   },
@@ -62,7 +65,7 @@ export function DevUserSwitcher() {
       lastName: user.name.split(' ')[1] || '',
       emailAddresses: [{ emailAddress: user.email }],
       imageUrl: user.avatar,
-      publicMetadata: { 
+      publicMetadata: {
         role: user.role,
         graduationYear: user.graduationYear,
         company: user.company,
@@ -71,7 +74,7 @@ export function DevUserSwitcher() {
 
     localStorage.setItem('dev-user', JSON.stringify(userData));
     setCurrentUser(userData);
-    
+
     // Refresh the page to update all components
     window.location.reload();
   };
@@ -95,7 +98,7 @@ export function DevUserSwitcher() {
             <Avatar src={currentUser.imageUrl} size={24} radius="xl" />
           }
           rightSection={<IconChevronDown size={14} />}
-          style={{ 
+          style={{
             backgroundColor: 'rgba(255, 193, 7, 0.1)',
             border: '1px solid rgba(255, 193, 7, 0.3)',
           }}
@@ -128,7 +131,7 @@ export function DevUserSwitcher() {
         <Divider />
 
         <Menu.Label>Switch User</Menu.Label>
-        {testUsers.map((user) => (
+        {testUsers.map(user => (
           <Menu.Item
             key={user.id}
             leftSection={<Avatar src={user.avatar} size={20} radius="xl" />}

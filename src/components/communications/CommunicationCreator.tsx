@@ -17,7 +17,7 @@ import {
   ActionIcon,
   Tooltip,
   LoadingOverlay,
-  Box
+  Box,
 } from '@mantine/core';
 import { DateTimePicker } from '@mantine/dates';
 import { Textarea } from '@mantine/core';
@@ -31,7 +31,7 @@ import {
   IconDeviceFloppy,
   IconTemplate,
   IconUsers,
-  IconBulb
+  IconBulb,
 } from '@tabler/icons-react';
 import { mockCommunicationService } from '@/lib/mock-services/communicationService';
 import { mockCommunicationTemplates } from '@/lib/mock-data/communications';
@@ -52,7 +52,7 @@ const communicationTypes = [
   { value: 'program_launch', label: 'Program Launch' },
   { value: 'donation_receipt', label: 'Donation Receipt' },
   { value: 'welcome', label: 'Welcome Message' },
-  { value: 'reminder', label: 'Reminder' }
+  { value: 'reminder', label: 'Reminder' },
 ];
 
 const audienceOptions = [
@@ -69,14 +69,21 @@ const audienceOptions = [
   { value: 'experienced', label: 'Experienced Professionals (10+ years)' },
   { value: 'regional_sf', label: 'San Francisco Region' },
   { value: 'regional_ny', label: 'New York Region' },
-  { value: 'regional_la', label: 'Los Angeles Region' }
+  { value: 'regional_la', label: 'Los Angeles Region' },
 ];
 
 export function CommunicationCreator() {
   const [loading, setLoading] = useState(false);
-  const [previewOpened, { open: openPreview, close: closePreview }] = useDisclosure(false);
-  const [templateModalOpened, { open: openTemplateModal, close: closeTemplateModal }] = useDisclosure(false);
-  const [sendConfirmOpened, { open: openSendConfirm, close: closeSendConfirm }] = useDisclosure(false);
+  const [previewOpened, { open: openPreview, close: closePreview }] =
+    useDisclosure(false);
+  const [
+    templateModalOpened,
+    { open: openTemplateModal, close: closeTemplateModal },
+  ] = useDisclosure(false);
+  const [
+    sendConfirmOpened,
+    { open: openSendConfirm, close: closeSendConfirm },
+  ] = useDisclosure(false);
   const [scheduleMode, setScheduleMode] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 
@@ -86,20 +93,22 @@ export function CommunicationCreator() {
       content: '',
       type: '',
       targetAudience: [],
-      scheduleDate: undefined
+      scheduleDate: undefined,
     },
     validate: {
-      title: (value) => (!value ? 'Title is required' : null),
-      content: (value) => (!value || value.trim() === '<p></p>' ? 'Content is required' : null),
-      type: (value) => (!value ? 'Communication type is required' : null),
-      targetAudience: (value) => (value.length === 0 ? 'At least one target audience is required' : null),
-      scheduleDate: (value) => {
+      title: value => (!value ? 'Title is required' : null),
+      content: value =>
+        !value || value.trim() === '<p></p>' ? 'Content is required' : null,
+      type: value => (!value ? 'Communication type is required' : null),
+      targetAudience: value =>
+        value.length === 0 ? 'At least one target audience is required' : null,
+      scheduleDate: value => {
         if (scheduleMode && (!value || value <= new Date())) {
           return 'Schedule date must be in the future';
         }
         return null;
-      }
-    }
+      },
+    },
   });
 
   // Simplified content editing without rich text editor
@@ -114,71 +123,75 @@ export function CommunicationCreator() {
             content: form.values.content,
             type: form.values.type,
             targetAudience: form.values.targetAudience,
-            createdBy: 'current_user'
+            createdBy: 'current_user',
           });
-          
+
           notifications.show({
             title: 'Success',
             message: 'Communication saved as draft',
-            color: 'green'
+            color: 'green',
           });
-          
+
           form.reset();
           editor?.commands.setContent('');
         } else if (status === 'send') {
           // First create the communication
-          const createResponse = await mockCommunicationService.createCommunication({
-            title: form.values.title,
-            content: form.values.content,
-            type: form.values.type,
-            targetAudience: form.values.targetAudience,
-            createdBy: 'current_user'
-          });
-          
+          const createResponse =
+            await mockCommunicationService.createCommunication({
+              title: form.values.title,
+              content: form.values.content,
+              type: form.values.type,
+              targetAudience: form.values.targetAudience,
+              createdBy: 'current_user',
+            });
+
           // Then send it
-          await mockCommunicationService.sendCommunication(createResponse.data.id);
-          
+          await mockCommunicationService.sendCommunication(
+            createResponse.data.id
+          );
+
           notifications.show({
             title: 'Success',
             message: 'Communication sent successfully',
-            color: 'green'
+            color: 'green',
           });
-          
+
           form.reset();
           editor?.commands.setContent('');
         } else if (status === 'schedule') {
           // First create the communication
-          const createResponse = await mockCommunicationService.createCommunication({
-            title: form.values.title,
-            content: form.values.content,
-            type: form.values.type,
-            targetAudience: form.values.targetAudience,
-            createdBy: 'current_user'
-          });
-          
+          const createResponse =
+            await mockCommunicationService.createCommunication({
+              title: form.values.title,
+              content: form.values.content,
+              type: form.values.type,
+              targetAudience: form.values.targetAudience,
+              createdBy: 'current_user',
+            });
+
           // Then schedule it
           await mockCommunicationService.sendCommunication(
             createResponse.data.id,
             form.values.scheduleDate
           );
-          
+
           notifications.show({
             title: 'Success',
             message: `Communication scheduled for ${form.values.scheduleDate?.toLocaleDateString()}`,
-            color: 'blue'
+            color: 'blue',
           });
-          
+
           form.reset();
           editor?.commands.setContent('');
           setScheduleMode(false);
         }
-        
+
         closeSendConfirm();
       } catch (error: any) {
         notifications.show({
           title: 'Error',
           message: error.message || 'Failed to save communication',
-          color: 'red'
+          color: 'red',
         });
       } finally {
         setLoading(false);
@@ -202,11 +215,11 @@ export function CommunicationCreator() {
       experienced: 890,
       regional_sf: 420,
       regional_ny: 380,
-      regional_la: 290
+      regional_la: 290,
     };
-    
+
     if (audiences.includes('all')) return audienceSizes.all;
-    
+
     return audiences.reduce((total, audience) => {
       return total + (audienceSizes[audience] || 0);
     }, 0);
@@ -222,16 +235,16 @@ export function CommunicationCreator() {
         content: template.content,
         type: template.type,
         targetAudience: form.values.targetAudience, // Keep existing audience selection
-        scheduleDate: form.values.scheduleDate
+        scheduleDate: form.values.scheduleDate,
       });
       editor?.commands.setContent(template.content);
       setSelectedTemplate(templateId);
       closeTemplateModal();
-      
+
       notifications.show({
         title: 'Template Applied',
         message: `Template "${template.name}" has been applied`,
-        color: 'blue'
+        color: 'blue',
       });
     }
   };
@@ -239,12 +252,14 @@ export function CommunicationCreator() {
   return (
     <Paper p="md" withBorder>
       <LoadingOverlay visible={loading} />
-      
+
       <form>
         <Stack gap="md">
           {/* Header with quick actions */}
           <Group justify="space-between">
-            <Text size="lg" fw={600}>Create New Communication</Text>
+            <Text size="lg" fw={600}>
+              Create New Communication
+            </Text>
             <Group gap="xs">
               <Tooltip label="Use Template">
                 <ActionIcon variant="light" onClick={openTemplateModal}>
@@ -290,7 +305,11 @@ export function CommunicationCreator() {
               <Group gap="xs">
                 <IconUsers size={16} />
                 <Text size="sm" c="dimmed">
-                  Estimated reach: <Text span fw={600}>{estimatedReach.toLocaleString()}</Text> recipients
+                  Estimated reach:{' '}
+                  <Text span fw={600}>
+                    {estimatedReach.toLocaleString()}
+                  </Text>{' '}
+                  recipients
                 </Text>
               </Group>
             )}
@@ -298,14 +317,18 @@ export function CommunicationCreator() {
 
           {/* Content Editor */}
           <Stack gap="xs">
-            <Text size="sm" fw={500}>Content</Text>
+            <Text size="sm" fw={500}>
+              Content
+            </Text>
             <Textarea
               placeholder="Write your communication content here..."
               minRows={10}
               {...form.getInputProps('content')}
             />
             {form.errors.content && (
-              <Text size="sm" c="red">{form.errors.content}</Text>
+              <Text size="sm" c="red">
+                {form.errors.content}
+              </Text>
             )}
           </Stack>
 
@@ -333,7 +356,7 @@ export function CommunicationCreator() {
               >
                 Save Draft
               </Button>
-              
+
               <Button
                 variant="light"
                 color="blue"
@@ -345,7 +368,9 @@ export function CommunicationCreator() {
             </Group>
 
             <Button
-              leftSection={scheduleMode ? <IconClock size={16} /> : <IconSend size={16} />}
+              leftSection={
+                scheduleMode ? <IconClock size={16} /> : <IconSend size={16} />
+              }
               onClick={openSendConfirm}
               disabled={!form.isValid()}
             >
@@ -356,8 +381,9 @@ export function CommunicationCreator() {
           {/* Tips */}
           <Alert icon={<IconBulb size={16} />} color="blue" variant="light">
             <Text size="sm">
-              <strong>Tips:</strong> Use templates for consistent formatting, preview before sending, 
-              and consider your audience when choosing the communication type.
+              <strong>Tips:</strong> Use templates for consistent formatting,
+              preview before sending, and consider your audience when choosing
+              the communication type.
             </Text>
           </Alert>
         </Stack>
@@ -373,9 +399,13 @@ export function CommunicationCreator() {
         <Stack gap="md">
           <Group justify="space-between">
             <div>
-              <Text fw={600}>{form.values.title || 'Untitled Communication'}</Text>
+              <Text fw={600}>
+                {form.values.title || 'Untitled Communication'}
+              </Text>
               <Text size="sm" c="dimmed">
-                Type: {communicationTypes.find(t => t.value === form.values.type)?.label || 'Not selected'}
+                Type:{' '}
+                {communicationTypes.find(t => t.value === form.values.type)
+                  ?.label || 'Not selected'}
               </Text>
             </div>
             <Group gap="xs">
@@ -386,17 +416,19 @@ export function CommunicationCreator() {
               ))}
             </Group>
           </Group>
-          
+
           <Divider />
-          
+
           <Box
             style={{
               border: '1px solid var(--mantine-color-gray-3)',
               borderRadius: 'var(--mantine-radius-sm)',
               padding: 'var(--mantine-spacing-md)',
-              minHeight: '200px'
+              minHeight: '200px',
             }}
-            dangerouslySetInnerHTML={{ __html: form.values.content || '<p>No content</p>' }}
+            dangerouslySetInnerHTML={{
+              __html: form.values.content || '<p>No content</p>',
+            }}
           />
         </Stack>
       </Modal>
@@ -405,19 +437,20 @@ export function CommunicationCreator() {
       <Modal
         opened={sendConfirmOpened}
         onClose={closeSendConfirm}
-        title={scheduleMode ? "Schedule Communication" : "Send Communication"}
+        title={scheduleMode ? 'Schedule Communication' : 'Send Communication'}
         size="md"
       >
         <Stack gap="md">
           <Alert color="blue" variant="light">
             <Text size="sm">
-              {scheduleMode 
+              {scheduleMode
                 ? `This communication will be scheduled to send on ${form.values.scheduleDate?.toLocaleString()}`
-                : 'This communication will be sent immediately'
-              } to approximately <strong>{estimatedReach.toLocaleString()}</strong> recipients.
+                : 'This communication will be sent immediately'}{' '}
+              to approximately{' '}
+              <strong>{estimatedReach.toLocaleString()}</strong> recipients.
             </Text>
           </Alert>
-          
+
           <Group justify="flex-end">
             <Button variant="light" onClick={closeSendConfirm}>
               Cancel
@@ -441,11 +474,12 @@ export function CommunicationCreator() {
       >
         <Stack gap="md">
           <Text size="sm" c="dimmed">
-            Select a template to get started quickly. You can customize the content after applying.
+            Select a template to get started quickly. You can customize the
+            content after applying.
           </Text>
-          
+
           <Stack gap="xs">
-            {mockCommunicationTemplates.map((template) => (
+            {mockCommunicationTemplates.map(template => (
               <Paper
                 key={template.id}
                 p="md"
@@ -453,8 +487,14 @@ export function CommunicationCreator() {
                 style={{
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
-                  backgroundColor: selectedTemplate === template.id ? 'var(--mantine-color-blue-0)' : undefined,
-                  borderColor: selectedTemplate === template.id ? 'var(--mantine-color-blue-4)' : undefined
+                  backgroundColor:
+                    selectedTemplate === template.id
+                      ? 'var(--mantine-color-blue-0)'
+                      : undefined,
+                  borderColor:
+                    selectedTemplate === template.id
+                      ? 'var(--mantine-color-blue-4)'
+                      : undefined,
                 }}
                 onClick={() => handleTemplateSelect(template.id)}
               >
@@ -463,7 +503,8 @@ export function CommunicationCreator() {
                     <Group gap="xs" mb="xs">
                       <Text fw={600}>{template.name}</Text>
                       <Badge size="sm" variant="light" color="blue">
-                        {communicationTypes.find(t => t.value === template.type)?.label || template.type}
+                        {communicationTypes.find(t => t.value === template.type)
+                          ?.label || template.type}
                       </Badge>
                     </Group>
                     <Text size="sm" c="dimmed" lineClamp={2}>
@@ -474,7 +515,7 @@ export function CommunicationCreator() {
               </Paper>
             ))}
           </Stack>
-          
+
           <Group justify="flex-end">
             <Button variant="light" onClick={closeTemplateModal}>
               Cancel

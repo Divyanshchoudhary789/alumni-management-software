@@ -22,7 +22,7 @@ import {
   Divider,
   Progress,
   List,
-  ThemeIcon
+  ThemeIcon,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
@@ -38,7 +38,7 @@ import {
   IconRefresh,
   IconAlertTriangle,
   IconCircleCheck,
-  IconX
+  IconX,
 } from '@tabler/icons-react';
 import { settingsService } from '@/lib/mock-services/settingsService';
 
@@ -77,7 +77,12 @@ interface SecuritySettings {
 
 interface SecurityEvent {
   id: string;
-  type: 'login_failed' | 'login_success' | 'password_change' | 'permission_change' | 'data_export';
+  type:
+    | 'login_failed'
+    | 'login_success'
+    | 'password_change'
+    | 'permission_change'
+    | 'data_export';
   userId: string;
   userEmail: string;
   ipAddress: string;
@@ -99,31 +104,31 @@ export function SecuritySettings() {
         requireLowercase: true,
         requireNumbers: true,
         requireSpecialChars: false,
-        passwordExpiry: 90
+        passwordExpiry: 90,
       },
       sessionSettings: {
         sessionTimeout: 60,
         maxConcurrentSessions: 3,
-        requireReauthentication: false
+        requireReauthentication: false,
       },
       twoFactorAuth: {
         enabled: false,
         enforceForAdmins: true,
-        allowedMethods: ['totp', 'sms']
+        allowedMethods: ['totp', 'sms'],
       },
       loginSecurity: {
         maxFailedAttempts: 5,
         lockoutDuration: 15,
         enableCaptcha: true,
-        allowedIpRanges: []
+        allowedIpRanges: [],
       },
       auditSettings: {
         enableAuditLog: true,
         retentionPeriod: 365,
         logFailedLogins: true,
-        logDataChanges: true
-      }
-    }
+        logDataChanges: true,
+      },
+    },
   });
 
   const handleSubmit = async (values: SecuritySettings) => {
@@ -134,14 +139,14 @@ export function SecuritySettings() {
         title: 'Security Settings Updated',
         message: 'Security configuration has been saved successfully',
         color: 'green',
-        icon: <IconCheck size={16} />
+        icon: <IconCheck size={16} />,
       });
     } catch (error) {
       notifications.show({
         title: 'Error',
         message: 'Failed to update security settings',
         color: 'red',
-        icon: <IconAlertCircle size={16} />
+        icon: <IconAlertCircle size={16} />,
       });
     } finally {
       setLoading(false);
@@ -151,13 +156,13 @@ export function SecuritySettings() {
   const calculatePasswordStrength = () => {
     let score = 0;
     const policy = form.values.passwordPolicy;
-    
+
     if (policy.minLength >= 8) score += 20;
     if (policy.requireUppercase) score += 20;
     if (policy.requireLowercase) score += 20;
     if (policy.requireNumbers) score += 20;
     if (policy.requireSpecialChars) score += 20;
-    
+
     return score;
   };
 
@@ -177,7 +182,7 @@ export function SecuritySettings() {
       ipAddress: '192.168.1.100',
       timestamp: new Date('2024-01-15T10:30:00'),
       details: 'Invalid password attempt',
-      severity: 'medium'
+      severity: 'medium',
     },
     {
       id: '2',
@@ -187,7 +192,7 @@ export function SecuritySettings() {
       ipAddress: '10.0.0.50',
       timestamp: new Date('2024-01-15T09:15:00'),
       details: 'Successful admin login',
-      severity: 'low'
+      severity: 'low',
     },
     {
       id: '3',
@@ -197,16 +202,20 @@ export function SecuritySettings() {
       ipAddress: '10.0.0.50',
       timestamp: new Date('2024-01-14T16:45:00'),
       details: 'Updated user permissions for john.doe@example.com',
-      severity: 'high'
-    }
+      severity: 'high',
+    },
   ];
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'high': return 'red';
-      case 'medium': return 'yellow';
-      case 'low': return 'green';
-      default: return 'gray';
+      case 'high':
+        return 'red';
+      case 'medium':
+        return 'yellow';
+      case 'low':
+        return 'green';
+      default:
+        return 'gray';
     }
   };
 
@@ -219,7 +228,9 @@ export function SecuritySettings() {
 
         {/* Password Policy */}
         <Card withBorder>
-          <Title order={3} mb="md">Password Policy</Title>
+          <Title order={3} mb="md">
+            Password Policy
+          </Title>
           <Grid>
             <Grid.Col span={6}>
               <NumberInput
@@ -241,37 +252,54 @@ export function SecuritySettings() {
           </Grid>
 
           <Stack gap="sm" mt="md">
-            <Text size="sm" fw={500}>Password Requirements</Text>
+            <Text size="sm" fw={500}>
+              Password Requirements
+            </Text>
             <Switch
               label="Require uppercase letters (A-Z)"
-              {...form.getInputProps('passwordPolicy.requireUppercase', { type: 'checkbox' })}
+              {...form.getInputProps('passwordPolicy.requireUppercase', {
+                type: 'checkbox',
+              })}
             />
             <Switch
               label="Require lowercase letters (a-z)"
-              {...form.getInputProps('passwordPolicy.requireLowercase', { type: 'checkbox' })}
+              {...form.getInputProps('passwordPolicy.requireLowercase', {
+                type: 'checkbox',
+              })}
             />
             <Switch
               label="Require numbers (0-9)"
-              {...form.getInputProps('passwordPolicy.requireNumbers', { type: 'checkbox' })}
+              {...form.getInputProps('passwordPolicy.requireNumbers', {
+                type: 'checkbox',
+              })}
             />
             <Switch
               label="Require special characters (!@#$%^&*)"
-              {...form.getInputProps('passwordPolicy.requireSpecialChars', { type: 'checkbox' })}
+              {...form.getInputProps('passwordPolicy.requireSpecialChars', {
+                type: 'checkbox',
+              })}
             />
           </Stack>
 
           <Alert mt="md" color={getPasswordStrengthColor(passwordStrength)}>
             <Group justify="space-between" mb="xs">
-              <Text size="sm" fw={500}>Password Policy Strength</Text>
+              <Text size="sm" fw={500}>
+                Password Policy Strength
+              </Text>
               <Text size="sm">{passwordStrength}%</Text>
             </Group>
-            <Progress value={passwordStrength} color={getPasswordStrengthColor(passwordStrength)} />
+            <Progress
+              value={passwordStrength}
+              color={getPasswordStrengthColor(passwordStrength)}
+            />
           </Alert>
         </Card>
 
         {/* Session Management */}
         <Card withBorder>
-          <Title order={3} mb="md">Session Management</Title>
+          <Title order={3} mb="md">
+            Session Management
+          </Title>
           <Grid>
             <Grid.Col span={6}>
               <NumberInput
@@ -293,28 +321,38 @@ export function SecuritySettings() {
           <Switch
             label="Require re-authentication for sensitive actions"
             mt="md"
-            {...form.getInputProps('sessionSettings.requireReauthentication', { type: 'checkbox' })}
+            {...form.getInputProps('sessionSettings.requireReauthentication', {
+              type: 'checkbox',
+            })}
           />
         </Card>
 
         {/* Two-Factor Authentication */}
         <Card withBorder>
-          <Title order={3} mb="md">Two-Factor Authentication</Title>
+          <Title order={3} mb="md">
+            Two-Factor Authentication
+          </Title>
           <Stack gap="md">
             <Switch
               label="Enable Two-Factor Authentication"
               description="Allow users to enable 2FA for their accounts"
-              {...form.getInputProps('twoFactorAuth.enabled', { type: 'checkbox' })}
+              {...form.getInputProps('twoFactorAuth.enabled', {
+                type: 'checkbox',
+              })}
             />
             {form.values.twoFactorAuth.enabled && (
               <>
                 <Switch
                   label="Enforce 2FA for Administrators"
                   description="Require all admin users to use 2FA"
-                  {...form.getInputProps('twoFactorAuth.enforceForAdmins', { type: 'checkbox' })}
+                  {...form.getInputProps('twoFactorAuth.enforceForAdmins', {
+                    type: 'checkbox',
+                  })}
                 />
                 <div>
-                  <Text size="sm" fw={500} mb="xs">Allowed 2FA Methods</Text>
+                  <Text size="sm" fw={500} mb="xs">
+                    Allowed 2FA Methods
+                  </Text>
                   <List spacing="xs" size="sm">
                     <List.Item
                       icon={
@@ -323,7 +361,8 @@ export function SecuritySettings() {
                         </ThemeIcon>
                       }
                     >
-                      TOTP (Time-based One-Time Password) - Google Authenticator, Authy
+                      TOTP (Time-based One-Time Password) - Google
+                      Authenticator, Authy
                     </List.Item>
                     <List.Item
                       icon={
@@ -343,7 +382,9 @@ export function SecuritySettings() {
 
         {/* Login Security */}
         <Card withBorder>
-          <Title order={3} mb="md">Login Security</Title>
+          <Title order={3} mb="md">
+            Login Security
+          </Title>
           <Grid>
             <Grid.Col span={6}>
               <NumberInput
@@ -366,18 +407,24 @@ export function SecuritySettings() {
             label="Enable CAPTCHA for login attempts"
             description="Show CAPTCHA after failed login attempts"
             mt="md"
-            {...form.getInputProps('loginSecurity.enableCaptcha', { type: 'checkbox' })}
+            {...form.getInputProps('loginSecurity.enableCaptcha', {
+              type: 'checkbox',
+            })}
           />
         </Card>
 
         {/* Audit & Logging */}
         <Card withBorder>
-          <Title order={3} mb="md">Audit & Logging</Title>
+          <Title order={3} mb="md">
+            Audit & Logging
+          </Title>
           <Stack gap="md">
             <Switch
               label="Enable Audit Logging"
               description="Log security events and user actions"
-              {...form.getInputProps('auditSettings.enableAuditLog', { type: 'checkbox' })}
+              {...form.getInputProps('auditSettings.enableAuditLog', {
+                type: 'checkbox',
+              })}
             />
             {form.values.auditSettings.enableAuditLog && (
               <>
@@ -390,12 +437,16 @@ export function SecuritySettings() {
                 />
                 <Switch
                   label="Log Failed Login Attempts"
-                  {...form.getInputProps('auditSettings.logFailedLogins', { type: 'checkbox' })}
+                  {...form.getInputProps('auditSettings.logFailedLogins', {
+                    type: 'checkbox',
+                  })}
                 />
                 <Switch
                   label="Log Data Changes"
                   description="Log when users modify data"
-                  {...form.getInputProps('auditSettings.logDataChanges', { type: 'checkbox' })}
+                  {...form.getInputProps('auditSettings.logDataChanges', {
+                    type: 'checkbox',
+                  })}
                 />
               </>
             )}
@@ -427,7 +478,7 @@ export function SecuritySettings() {
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {mockAuditEvents.slice(0, 5).map((event) => (
+                {mockAuditEvents.slice(0, 5).map(event => (
                   <Table.Tr key={event.id}>
                     <Table.Td>
                       <Text size="sm">{event.details}</Text>
@@ -436,7 +487,9 @@ export function SecuritySettings() {
                       <Text size="sm">{event.userEmail}</Text>
                     </Table.Td>
                     <Table.Td>
-                      <Text size="sm" c="dimmed">{event.ipAddress}</Text>
+                      <Text size="sm" c="dimmed">
+                        {event.ipAddress}
+                      </Text>
                     </Table.Td>
                     <Table.Td>
                       <Text size="sm" c="dimmed">
@@ -444,7 +497,10 @@ export function SecuritySettings() {
                       </Text>
                     </Table.Td>
                     <Table.Td>
-                      <Badge color={getSeverityColor(event.severity)} variant="light">
+                      <Badge
+                        color={getSeverityColor(event.severity)}
+                        variant="light"
+                      >
                         {event.severity}
                       </Badge>
                     </Table.Td>
@@ -473,9 +529,10 @@ export function SecuritySettings() {
       >
         <Stack gap="md">
           <Alert icon={<IconShield size={16} />} color="blue">
-            Security events are automatically logged and retained according to your audit settings.
+            Security events are automatically logged and retained according to
+            your audit settings.
           </Alert>
-          
+
           <Table>
             <Table.Thead>
               <Table.Tr>
@@ -488,7 +545,7 @@ export function SecuritySettings() {
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {mockAuditEvents.map((event) => (
+              {mockAuditEvents.map(event => (
                 <Table.Tr key={event.id}>
                   <Table.Td>
                     <Badge variant="light">
@@ -502,7 +559,9 @@ export function SecuritySettings() {
                     <Text size="sm">{event.details}</Text>
                   </Table.Td>
                   <Table.Td>
-                    <Text size="sm" c="dimmed">{event.ipAddress}</Text>
+                    <Text size="sm" c="dimmed">
+                      {event.ipAddress}
+                    </Text>
                   </Table.Td>
                   <Table.Td>
                     <Text size="sm" c="dimmed">
@@ -510,7 +569,10 @@ export function SecuritySettings() {
                     </Text>
                   </Table.Td>
                   <Table.Td>
-                    <Badge color={getSeverityColor(event.severity)} variant="light">
+                    <Badge
+                      color={getSeverityColor(event.severity)}
+                      variant="light"
+                    >
                       {event.severity}
                     </Badge>
                   </Table.Td>

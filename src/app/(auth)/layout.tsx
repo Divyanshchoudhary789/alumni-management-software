@@ -24,7 +24,7 @@ export default function AuthLayout({
                 Connect, Engage, and Grow Together
               </Text>
             </Stack>
-            
+
             {/* Auth Forms */}
             {children}
           </Stack>

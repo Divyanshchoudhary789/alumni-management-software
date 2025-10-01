@@ -23,7 +23,7 @@ import {
   Box,
   Image,
   Modal,
-  Tabs
+  Tabs,
 } from '@mantine/core';
 import {
   IconUser,
@@ -43,10 +43,10 @@ import {
   IconMessage,
   IconShare,
   IconArrowLeft,
-  IconAlertCircle
+  IconAlertCircle,
 } from '@tabler/icons-react';
 import { AlumniProfile as AlumniProfileType } from '@/types';
-import { mockAlumniService } from '@/lib/mock-services/alumniService';
+import { alumniProfileService } from '@/services/alumniProfileService';
 
 interface AlumniProfileProps {
   alumniId: string;
@@ -54,7 +54,11 @@ interface AlumniProfileProps {
   onEdit?: (alumni: AlumniProfileType) => void;
 }
 
-export function AlumniProfile({ alumniId, onBack, onEdit }: AlumniProfileProps) {
+export function AlumniProfile({
+  alumniId,
+  onBack,
+  onEdit,
+}: AlumniProfileProps) {
   const [alumni, setAlumni] = useState<AlumniProfileType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -66,10 +70,18 @@ export function AlumniProfile({ alumniId, onBack, onEdit }: AlumniProfileProps) 
       try {
         setLoading(true);
         setError(null);
-        const response = await mockAlumniService.getAlumniById(alumniId);
+        
+        // Validate profile ID first
+        if (!alumniProfileService.validateProfileId(alumniId)) {
+          throw new Error('Invalid profile ID');
+        }
+        
+        const response = await alumniProfileService.getAlumniById(alumniId);
         setAlumni(response.data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load alumni profile');
+        setError(
+          err instanceof Error ? err.message : 'Failed to load alumni profile'
+        );
       } finally {
         setLoading(false);
       }
@@ -133,7 +145,9 @@ export function AlumniProfile({ alumniId, onBack, onEdit }: AlumniProfileProps) 
                   alt={`${alumni.firstName} ${alumni.lastName}`}
                   size={120}
                   radius="md"
-                  style={{ cursor: alumni.profileImage ? 'pointer' : 'default' }}
+                  style={{
+                    cursor: alumni.profileImage ? 'pointer' : 'default',
+                  }}
                   onClick={() => alumni.profileImage && setImageModalOpen(true)}
                 />
                 {!alumni.isPublic && (
@@ -187,7 +201,9 @@ export function AlumniProfile({ alumniId, onBack, onEdit }: AlumniProfileProps) 
               {alumni.location && (
                 <Group gap="xs">
                   <IconMapPin size={16} color="gray" />
-                  <Text size="sm" ta="center">{alumni.location}</Text>
+                  <Text size="sm" ta="center">
+                    {alumni.location}
+                  </Text>
                 </Group>
               )}
 
@@ -221,7 +237,9 @@ export function AlumniProfile({ alumniId, onBack, onEdit }: AlumniProfileProps) 
                   <ActionIcon
                     variant="light"
                     size="lg"
-                    onClick={() => {/* TODO: Implement messaging */}}
+                    onClick={() => {
+                      /* TODO: Implement messaging */
+                    }}
                   >
                     <IconMessage size={18} />
                   </ActionIcon>
@@ -300,7 +318,10 @@ export function AlumniProfile({ alumniId, onBack, onEdit }: AlumniProfileProps) 
               <Tabs.Tab value="about" leftSection={<IconUser size={16} />}>
                 About
               </Tabs.Tab>
-              <Tabs.Tab value="experience" leftSection={<IconBriefcase size={16} />}>
+              <Tabs.Tab
+                value="experience"
+                leftSection={<IconBriefcase size={16} />}
+              >
                 Experience
               </Tabs.Tab>
               <Tabs.Tab value="skills" leftSection={<IconStar size={16} />}>
@@ -348,7 +369,8 @@ export function AlumniProfile({ alumniId, onBack, onEdit }: AlumniProfileProps) 
                           href={`mailto:${alumni.firstName.toLowerCase()}.${alumni.lastName.toLowerCase()}@example.com`}
                           size="sm"
                         >
-                          {alumni.firstName.toLowerCase()}.{alumni.lastName.toLowerCase()}@example.com
+                          {alumni.firstName.toLowerCase()}.
+                          {alumni.lastName.toLowerCase()}@example.com
                         </Anchor>
                       </Group>
                       {alumni.phone && (
@@ -381,7 +403,9 @@ export function AlumniProfile({ alumniId, onBack, onEdit }: AlumniProfileProps) 
                       <IconBriefcase size={20} color="gray" />
                       <div>
                         <Text fw={500}>{alumni.currentPosition}</Text>
-                        <Text size="sm" c="dimmed">{alumni.currentCompany}</Text>
+                        <Text size="sm" c="dimmed">
+                          {alumni.currentCompany}
+                        </Text>
                         <Text size="xs" c="dimmed">
                           {alumni.location && `Located in ${alumni.location}`}
                         </Text>
@@ -405,7 +429,7 @@ export function AlumniProfile({ alumniId, onBack, onEdit }: AlumniProfileProps) 
                     <Stack gap="sm">
                       <Title order={4}>Skills</Title>
                       <Group gap="xs">
-                        {alumni.skills.map((skill) => (
+                        {alumni.skills.map(skill => (
                           <Badge
                             key={skill}
                             variant="light"
@@ -426,7 +450,7 @@ export function AlumniProfile({ alumniId, onBack, onEdit }: AlumniProfileProps) 
                     <Stack gap="sm">
                       <Title order={4}>Interests</Title>
                       <Group gap="xs">
-                        {alumni.interests.map((interest) => (
+                        {alumni.interests.map(interest => (
                           <Badge
                             key={interest}
                             variant="outline"
@@ -441,13 +465,14 @@ export function AlumniProfile({ alumniId, onBack, onEdit }: AlumniProfileProps) 
                   </Card>
                 )}
 
-                {alumni.skills.length === 0 && alumni.interests.length === 0 && (
-                  <Card shadow="sm" padding="lg" radius="md" withBorder>
-                    <Text c="dimmed" size="sm" ta="center">
-                      No skills or interests information available
-                    </Text>
-                  </Card>
-                )}
+                {alumni.skills.length === 0 &&
+                  alumni.interests.length === 0 && (
+                    <Card shadow="sm" padding="lg" radius="md" withBorder>
+                      <Text c="dimmed" size="sm" ta="center">
+                        No skills or interests information available
+                      </Text>
+                    </Card>
+                  )}
               </Stack>
             </Tabs.Panel>
           </Tabs>
@@ -483,18 +508,18 @@ interface AlumniProfileCardProps {
   onMessage?: () => void;
 }
 
-export function AlumniProfileCard({ 
-  alumni, 
-  onClick, 
+export function AlumniProfileCard({
+  alumni,
+  onClick,
   showActions = false,
   onEdit,
-  onMessage 
+  onMessage,
 }: AlumniProfileCardProps) {
   return (
-    <Card 
-      shadow="sm" 
-      padding="lg" 
-      radius="md" 
+    <Card
+      shadow="sm"
+      padding="lg"
+      radius="md"
       withBorder
       style={{ cursor: onClick ? 'pointer' : 'default' }}
       onClick={onClick}
@@ -542,7 +567,7 @@ export function AlumniProfileCard({
 
             {alumni.skills.length > 0 && (
               <Group gap="xs">
-                {alumni.skills.slice(0, 3).map((skill) => (
+                {alumni.skills.slice(0, 3).map(skill => (
                   <Badge key={skill} variant="light" size="sm">
                     {skill}
                   </Badge>
@@ -554,6 +579,11 @@ export function AlumniProfileCard({
                 )}
               </Group>
             )}
+
+            {/* Last Updated */}
+            <Text size="xs" c="dimmed" mt="xs">
+              Last updated: {alumni.updatedAt.toLocaleDateString()}
+            </Text>
           </Stack>
         </Group>
 
@@ -563,7 +593,7 @@ export function AlumniProfileCard({
               <Tooltip label="Send Message">
                 <ActionIcon
                   variant="light"
-                  onClick={(e) => {
+                  onClick={e => {
                     e.stopPropagation();
                     onMessage();
                   }}
@@ -576,7 +606,7 @@ export function AlumniProfileCard({
               <Tooltip label="Edit Profile">
                 <ActionIcon
                   variant="light"
-                  onClick={(e) => {
+                  onClick={e => {
                     e.stopPropagation();
                     onEdit();
                   }}

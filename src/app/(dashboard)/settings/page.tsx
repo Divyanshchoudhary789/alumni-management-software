@@ -1,7 +1,13 @@
 'use client';
 
 import { Container, Tabs, Title, Paper, Group, Text } from '@mantine/core';
-import { IconSettings, IconUsers, IconPalette, IconPlug, IconShield } from '@tabler/icons-react';
+import {
+  IconSettings,
+  IconUsers,
+  IconPalette,
+  IconPlug,
+  IconShield,
+} from '@tabler/icons-react';
 import { SystemConfiguration } from '@/components/settings/SystemConfiguration';
 import { UserManagement } from '@/components/settings/UserManagement';
 import { BrandingSettings } from '@/components/settings/BrandingSettings';
@@ -15,7 +21,8 @@ export default function SettingsPage() {
         <div>
           <Title order={1}>System Settings</Title>
           <Text c="dimmed" size="sm">
-            Configure system preferences, manage users, and customize your alumni management platform
+            Configure system preferences, manage users, and customize your
+            alumni management platform
           </Text>
         </div>
       </Group>

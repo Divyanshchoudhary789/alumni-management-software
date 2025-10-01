@@ -1,10 +1,29 @@
 'use client';
 
-import { Card, Title, Group, Text, SimpleGrid, Skeleton, Badge, Progress, RingProgress } from '@mantine/core';
+import {
+  Card,
+  Title,
+  Group,
+  Text,
+  SimpleGrid,
+  Skeleton,
+  Badge,
+  Progress,
+  RingProgress,
+} from '@mantine/core';
 import { BarChart, LineChart, AreaChart } from '@mantine/charts';
-import { IconCalendarEvent, IconUsers, IconTrendingUp, IconPercentage } from '@tabler/icons-react';
+import {
+  IconCalendarEvent,
+  IconUsers,
+  IconTrendingUp,
+  IconPercentage,
+} from '@tabler/icons-react';
 import { useState, useEffect } from 'react';
-import { mockAnalyticsService, EventAnalytics, AnalyticsFilters } from '@/lib/mock-services/analyticsService';
+import {
+  mockAnalyticsService,
+  EventAnalytics,
+  AnalyticsFilters,
+} from '@/lib/mock-services/analyticsService';
 
 interface EventAnalyticsChartsProps {
   filters?: AnalyticsFilters;
@@ -49,7 +68,9 @@ export function EventAnalyticsCharts({ filters }: EventAnalyticsChartsProps) {
   if (!data) {
     return (
       <Card withBorder radius="md" p="lg">
-        <Text c="dimmed" ta="center">Failed to load event analytics data</Text>
+        <Text c="dimmed" ta="center">
+          Failed to load event analytics data
+        </Text>
       </Card>
     );
   }
@@ -59,7 +80,7 @@ export function EventAnalyticsCharts({ filters }: EventAnalyticsChartsProps) {
     count: item.count,
     avgAttendance: item.avgAttendance,
     Events: item.count,
-    'Avg Attendance': item.avgAttendance
+    'Avg Attendance': item.avgAttendance,
   }));
 
   const monthlyTrendData = data.monthlyEventTrends.map(item => ({
@@ -67,7 +88,7 @@ export function EventAnalyticsCharts({ filters }: EventAnalyticsChartsProps) {
     events: item.events,
     attendance: item.attendance,
     Events: item.events,
-    Attendance: item.attendance
+    Attendance: item.attendance,
   }));
 
   return (
@@ -75,27 +96,47 @@ export function EventAnalyticsCharts({ filters }: EventAnalyticsChartsProps) {
       {/* Event Overview Stats */}
       <Card withBorder radius="md" p="lg">
         <Group justify="space-between" mb="xs">
-          <Text size="sm" c="dimmed" fw={500}>Total Events</Text>
+          <Text size="sm" c="dimmed" fw={500}>
+            Total Events
+          </Text>
           <IconCalendarEvent size={20} color="var(--mantine-color-blue-6)" />
         </Group>
-        <Text size="xl" fw={700} mb="md">{data.totalEvents}</Text>
-        
+        <Text size="xl" fw={700} mb="md">
+          {data.totalEvents}
+        </Text>
+
         <Group justify="space-between" mb="xs">
-          <Text size="sm" c="dimmed">Average Attendance</Text>
-          <Text size="sm" fw={500}>{data.averageAttendance.toFixed(1)}</Text>
+          <Text size="sm" c="dimmed">
+            Average Attendance
+          </Text>
+          <Text size="sm" fw={500}>
+            {data.averageAttendance.toFixed(1)}
+          </Text>
         </Group>
-        
+
         <Group justify="space-between" mb="xs">
-          <Text size="sm" c="dimmed">Attendance Rate</Text>
-          <Badge size="sm" variant="light" color={data.attendanceRate > 70 ? 'green' : 'orange'}>
+          <Text size="sm" c="dimmed">
+            Attendance Rate
+          </Text>
+          <Badge
+            size="sm"
+            variant="light"
+            color={data.attendanceRate > 70 ? 'green' : 'orange'}
+          >
             {data.attendanceRate.toFixed(1)}%
           </Badge>
         </Group>
-        
-        <Progress 
-          value={data.attendanceRate} 
-          size="sm" 
-          color={data.attendanceRate > 70 ? 'green' : data.attendanceRate > 50 ? 'yellow' : 'red'}
+
+        <Progress
+          value={data.attendanceRate}
+          size="sm"
+          color={
+            data.attendanceRate > 70
+              ? 'green'
+              : data.attendanceRate > 50
+                ? 'yellow'
+                : 'red'
+          }
           mt="md"
         />
       </Card>
@@ -103,19 +144,26 @@ export function EventAnalyticsCharts({ filters }: EventAnalyticsChartsProps) {
       {/* Capacity Utilization */}
       <Card withBorder radius="md" p="lg">
         <Group justify="space-between" mb="xs">
-          <Text size="sm" c="dimmed" fw={500}>Capacity Utilization</Text>
+          <Text size="sm" c="dimmed" fw={500}>
+            Capacity Utilization
+          </Text>
           <IconPercentage size={20} color="var(--mantine-color-teal-6)" />
         </Group>
-        
+
         <Group justify="center" mt="md">
           <RingProgress
             size={200}
             thickness={20}
             sections={[
-              { 
-                value: data.capacityUtilization, 
-                color: data.capacityUtilization > 80 ? 'red' : data.capacityUtilization > 60 ? 'yellow' : 'teal' 
-              }
+              {
+                value: data.capacityUtilization,
+                color:
+                  data.capacityUtilization > 80
+                    ? 'red'
+                    : data.capacityUtilization > 60
+                      ? 'yellow'
+                      : 'teal',
+              },
             ]}
             label={
               <Text ta="center" fw={700} size="xl">
@@ -124,27 +172,28 @@ export function EventAnalyticsCharts({ filters }: EventAnalyticsChartsProps) {
             }
           />
         </Group>
-        
+
         <Text size="sm" c="dimmed" ta="center" mt="md">
-          {data.capacityUtilization > 80 
-            ? 'High demand - consider larger venues' 
-            : data.capacityUtilization > 60 
-            ? 'Good utilization' 
-            : 'Room for growth'
-          }
+          {data.capacityUtilization > 80
+            ? 'High demand - consider larger venues'
+            : data.capacityUtilization > 60
+              ? 'Good utilization'
+              : 'Room for growth'}
         </Text>
       </Card>
 
       {/* Popular Event Types */}
       <Card withBorder radius="md" p="lg">
-        <Title order={4} mb="md">Popular Event Types</Title>
+        <Title order={4} mb="md">
+          Popular Event Types
+        </Title>
         <BarChart
           h={300}
           data={eventTypeData}
           dataKey="type"
           series={[
             { name: 'Events', color: 'blue.6' },
-            { name: 'Avg Attendance', color: 'teal.6' }
+            { name: 'Avg Attendance', color: 'teal.6' },
           ]}
           tickLine="y"
           gridAxis="y"
@@ -155,14 +204,16 @@ export function EventAnalyticsCharts({ filters }: EventAnalyticsChartsProps) {
 
       {/* Monthly Event Trends */}
       <Card withBorder radius="md" p="lg">
-        <Title order={4} mb="md">Monthly Event Trends</Title>
+        <Title order={4} mb="md">
+          Monthly Event Trends
+        </Title>
         <LineChart
           h={300}
           data={monthlyTrendData}
           dataKey="month"
           series={[
             { name: 'Events', color: 'blue.6' },
-            { name: 'Attendance', color: 'green.6' }
+            { name: 'Attendance', color: 'green.6' },
           ]}
           curveType="monotone"
           strokeWidth={3}
@@ -177,14 +228,14 @@ export function EventAnalyticsCharts({ filters }: EventAnalyticsChartsProps) {
 
       {/* Event Performance Summary */}
       <Card withBorder radius="md" p="lg" style={{ gridColumn: 'span 2' }}>
-        <Title order={4} mb="md">Event Performance Overview</Title>
+        <Title order={4} mb="md">
+          Event Performance Overview
+        </Title>
         <AreaChart
           h={300}
           data={monthlyTrendData}
           dataKey="month"
-          series={[
-            { name: 'Attendance', color: 'blue.6' }
-          ]}
+          series={[{ name: 'Attendance', color: 'blue.6' }]}
           curveType="monotone"
           strokeWidth={2}
           fillOpacity={0.3}

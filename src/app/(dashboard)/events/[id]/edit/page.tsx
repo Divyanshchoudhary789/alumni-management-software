@@ -1,18 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  Container,
-  Alert,
-  Loader,
-  Center
-} from '@mantine/core';
-import { IconAlertCircle } from '@tabler/icons-react';
-import { Event } from '@/types';
+import { Container, LoadingOverlay, Alert } from '@mantine/core';
+import { useRouter, useParams } from 'next/navigation';
 import { EventForm } from '@/components/events';
-import { mockEventService } from '@/lib/mock-services/eventService';
+import { eventsApiService } from '@/services/api';
 import { notifications } from '@mantine/notifications';
-import { useRouter } from 'next/navigation';
+import { Event } from '@/types';
+import { IconAlertCircle } from '@tabler/icons-react';
 
 interface EventFormData {
   title: string;
@@ -25,40 +20,31 @@ interface EventFormData {
   imageUrl: string;
 }
 
-interface EditEventPageProps {
-  params: Promise<{ id: string }>;
-}
-
-export default function EditEventPage({ params }: EditEventPageProps) {
+export default function EditEventPage() {
   const router = useRouter();
+  const params = useParams();
+  const eventId = params.id as string;
+
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [eventId, setEventId] = useState<string | null>(null);
 
   useEffect(() => {
-    params.then(({ id }) => {
-      setEventId(id);
-    });
-  }, [params]);
+    const loadEvent = async () => {
+      try {
+        setLoading(true);
+        const response = await eventsApiService.getEventById(eventId);
+        setEvent(response);
+      } catch (err: any) {
+        setError(err.message || 'Failed to load event');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const loadEvent = async (id: string) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await mockEventService.getEventById(id);
-      setEvent(response.data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load event');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
     if (eventId) {
-      loadEvent(eventId);
+      loadEvent();
     }
   }, [eventId]);
 
@@ -69,8 +55,7 @@ export default function EditEventPage({ params }: EditEventPageProps) {
 
     setSubmitting(true);
     try {
-      if (!eventId) throw new Error('Event ID not found');
-      await mockEventService.updateEvent(eventId, {
+      await eventsApiService.updateEvent(eventId, {
         title: data.title,
         description: data.description,
         eventDate: data.eventDate,
@@ -78,16 +63,16 @@ export default function EditEventPage({ params }: EditEventPageProps) {
         capacity: data.capacity,
         registrationDeadline: data.registrationDeadline,
         status: data.status,
-        imageUrl: data.imageUrl
+        imageUrl: data.imageUrl,
       });
 
       notifications.show({
         title: 'Success',
         message: 'Event updated successfully',
-        color: 'green'
+        color: 'green',
       });
 
-      router.push(`/events/${eventId}`);
+      router.push('/events');
     } catch (error: any) {
       throw error;
     } finally {
@@ -96,17 +81,13 @@ export default function EditEventPage({ params }: EditEventPageProps) {
   };
 
   const handleCancel = () => {
-    if (eventId) {
-      router.push(`/events/${eventId}`);
-    }
+    router.push('/events');
   };
 
   if (loading) {
     return (
       <Container size="md" py="xl">
-        <Center>
-          <Loader size="lg" />
-        </Center>
+        <LoadingOverlay visible />
       </Container>
     );
   }

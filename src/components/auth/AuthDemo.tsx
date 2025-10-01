@@ -1,7 +1,21 @@
 'use client';
 
-import { Stack, Paper, Title, Text, Group, Button, Badge, Alert } from '@mantine/core';
-import { IconUser, IconShield, IconLogin, IconLogout } from '@tabler/icons-react';
+import {
+  Stack,
+  Paper,
+  Title,
+  Text,
+  Group,
+  Button,
+  Badge,
+  Alert,
+} from '@mantine/core';
+import {
+  IconUser,
+  IconShield,
+  IconLogin,
+  IconLogout,
+} from '@tabler/icons-react';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthStatus } from './AuthStatus';
 import { UserProfile } from './UserProfile';
@@ -11,7 +25,8 @@ import { UserProfile } from './UserProfile';
  * This component can be used for testing and demonstration purposes
  */
 export function AuthDemo() {
-  const { user, isLoaded, isSignedIn, signOut, error, redirectToSignIn } = useAuth();
+  const { user, isLoaded, isSignedIn, signOut, error, redirectToSignIn } =
+    useAuth();
 
   return (
     <Stack gap="md">
@@ -45,14 +60,16 @@ export function AuthDemo() {
               <IconUser size={20} />
               <div>
                 <Text fw={500}>
-                  {user.fullName || `${user.firstName} ${user.lastName}` || 'Unknown User'}
+                  {user.fullName ||
+                    `${user.firstName} ${user.lastName}` ||
+                    'Unknown User'}
                 </Text>
                 <Text size="sm" c="dimmed">
                   {user.emailAddresses[0]?.emailAddress}
                 </Text>
               </div>
             </Group>
-            
+
             {user.role && (
               <Group gap="md">
                 <IconShield size={20} />

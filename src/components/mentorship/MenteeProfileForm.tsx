@@ -12,10 +12,15 @@ import {
   Title,
   Alert,
   Grid,
-  Switch
+  Switch,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { IconInfoCircle, IconUser, IconTarget, IconClock } from '@tabler/icons-react';
+import {
+  IconInfoCircle,
+  IconUser,
+  IconTarget,
+  IconClock,
+} from '@tabler/icons-react';
 
 interface MenteeProfileFormProps {
   alumniId?: string;
@@ -30,7 +35,7 @@ export function MenteeProfileForm({
   initialData,
   onSave,
   onCancel,
-  loading = false
+  loading = false,
 }: MenteeProfileFormProps) {
   const form = useForm({
     initialValues: {
@@ -40,26 +45,34 @@ export function MenteeProfileForm({
       currentSituation: initialData?.currentSituation || '',
       preferredMentorIndustries: initialData?.preferredMentorIndustries || [],
       timeCommitment: initialData?.timeCommitment || 'Bi-weekly meetings',
-      communicationPreference: initialData?.communicationPreference || 'Video calls',
+      communicationPreference:
+        initialData?.communicationPreference || 'Video calls',
       specificChallenges: initialData?.specificChallenges || [],
       desiredOutcomes: initialData?.desiredOutcomes || [],
       timeZone: initialData?.timeZone || '',
       availabilityDays: initialData?.availabilityDays || [],
       availabilityTimes: initialData?.availabilityTimes || [],
       mentorshipDuration: initialData?.mentorshipDuration || '6 months',
-      previousMentorshipExperience: initialData?.previousMentorshipExperience || false,
-      additionalNotes: initialData?.additionalNotes || ''
+      previousMentorshipExperience:
+        initialData?.previousMentorshipExperience || false,
+      additionalNotes: initialData?.additionalNotes || '',
     },
     validate: {
-      requestedSpecializations: (value) => 
+      requestedSpecializations: value =>
         value.length === 0 ? 'At least one specialization is required' : null,
-      careerGoals: (value) => 
-        value.length < 20 ? 'Please provide more detailed career goals (at least 20 characters)' : null,
-      currentSituation: (value) => 
-        value.length < 20 ? 'Please provide more details about your current situation (at least 20 characters)' : null,
-      preferredMentorIndustries: (value) => 
-        value.length === 0 ? 'At least one preferred industry is required' : null
-    }
+      careerGoals: value =>
+        value.length < 20
+          ? 'Please provide more detailed career goals (at least 20 characters)'
+          : null,
+      currentSituation: value =>
+        value.length < 20
+          ? 'Please provide more details about your current situation (at least 20 characters)'
+          : null,
+      preferredMentorIndustries: value =>
+        value.length === 0
+          ? 'At least one preferred industry is required'
+          : null,
+    },
   });
 
   const specializationOptions = [
@@ -85,7 +98,7 @@ export function MenteeProfileForm({
     'Operations',
     'Human Resources',
     'Legal',
-    'Research & Development'
+    'Research & Development',
   ];
 
   const industryOptions = [
@@ -110,7 +123,7 @@ export function MenteeProfileForm({
     'Travel & Hospitality',
     'Agriculture',
     'Telecommunications',
-    'Aerospace'
+    'Aerospace',
   ];
 
   const challengeOptions = [
@@ -127,7 +140,7 @@ export function MenteeProfileForm({
     'Goal Setting',
     'Confidence Building',
     'Communication Skills',
-    'Time Management'
+    'Time Management',
   ];
 
   const outcomeOptions = [
@@ -142,7 +155,7 @@ export function MenteeProfileForm({
     'Technical Expertise',
     'Strategic Thinking',
     'Problem-Solving Skills',
-    'Communication Skills'
+    'Communication Skills',
   ];
 
   const dayOptions = [
@@ -152,13 +165,13 @@ export function MenteeProfileForm({
     { value: 'thursday', label: 'Thursday' },
     { value: 'friday', label: 'Friday' },
     { value: 'saturday', label: 'Saturday' },
-    { value: 'sunday', label: 'Sunday' }
+    { value: 'sunday', label: 'Sunday' },
   ];
 
   const timeOptions = [
     { value: 'morning', label: 'Morning (6AM - 12PM)' },
     { value: 'afternoon', label: 'Afternoon (12PM - 6PM)' },
-    { value: 'evening', label: 'Evening (6PM - 10PM)' }
+    { value: 'evening', label: 'Evening (6PM - 10PM)' },
   ];
 
   const handleSubmit = (values: typeof form.values) => {
@@ -170,7 +183,8 @@ export function MenteeProfileForm({
       <Stack gap="lg">
         <Alert icon={<IconInfoCircle size={16} />} color="blue">
           Create your mentee profile to help us match you with the right mentor.
-          Be specific about your goals and what you're looking for in a mentorship.
+          Be specific about your goals and what you're looking for in a
+          mentorship.
         </Alert>
 
         {/* Career Goals & Current Situation */}
@@ -179,7 +193,7 @@ export function MenteeProfileForm({
             <IconTarget size={20} />
             <Title order={4}>Career Goals & Current Situation</Title>
           </Group>
-          
+
           <Stack gap="md">
             <MultiSelect
               label="Requested Specializations"
@@ -189,7 +203,7 @@ export function MenteeProfileForm({
               required
               {...form.getInputProps('requestedSpecializations')}
             />
-            
+
             <Textarea
               label="Career Goals"
               placeholder="Describe your career goals and what you want to achieve through mentorship..."
@@ -197,7 +211,7 @@ export function MenteeProfileForm({
               required
               {...form.getInputProps('careerGoals')}
             />
-            
+
             <Textarea
               label="Current Situation"
               placeholder="Tell us about your current role, experience level, and challenges you're facing..."
@@ -205,7 +219,7 @@ export function MenteeProfileForm({
               required
               {...form.getInputProps('currentSituation')}
             />
-            
+
             <MultiSelect
               label="Preferred Mentor Industries"
               placeholder="Which industries would you like your mentor to have experience in?"
@@ -223,7 +237,7 @@ export function MenteeProfileForm({
             <IconClock size={20} />
             <Title order={4}>Mentorship Preferences</Title>
           </Group>
-          
+
           <Grid>
             <Grid.Col span={{ base: 12, md: 6 }}>
               <Select
@@ -232,28 +246,31 @@ export function MenteeProfileForm({
                   { value: 'Weekly meetings', label: 'Weekly meetings' },
                   { value: 'Bi-weekly meetings', label: 'Bi-weekly meetings' },
                   { value: 'Monthly meetings', label: 'Monthly meetings' },
-                  { value: 'As needed', label: 'As needed' }
+                  { value: 'As needed', label: 'As needed' },
                 ]}
                 required
                 {...form.getInputProps('timeCommitment')}
               />
             </Grid.Col>
-            
+
             <Grid.Col span={{ base: 12, md: 6 }}>
               <Select
                 label="Communication Preference"
                 data={[
                   { value: 'Video calls', label: 'Video calls' },
                   { value: 'Phone calls', label: 'Phone calls' },
-                  { value: 'Video calls + messaging', label: 'Video calls + messaging' },
+                  {
+                    value: 'Video calls + messaging',
+                    label: 'Video calls + messaging',
+                  },
                   { value: 'Email only', label: 'Email only' },
-                  { value: 'In-person meetings', label: 'In-person meetings' }
+                  { value: 'In-person meetings', label: 'In-person meetings' },
                 ]}
                 required
                 {...form.getInputProps('communicationPreference')}
               />
             </Grid.Col>
-            
+
             <Grid.Col span={{ base: 12, md: 6 }}>
               <Select
                 label="Preferred Mentorship Duration"
@@ -261,12 +278,12 @@ export function MenteeProfileForm({
                   { value: '3 months', label: '3 months' },
                   { value: '6 months', label: '6 months' },
                   { value: '1 year', label: '1 year' },
-                  { value: 'Ongoing', label: 'Ongoing' }
+                  { value: 'Ongoing', label: 'Ongoing' },
                 ]}
                 {...form.getInputProps('mentorshipDuration')}
               />
             </Grid.Col>
-            
+
             <Grid.Col span={{ base: 12, md: 6 }}>
               <TextInput
                 label="Time Zone"
@@ -279,8 +296,10 @@ export function MenteeProfileForm({
 
         {/* Availability */}
         <Card withBorder>
-          <Title order={4} mb="md">Availability</Title>
-          
+          <Title order={4} mb="md">
+            Availability
+          </Title>
+
           <Grid>
             <Grid.Col span={{ base: 12, md: 6 }}>
               <MultiSelect
@@ -290,7 +309,7 @@ export function MenteeProfileForm({
                 {...form.getInputProps('availabilityDays')}
               />
             </Grid.Col>
-            
+
             <Grid.Col span={{ base: 12, md: 6 }}>
               <MultiSelect
                 label="Available Times"
@@ -308,7 +327,7 @@ export function MenteeProfileForm({
             <IconUser size={20} />
             <Title order={4}>Specific Needs & Expectations</Title>
           </Group>
-          
+
           <Stack gap="md">
             <MultiSelect
               label="Specific Challenges"
@@ -317,7 +336,7 @@ export function MenteeProfileForm({
               searchable
               {...form.getInputProps('specificChallenges')}
             />
-            
+
             <MultiSelect
               label="Desired Outcomes"
               placeholder="What do you hope to achieve from this mentorship?"
@@ -325,13 +344,15 @@ export function MenteeProfileForm({
               searchable
               {...form.getInputProps('desiredOutcomes')}
             />
-            
+
             <Switch
               label="Previous Mentorship Experience"
               description="Have you been in a mentorship relationship before?"
-              {...form.getInputProps('previousMentorshipExperience', { type: 'checkbox' })}
+              {...form.getInputProps('previousMentorshipExperience', {
+                type: 'checkbox',
+              })}
             />
-            
+
             <Textarea
               label="Additional Notes"
               placeholder="Any additional information you'd like to share with potential mentors..."

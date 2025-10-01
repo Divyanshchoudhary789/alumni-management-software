@@ -17,7 +17,7 @@ import {
   ActionIcon,
   rem,
   Loader,
-  Center
+  Center,
 } from '@mantine/core';
 import {
   IconSearch,
@@ -26,11 +26,11 @@ import {
   IconQrcode,
   IconAlertCircle,
   IconCheck,
-  IconClock
+  IconClock,
 } from '@tabler/icons-react';
 import { Event, EventRegistration, AlumniProfile } from '@/types';
 import { mockEventService } from '@/lib/mock-services/eventService';
-import { mockAlumniService } from '@/lib/mock-services/alumniService';
+import { alumniProfileService } from '@/services/alumniProfileService';
 import { notifications } from '@mantine/notifications';
 import { format } from 'date-fns';
 
@@ -52,19 +52,22 @@ export function EventCheckIn({ event, onCheckInUpdate }: EventCheckInProps) {
   const loadAttendees = async () => {
     try {
       setLoading(true);
-      
+
       // Get event registrations
-      const registrationsResponse = await mockEventService.getEventRegistrations(event.id);
-      const registrations = registrationsResponse.data.filter(r => r.status === 'registered');
+      const registrationsResponse =
+        await mockEventService.getEventRegistrations(event.id);
+      const registrations = registrationsResponse.data.filter(
+        r => r.status === 'registered'
+      );
 
       // Get alumni profiles for attendees
-      const alumniResponse = await mockAlumniService.getAlumni();
+      const alumniResponse = await alumniProfileService.getAlumni();
       const allAlumni = alumniResponse.data;
 
       // Combine registration data with alumni profiles
       const attendeesWithProfiles = registrations.map(registration => ({
         ...registration,
-        profile: allAlumni.find(alumni => alumni.id === registration.alumniId)
+        profile: allAlumni.find(alumni => alumni.id === registration.alumniId),
       }));
 
       setAttendees(attendeesWithProfiles);
@@ -72,7 +75,7 @@ export function EventCheckIn({ event, onCheckInUpdate }: EventCheckInProps) {
       notifications.show({
         title: 'Error',
         message: 'Failed to load attendees',
-        color: 'red'
+        color: 'red',
       });
     } finally {
       setLoading(false);
@@ -86,25 +89,30 @@ export function EventCheckIn({ event, onCheckInUpdate }: EventCheckInProps) {
   // Filter attendees based on search
   const filteredAttendees = attendees.filter(attendee => {
     if (!searchQuery) return true;
-    
+
     const query = searchQuery.toLowerCase();
-    return attendee.profile && (
-      `${attendee.profile.firstName} ${attendee.profile.lastName}`.toLowerCase().includes(query) ||
-      attendee.profile.currentCompany?.toLowerCase().includes(query) ||
-      attendee.profile.graduationYear?.toString().includes(query)
+    return (
+      attendee.profile &&
+      (`${attendee.profile.firstName} ${attendee.profile.lastName}`
+        .toLowerCase()
+        .includes(query) ||
+        attendee.profile.currentCompany?.toLowerCase().includes(query) ||
+        attendee.profile.graduationYear?.toString().includes(query))
     );
   });
 
   const handleCheckIn = async (attendeeId: string, attendeeName: string) => {
     try {
       setCheckingIn(attendeeId);
-      
+
       // In a real implementation, this would call the API to update the registration status
-      const updatedAttendees = attendees.map(attendee =>
-        attendee.id === attendeeId
-          ? { ...attendee, status: 'attended' as const }
-          : attendee
-      ).filter(attendee => attendee.status === 'registered'); // Remove checked-in attendees from the list
+      const updatedAttendees = attendees
+        .map(attendee =>
+          attendee.id === attendeeId
+            ? { ...attendee, status: 'attended' as const }
+            : attendee
+        )
+        .filter(attendee => attendee.status === 'registered'); // Remove checked-in attendees from the list
 
       setAttendees(updatedAttendees);
 
@@ -112,7 +120,7 @@ export function EventCheckIn({ event, onCheckInUpdate }: EventCheckInProps) {
         title: 'Success',
         message: `${attendeeName} checked in successfully`,
         color: 'green',
-        icon: <IconCheck />
+        icon: <IconCheck />,
       });
 
       onCheckInUpdate?.();
@@ -120,7 +128,7 @@ export function EventCheckIn({ event, onCheckInUpdate }: EventCheckInProps) {
       notifications.show({
         title: 'Error',
         message: 'Failed to check in attendee',
-        color: 'red'
+        color: 'red',
       });
     } finally {
       setCheckingIn(null);
@@ -132,12 +140,16 @@ export function EventCheckIn({ event, onCheckInUpdate }: EventCheckInProps) {
     notifications.show({
       title: 'Feature Coming Soon',
       message: 'QR code scanning will be implemented in future updates',
-      color: 'blue'
+      color: 'blue',
     });
   };
 
-  const checkedInCount = event.registrations?.filter(r => r.status === 'attended').length || 0;
-  const totalRegistered = event.registrations?.filter(r => r.status === 'registered' || r.status === 'attended').length || 0;
+  const checkedInCount =
+    event.registrations?.filter(r => r.status === 'attended').length || 0;
+  const totalRegistered =
+    event.registrations?.filter(
+      r => r.status === 'registered' || r.status === 'attended'
+    ).length || 0;
 
   if (loading) {
     return (
@@ -163,13 +175,16 @@ export function EventCheckIn({ event, onCheckInUpdate }: EventCheckInProps) {
               {format(event.eventDate, 'PPP p')}
             </Text>
           </div>
-          
+
           <Stack gap="xs" align="flex-end">
             <Badge size="lg" color="green" variant="light">
               {checkedInCount} / {totalRegistered} Checked In
             </Badge>
             <Text size="xs" c="dimmed">
-              {Math.round((checkedInCount / Math.max(totalRegistered, 1)) * 100)}% attendance
+              {Math.round(
+                (checkedInCount / Math.max(totalRegistered, 1)) * 100
+              )}
+              % attendance
             </Text>
           </Stack>
         </Group>
@@ -180,12 +195,14 @@ export function EventCheckIn({ event, onCheckInUpdate }: EventCheckInProps) {
         <Group>
           <TextInput
             placeholder="Search attendees by name, company, or graduation year..."
-            leftSection={<IconSearch style={{ width: rem(16), height: rem(16) }} />}
+            leftSection={
+              <IconSearch style={{ width: rem(16), height: rem(16) }} />
+            }
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={e => setSearchQuery(e.target.value)}
             style={{ flex: 1 }}
           />
-          
+
           <Button
             leftSection={<IconQrcode size={16} />}
             variant="light"
@@ -198,14 +215,15 @@ export function EventCheckIn({ event, onCheckInUpdate }: EventCheckInProps) {
 
       {/* Attendees Grid */}
       {filteredAttendees.length === 0 ? (
-        <Alert 
-          icon={searchQuery ? <IconSearch /> : <IconAlertCircle />} 
-          title={searchQuery ? "No matching attendees" : "All attendees checked in"}
-        >
-          {searchQuery 
-            ? 'No attendees match your search criteria.'
-            : 'All registered attendees have been checked in for this event.'
+        <Alert
+          icon={searchQuery ? <IconSearch /> : <IconAlertCircle />}
+          title={
+            searchQuery ? 'No matching attendees' : 'All attendees checked in'
           }
+        >
+          {searchQuery
+            ? 'No attendees match your search criteria.'
+            : 'All registered attendees have been checked in for this event.'}
         </Alert>
       ) : (
         <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
@@ -215,15 +233,18 @@ export function EventCheckIn({ event, onCheckInUpdate }: EventCheckInProps) {
                 <Group>
                   <Avatar
                     src={attendee.profile?.profileImage}
-                    alt={attendee.profile ? `${attendee.profile.firstName} ${attendee.profile.lastName}` : 'Unknown'}
+                    alt={
+                      attendee.profile
+                        ? `${attendee.profile.firstName} ${attendee.profile.lastName}`
+                        : 'Unknown'
+                    }
                     size="lg"
                   />
                   <div style={{ flex: 1 }}>
                     <Text fw={500} size="sm">
-                      {attendee.profile 
+                      {attendee.profile
                         ? `${attendee.profile.firstName} ${attendee.profile.lastName}`
-                        : 'Unknown User'
-                      }
+                        : 'Unknown User'}
                     </Text>
                     <Text size="xs" c="dimmed">
                       Class of {attendee.profile?.graduationYear || 'N/A'}
@@ -236,19 +257,27 @@ export function EventCheckIn({ event, onCheckInUpdate }: EventCheckInProps) {
 
                 <Group justify="space-between" align="center">
                   <Badge color="blue" variant="light" size="sm">
-                    <IconClock style={{ width: rem(12), height: rem(12), marginRight: rem(4) }} />
+                    <IconClock
+                      style={{
+                        width: rem(12),
+                        height: rem(12),
+                        marginRight: rem(4),
+                      }}
+                    />
                     Registered {format(attendee.registrationDate, 'MMM d')}
                   </Badge>
-                  
+
                   <Button
                     size="sm"
                     leftSection={<IconUserCheck size={14} />}
-                    onClick={() => handleCheckIn(
-                      attendee.id,
-                      attendee.profile 
-                        ? `${attendee.profile.firstName} ${attendee.profile.lastName}`
-                        : 'Unknown User'
-                    )}
+                    onClick={() =>
+                      handleCheckIn(
+                        attendee.id,
+                        attendee.profile
+                          ? `${attendee.profile.firstName} ${attendee.profile.lastName}`
+                          : 'Unknown User'
+                      )
+                    }
                     loading={checkingIn === attendee.id}
                     disabled={checkingIn !== null}
                   >
@@ -272,7 +301,7 @@ export function EventCheckIn({ event, onCheckInUpdate }: EventCheckInProps) {
               Total Registered
             </Text>
           </div>
-          
+
           <div>
             <Text size="xl" fw={700} c="green">
               {checkedInCount}
@@ -281,7 +310,7 @@ export function EventCheckIn({ event, onCheckInUpdate }: EventCheckInProps) {
               Checked In
             </Text>
           </div>
-          
+
           <div>
             <Text size="xl" fw={700} c="orange">
               {totalRegistered - checkedInCount}
@@ -290,10 +319,13 @@ export function EventCheckIn({ event, onCheckInUpdate }: EventCheckInProps) {
               Pending Check-In
             </Text>
           </div>
-          
+
           <div>
             <Text size="xl" fw={700} c="teal">
-              {Math.round((checkedInCount / Math.max(totalRegistered, 1)) * 100)}%
+              {Math.round(
+                (checkedInCount / Math.max(totalRegistered, 1)) * 100
+              )}
+              %
             </Text>
             <Text size="sm" c="dimmed">
               Attendance Rate

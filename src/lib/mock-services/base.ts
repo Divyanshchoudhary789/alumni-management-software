@@ -24,7 +24,10 @@ export interface MockApiError {
 }
 
 // Simulate network delay
-export const simulateDelay = (min: number = 200, max: number = 800): Promise<void> => {
+export const simulateDelay = (
+  min: number = 200,
+  max: number = 800
+): Promise<void> => {
   const delay = Math.random() * (max - min) + min;
   return new Promise(resolve => setTimeout(resolve, delay));
 };
@@ -38,42 +41,48 @@ export const simulateError = (errorRate: number = 0.05): boolean => {
 export const mockErrors = {
   NETWORK_ERROR: {
     code: 'NETWORK_ERROR',
-    message: 'Network connection failed. Please check your internet connection.'
+    message:
+      'Network connection failed. Please check your internet connection.',
   },
   UNAUTHORIZED: {
     code: 'UNAUTHORIZED',
-    message: 'You are not authorized to perform this action.'
+    message: 'You are not authorized to perform this action.',
   },
   NOT_FOUND: {
     code: 'NOT_FOUND',
-    message: 'The requested resource was not found.'
+    message: 'The requested resource was not found.',
   },
   VALIDATION_ERROR: {
     code: 'VALIDATION_ERROR',
-    message: 'Validation failed. Please check your input data.'
+    message: 'Validation failed. Please check your input data.',
   },
   SERVER_ERROR: {
     code: 'SERVER_ERROR',
-    message: 'Internal server error. Please try again later.'
+    message: 'Internal server error. Please try again later.',
   },
   RATE_LIMIT: {
     code: 'RATE_LIMIT',
-    message: 'Too many requests. Please wait before trying again.'
-  }
+    message: 'Too many requests. Please wait before trying again.',
+  },
 };
 
 // Create successful response
-export const createSuccessResponse = <T>(data: T, message?: string): MockApiResponse<T> => ({
+export const createSuccessResponse = <T>(
+  data: T,
+  message?: string
+): MockApiResponse<T> => ({
   data,
   success: true,
-  message
+  message,
 });
 
 // Create error response
-export const createErrorResponse = (error: MockApiError): MockApiResponse<never> => ({
+export const createErrorResponse = (
+  error: MockApiError
+): MockApiResponse<never> => ({
   data: null as never,
   success: false,
-  error: error.message
+  error: error.message,
 });
 
 // Create paginated response
@@ -85,16 +94,16 @@ export const createPaginatedResponse = <T>(
   const startIndex = (page - 1) * limit;
   const endIndex = startIndex + limit;
   const paginatedData = data.slice(startIndex, endIndex);
-  
+
   return {
     data: paginatedData,
     pagination: {
       page,
       limit,
       total: data.length,
-      totalPages: Math.ceil(data.length / limit)
+      totalPages: Math.ceil(data.length / limit),
     },
-    success: true
+    success: true,
   };
 };
 
@@ -105,7 +114,7 @@ export const filterByText = <T>(
   searchFields: (keyof T)[]
 ): T[] => {
   if (!searchTerm) return items;
-  
+
   const lowercaseSearch = searchTerm.toLowerCase();
   return items.filter(item =>
     searchFields.some(field => {
@@ -123,7 +132,7 @@ export const sortByField = <T>(
   return [...items].sort((a, b) => {
     const aValue = a[field];
     const bValue = b[field];
-    
+
     if (aValue < bValue) return direction === 'asc' ? -1 : 1;
     if (aValue > bValue) return direction === 'asc' ? 1 : -1;
     return 0;

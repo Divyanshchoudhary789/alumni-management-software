@@ -1,7 +1,23 @@
 'use client';
 
-import { Container, Title, Text, Tabs, Stack, Group, Badge } from '@mantine/core';
-import { IconChartBar, IconUsers, IconCalendarEvent, IconCurrencyDollar, IconMail, IconEye, IconReportAnalytics } from '@tabler/icons-react';
+import {
+  Container,
+  Title,
+  Text,
+  Tabs,
+  Stack,
+  Group,
+  Badge,
+} from '@mantine/core';
+import {
+  IconChartBar,
+  IconUsers,
+  IconCalendarEvent,
+  IconCurrencyDollar,
+  IconMail,
+  IconEye,
+  IconReportAnalytics,
+} from '@tabler/icons-react';
 import { useState } from 'react';
 import {
   AnalyticsOverview,
@@ -11,7 +27,7 @@ import {
   CommunicationAnalyticsCharts,
   AnalyticsFilters,
   RealTimeAnalytics,
-  CustomReports
+  CustomReports,
 } from '@/components/analytics';
 import { AnalyticsFilters as FilterType } from '@/lib/mock-services/analyticsService';
 
@@ -39,7 +55,8 @@ export default function AnalyticsPage() {
         <div>
           <Title order={1}>Analytics & Reports</Title>
           <Text c="dimmed" mt="sm">
-            Comprehensive analytics dashboard with real-time insights and custom reporting
+            Comprehensive analytics dashboard with real-time insights and custom
+            reporting
           </Text>
         </div>
         <Badge variant="light" color="blue" size="lg">
@@ -57,46 +74,43 @@ export default function AnalyticsPage() {
         />
 
         {/* Analytics Tabs */}
-        <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'overview')}>
+        <Tabs
+          value={activeTab}
+          onChange={value => setActiveTab(value || 'overview')}
+        >
           <Tabs.List>
-            <Tabs.Tab 
-              value="overview" 
-              leftSection={<IconChartBar size={16} />}
-            >
+            <Tabs.Tab value="overview" leftSection={<IconChartBar size={16} />}>
               Overview
             </Tabs.Tab>
-            <Tabs.Tab 
-              value="demographics" 
+            <Tabs.Tab
+              value="demographics"
               leftSection={<IconUsers size={16} />}
             >
               Demographics
             </Tabs.Tab>
-            <Tabs.Tab 
-              value="events" 
+            <Tabs.Tab
+              value="events"
               leftSection={<IconCalendarEvent size={16} />}
             >
               Events
             </Tabs.Tab>
-            <Tabs.Tab 
-              value="donations" 
+            <Tabs.Tab
+              value="donations"
               leftSection={<IconCurrencyDollar size={16} />}
             >
               Donations
             </Tabs.Tab>
-            <Tabs.Tab 
-              value="communications" 
+            <Tabs.Tab
+              value="communications"
               leftSection={<IconMail size={16} />}
             >
               Communications
             </Tabs.Tab>
-            <Tabs.Tab 
-              value="realtime" 
-              leftSection={<IconEye size={16} />}
-            >
+            <Tabs.Tab value="realtime" leftSection={<IconEye size={16} />}>
               Real-time
             </Tabs.Tab>
-            <Tabs.Tab 
-              value="reports" 
+            <Tabs.Tab
+              value="reports"
               leftSection={<IconReportAnalytics size={16} />}
             >
               Custom Reports
@@ -104,37 +118,37 @@ export default function AnalyticsPage() {
           </Tabs.List>
 
           <Tabs.Panel value="overview" pt="md">
-            <AnalyticsOverview 
+            <AnalyticsOverview
               key={`overview-${refreshKey}`}
-              dateRange={filters.dateRange} 
+              dateRange={filters.dateRange}
             />
           </Tabs.Panel>
 
           <Tabs.Panel value="demographics" pt="md">
-            <DemographicsCharts 
+            <DemographicsCharts
               key={`demographics-${refreshKey}`}
-              filters={filters} 
+              filters={filters}
             />
           </Tabs.Panel>
 
           <Tabs.Panel value="events" pt="md">
-            <EventAnalyticsCharts 
+            <EventAnalyticsCharts
               key={`events-${refreshKey}`}
-              filters={filters} 
+              filters={filters}
             />
           </Tabs.Panel>
 
           <Tabs.Panel value="donations" pt="md">
-            <DonationAnalyticsCharts 
+            <DonationAnalyticsCharts
               key={`donations-${refreshKey}`}
-              filters={filters} 
+              filters={filters}
             />
           </Tabs.Panel>
 
           <Tabs.Panel value="communications" pt="md">
-            <CommunicationAnalyticsCharts 
+            <CommunicationAnalyticsCharts
               key={`communications-${refreshKey}`}
-              filters={filters} 
+              filters={filters}
             />
           </Tabs.Panel>
 
@@ -143,10 +157,7 @@ export default function AnalyticsPage() {
           </Tabs.Panel>
 
           <Tabs.Panel value="reports" pt="md">
-            <CustomReports 
-              key={`reports-${refreshKey}`}
-              filters={filters} 
-            />
+            <CustomReports key={`reports-${refreshKey}`} filters={filters} />
           </Tabs.Panel>
         </Tabs>
       </Stack>

@@ -14,7 +14,6 @@ const UserSchema = new Schema<IUser>({
     type: String,
     required: true,
     unique: true,
-    index: true,
   },
   email: {
     type: String,
@@ -22,7 +21,6 @@ const UserSchema = new Schema<IUser>({
     unique: true,
     lowercase: true,
     trim: true,
-    index: true,
   },
   role: {
     type: String,
@@ -47,9 +45,7 @@ const UserSchema = new Schema<IUser>({
   }
 });
 
-// Indexes for performance
-UserSchema.index({ clerkUserId: 1 });
-UserSchema.index({ email: 1 });
+// Indexes for performance (unique fields already have indexes)
 UserSchema.index({ role: 1 });
 UserSchema.index({ createdAt: -1 });
 

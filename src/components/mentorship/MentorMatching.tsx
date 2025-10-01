@@ -22,7 +22,7 @@ import {
   Tabs,
   SimpleGrid,
   ThemeIcon,
-  LoadingOverlay
+  LoadingOverlay,
 } from '@mantine/core';
 import {
   IconSearch,
@@ -33,11 +33,12 @@ import {
   IconEye,
   IconBrain,
   IconInfoCircle,
-  IconRefresh
+  IconRefresh,
 } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
+import Link from 'next/link';
 import { mockMentorshipService } from '@/lib/mock-services/mentorshipService';
-import { mockAlumniService } from '@/lib/mock-services/alumniService';
+import { alumniProfileService } from '@/services/alumniProfileService';
 
 export function MentorMatching() {
   const [activeTab, setActiveTab] = useState<string>('requests');
@@ -48,21 +49,26 @@ export function MentorMatching() {
   const [error, setError] = useState<string | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [suggestedMatches, setSuggestedMatches] = useState<any[]>([]);
-  
-  const [matchModalOpened, { open: openMatchModal, close: closeMatchModal }] = useDisclosure(false);
-  const [requestModalOpened, { open: openRequestModal, close: closeRequestModal }] = useDisclosure(false);
+
+  const [matchModalOpened, { open: openMatchModal, close: closeMatchModal }] =
+    useDisclosure(false);
+  const [
+    requestModalOpened,
+    { open: openRequestModal, close: closeRequestModal },
+  ] = useDisclosure(false);
 
   const loadData = async () => {
     try {
       setLoading(true);
       setError(null);
-      
-      const [requestsResponse, mentorsResponse, alumniResponse] = await Promise.all([
-        mockMentorshipService.getMenteeRequests(),
-        mockMentorshipService.getMentorProfiles(),
-        mockAlumniService.getAlumni()
-      ]);
-      
+
+      const [requestsResponse, mentorsResponse, alumniResponse] =
+        await Promise.all([
+          mockMentorshipService.getMenteeRequests(),
+          mockMentorshipService.getMentorProfiles(),
+          alumniProfileService.getAlumni(),
+        ]);
+
       setMenteeRequests(requestsResponse.data);
       setMentorProfiles(mentorsResponse.data);
       setAlumni(alumniResponse.data);
@@ -79,7 +85,9 @@ export function MentorMatching() {
 
   const getAlumniName = (alumniId: string) => {
     const alumnus = alumni.find(a => a.id === alumniId);
-    return alumnus ? `${alumnus.firstName} ${alumnus.lastName}` : `Alumni #${alumniId}`;
+    return alumnus
+      ? `${alumnus.firstName} ${alumnus.lastName}`
+      : `Alumni #${alumniId}`;
   };
 
   const getAlumniDetails = (alumniId: string) => {
@@ -89,7 +97,9 @@ export function MentorMatching() {
   const handleViewMatches = async (request: any) => {
     try {
       setSelectedRequest(request);
-      const matchesResponse = await mockMentorshipService.suggestMentorMatches(request.id);
+      const matchesResponse = await mockMentorshipService.suggestMentorMatches(
+        request.id
+      );
       setSuggestedMatches(matchesResponse.data);
       openMatchModal();
     } catch (err: any) {
@@ -100,17 +110,19 @@ export function MentorMatching() {
   const handleCreateConnection = async (mentorId: string, menteeId: string) => {
     try {
       const startDate = new Date();
-      const endDate = new Date(startDate.getTime() + (6 * 30 * 24 * 60 * 60 * 1000)); // 6 months
-      
+      const endDate = new Date(
+        startDate.getTime() + 6 * 30 * 24 * 60 * 60 * 1000
+      ); // 6 months
+
       await mockMentorshipService.createMentorshipConnection({
         mentorId,
         menteeId,
         status: 'pending',
         startDate,
         endDate,
-        notes: 'Connection created through matching system'
+        notes: 'Connection created through matching system',
       });
-      
+
       // Update request status
       // In a real app, you'd have an API to update the request
       loadData();
@@ -124,25 +136,33 @@ export function MentorMatching() {
     return new Date(date).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric',
     });
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'orange';
-      case 'matched': return 'green';
-      case 'rejected': return 'red';
-      default: return 'gray';
+      case 'pending':
+        return 'orange';
+      case 'matched':
+        return 'green';
+      case 'rejected':
+        return 'red';
+      default:
+        return 'gray';
     }
   };
 
   const getAvailabilityColor = (availability: string) => {
     switch (availability) {
-      case 'Available': return 'green';
-      case 'Limited': return 'yellow';
-      case 'Unavailable': return 'red';
-      default: return 'gray';
+      case 'Available':
+        return 'green';
+      case 'Limited':
+        return 'yellow';
+      case 'Unavailable':
+        return 'red';
+      default:
+        return 'gray';
     }
   };
 
@@ -181,19 +201,37 @@ export function MentorMatching() {
           </Group>
         </Group>
 
-        <Tabs value={activeTab} onChange={setActiveTab}>
+        <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'requests')}>
           <Tabs.List>
             <Tabs.Tab value="requests" leftSection={<IconUsers size={16} />}>
-              Mentee Requests ({menteeRequests.filter(r => r.status === 'pending').length})
+              Mentee Requests (
+              {menteeRequests.filter(r => r.status === 'pending').length})
             </Tabs.Tab>
-            <Tabs.Tab value="mentors" leftSection={<IconStar size={16} />}>
-              Available Mentors ({mentorProfiles.filter(m => m.isActive && m.currentMentees < m.maxMentees).length})
+            <Tabs.Tab value="free-mentors" leftSection={<IconStar size={16} />}>
+              Free Mentors (
+              {
+                mentorProfiles.filter(
+                  m => m.isActive && m.currentMentees < m.maxMentees &&
+                  (m.mentorshipType === 'free' || m.mentorshipType === 'both')
+                ).length
+              }
+              )
+            </Tabs.Tab>
+            <Tabs.Tab value="paid-mentors" leftSection={<IconStar size={16} />}>
+              Paid Mentors (
+              {
+                mentorProfiles.filter(
+                  m => m.isActive && m.currentMentees < m.maxMentees &&
+                  (m.mentorshipType === 'paid' || m.mentorshipType === 'both')
+                ).length
+              }
+              )
             </Tabs.Tab>
           </Tabs.List>
 
           <div style={{ position: 'relative' }}>
             <LoadingOverlay visible={loading} />
-            
+
             <Tabs.Panel value="requests" pt="md">
               <MenteeRequestsPanel
                 requests={menteeRequests}
@@ -205,13 +243,31 @@ export function MentorMatching() {
               />
             </Tabs.Panel>
 
-            <Tabs.Panel value="mentors" pt="md">
+            <Tabs.Panel value="free-mentors" pt="md">
               <MentorProfilesPanel
-                mentors={mentorProfiles}
+                mentors={mentorProfiles.filter(m =>
+                  m.isActive && m.currentMentees < m.maxMentees &&
+                  (m.mentorshipType === 'free' || m.mentorshipType === 'both')
+                )}
                 alumni={alumni}
                 getAlumniName={getAlumniName}
                 getAlumniDetails={getAlumniDetails}
                 getAvailabilityColor={getAvailabilityColor}
+                mentorshipType="free"
+              />
+            </Tabs.Panel>
+
+            <Tabs.Panel value="paid-mentors" pt="md">
+              <MentorProfilesPanel
+                mentors={mentorProfiles.filter(m =>
+                  m.isActive && m.currentMentees < m.maxMentees &&
+                  (m.mentorshipType === 'paid' || m.mentorshipType === 'both')
+                )}
+                alumni={alumni}
+                getAlumniName={getAlumniName}
+                getAlumniDetails={getAlumniDetails}
+                getAvailabilityColor={getAvailabilityColor}
+                mentorshipType="paid"
               />
             </Tabs.Panel>
           </div>
@@ -228,64 +284,88 @@ export function MentorMatching() {
         {selectedRequest && (
           <Stack gap="md">
             <Card withBorder>
-              <Title order={5} mb="sm">Mentee Request Details</Title>
+              <Title order={5} mb="sm">
+                Mentee Request Details
+              </Title>
               <Grid>
                 <Grid.Col span={6}>
-                  <Text size="sm" fw={500} c="dimmed">Mentee</Text>
+                  <Text size="sm" fw={500} c="dimmed">
+                    Mentee
+                  </Text>
                   <Text>{getAlumniName(selectedRequest.alumniId)}</Text>
                 </Grid.Col>
                 <Grid.Col span={6}>
-                  <Text size="sm" fw={500} c="dimmed">Requested Specializations</Text>
-                  <Text>{selectedRequest.requestedSpecializations.join(', ')}</Text>
+                  <Text size="sm" fw={500} c="dimmed">
+                    Requested Specializations
+                  </Text>
+                  <Text>
+                    {selectedRequest.requestedSpecializations.join(', ')}
+                  </Text>
                 </Grid.Col>
                 <Grid.Col span={12}>
-                  <Text size="sm" fw={500} c="dimmed">Career Goals</Text>
+                  <Text size="sm" fw={500} c="dimmed">
+                    Career Goals
+                  </Text>
                   <Text size="sm">{selectedRequest.careerGoals}</Text>
                 </Grid.Col>
               </Grid>
             </Card>
 
             <Title order={5}>Suggested Matches</Title>
-            
+
             {suggestedMatches.length > 0 ? (
               <Stack gap="sm">
                 {suggestedMatches.map((match, index) => {
-                  const mentor = mentorProfiles.find(m => m.alumniId === match.mentorId);
+                  const mentor = mentorProfiles.find(
+                    m => m.alumniId === match.mentorId
+                  );
                   const mentorAlumni = getAlumniDetails(match.mentorId);
-                  
+
                   return (
                     <Card key={match.mentorId} withBorder>
                       <Group justify="space-between">
                         <Group>
                           <Avatar size="md" />
                           <div>
-                            <Text fw={500}>{getAlumniName(match.mentorId)}</Text>
+                            <Text fw={500}>
+                              {getAlumniName(match.mentorId)}
+                            </Text>
                             <Text size="sm" c="dimmed">
-                              {mentorAlumni?.currentPosition} at {mentorAlumni?.currentCompany}
+                              {mentorAlumni?.currentPosition} at{' '}
+                              {mentorAlumni?.currentCompany}
                             </Text>
                             <Group gap="xs" mt="xs">
-                              {mentor?.specializations.slice(0, 3).map((spec: string) => (
-                                <Badge key={spec} size="xs" variant="light">
-                                  {spec}
-                                </Badge>
-                              ))}
+                              {mentor?.specializations
+                                .slice(0, 3)
+                                .map((spec: string) => (
+                                  <Badge key={spec} size="xs" variant="light">
+                                    {spec}
+                                  </Badge>
+                                ))}
                             </Group>
                           </div>
                         </Group>
-                        
+
                         <div style={{ textAlign: 'right' }}>
                           <Group gap="xs" mb="xs">
                             <ThemeIcon size="sm" variant="light" color="blue">
                               <IconBrain size={12} />
                             </ThemeIcon>
-                            <Text size="sm" fw={500}>{match.score}% Match</Text>
+                            <Text size="sm" fw={500}>
+                              {match.score}% Match
+                            </Text>
                           </Group>
                           <Progress value={match.score} size="xs" mb="xs" />
                           <Group gap="xs">
                             <Button
                               size="xs"
                               leftSection={<IconCheck size={14} />}
-                              onClick={() => handleCreateConnection(match.mentorId, selectedRequest.alumniId)}
+                              onClick={() =>
+                                handleCreateConnection(
+                                  match.mentorId,
+                                  selectedRequest.alumniId
+                                )
+                              }
                             >
                               Connect
                             </Button>
@@ -295,7 +375,7 @@ export function MentorMatching() {
                           </Group>
                         </div>
                       </Group>
-                      
+
                       <Text size="xs" c="dimmed" mt="sm">
                         Match reasons: {match.matchReasons.join(', ')}
                       </Text>
@@ -333,26 +413,29 @@ export function MentorMatching() {
 }
 
 // Mentee Requests Panel Component
-function MenteeRequestsPanel({ 
-  requests, 
-  alumni, 
-  onViewMatches, 
-  getAlumniName, 
-  formatDate, 
-  getStatusColor 
+function MenteeRequestsPanel({
+  requests,
+  alumni,
+  onViewMatches,
+  getAlumniName,
+  formatDate,
+  getStatusColor,
 }: any) {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
   const filteredRequests = requests.filter((request: any) => {
-    const matchesSearch = !searchQuery || 
-      getAlumniName(request.alumniId).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      request.requestedSpecializations.some((spec: string) => 
+    const matchesSearch =
+      !searchQuery ||
+      getAlumniName(request.alumniId)
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      request.requestedSpecializations.some((spec: string) =>
         spec.toLowerCase().includes(searchQuery.toLowerCase())
       );
-    
+
     const matchesStatus = !statusFilter || request.status === statusFilter;
-    
+
     return matchesSearch && matchesStatus;
   });
 
@@ -363,7 +446,7 @@ function MenteeRequestsPanel({
           placeholder="Search requests..."
           leftSection={<IconSearch size={16} />}
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={e => setSearchQuery(e.target.value)}
           style={{ flex: 1 }}
         />
         <Select
@@ -372,10 +455,10 @@ function MenteeRequestsPanel({
             { value: '', label: 'All Statuses' },
             { value: 'pending', label: 'Pending' },
             { value: 'matched', label: 'Matched' },
-            { value: 'rejected', label: 'Rejected' }
+            { value: 'rejected', label: 'Rejected' },
           ]}
           value={statusFilter}
-          onChange={(value) => setStatusFilter(value || '')}
+          onChange={value => setStatusFilter(value || '')}
           clearable
         />
       </Group>
@@ -401,7 +484,9 @@ function MenteeRequestsPanel({
 
               <Stack gap="xs" mb="md">
                 <div>
-                  <Text size="sm" fw={500} c="dimmed">Specializations</Text>
+                  <Text size="sm" fw={500} c="dimmed">
+                    Specializations
+                  </Text>
                   <Group gap="xs">
                     {request.requestedSpecializations.map((spec: string) => (
                       <Badge key={spec} size="xs" variant="light">
@@ -412,12 +497,16 @@ function MenteeRequestsPanel({
                 </div>
 
                 <div>
-                  <Text size="sm" fw={500} c="dimmed">Career Goals</Text>
+                  <Text size="sm" fw={500} c="dimmed">
+                    Career Goals
+                  </Text>
                   <Text size="sm">{request.careerGoals}</Text>
                 </div>
 
                 <div>
-                  <Text size="sm" fw={500} c="dimmed">Time Commitment</Text>
+                  <Text size="sm" fw={500} c="dimmed">
+                    Time Commitment
+                  </Text>
                   <Text size="sm">{request.timeCommitment}</Text>
                 </div>
               </Stack>
@@ -446,29 +535,41 @@ function MenteeRequestsPanel({
 }
 
 // Mentor Profiles Panel Component
-function MentorProfilesPanel({ 
-  mentors, 
-  alumni, 
-  getAlumniName, 
-  getAlumniDetails, 
-  getAvailabilityColor 
+function MentorProfilesPanel({
+  mentors,
+  alumni,
+  getAlumniName,
+  getAlumniDetails,
+  getAvailabilityColor,
+  mentorshipType,
 }: any) {
   const [searchQuery, setSearchQuery] = useState('');
   const [availabilityFilter, setAvailabilityFilter] = useState('');
+  const [mentorshipTypeFilter, setMentorshipTypeFilter] = useState('');
 
   const filteredMentors = mentors.filter((mentor: any) => {
     const alumniDetails = getAlumniDetails(mentor.alumniId);
-    const matchesSearch = !searchQuery || 
-      getAlumniName(mentor.alumniId).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      mentor.specializations.some((spec: string) => 
+    const matchesSearch =
+      !searchQuery ||
+      getAlumniName(mentor.alumniId)
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      mentor.specializations.some((spec: string) =>
         spec.toLowerCase().includes(searchQuery.toLowerCase())
       ) ||
-      (alumniDetails?.currentCompany && 
-        alumniDetails.currentCompany.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesAvailability = !availabilityFilter || mentor.availability === availabilityFilter;
-    
-    return matchesSearch && matchesAvailability;
+      (alumniDetails?.currentCompany &&
+        alumniDetails.currentCompany
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()));
+
+    const matchesAvailability =
+      !availabilityFilter || mentor.availability === availabilityFilter;
+
+    const matchesMentorshipType =
+      !mentorshipTypeFilter || mentor.mentorshipType === mentorshipTypeFilter ||
+      (mentorshipTypeFilter === 'both' && mentor.mentorshipType === 'both');
+
+    return matchesSearch && matchesAvailability && matchesMentorshipType;
   });
 
   return (
@@ -478,7 +579,7 @@ function MentorProfilesPanel({
           placeholder="Search mentors..."
           leftSection={<IconSearch size={16} />}
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={e => setSearchQuery(e.target.value)}
           style={{ flex: 1 }}
         />
         <Select
@@ -487,10 +588,22 @@ function MentorProfilesPanel({
             { value: '', label: 'All Availability' },
             { value: 'Available', label: 'Available' },
             { value: 'Limited', label: 'Limited' },
-            { value: 'Unavailable', label: 'Unavailable' }
+            { value: 'Unavailable', label: 'Unavailable' },
           ]}
           value={availabilityFilter}
-          onChange={(value) => setAvailabilityFilter(value || '')}
+          onChange={value => setAvailabilityFilter(value || '')}
+          clearable
+        />
+        <Select
+          placeholder="Filter by mentorship type"
+          data={[
+            { value: '', label: 'All Types' },
+            { value: 'free', label: 'Free Only' },
+            { value: 'paid', label: 'Paid Only' },
+            { value: 'both', label: 'Free & Paid' },
+          ]}
+          value={mentorshipTypeFilter}
+          onChange={value => setMentorshipTypeFilter(value || '')}
           clearable
         />
       </Group>
@@ -499,7 +612,7 @@ function MentorProfilesPanel({
         {filteredMentors.length > 0 ? (
           filteredMentors.map((mentor: any) => {
             const alumniDetails = getAlumniDetails(mentor.alumniId);
-            
+
             return (
               <Card key={mentor.alumniId} withBorder>
                 <Group justify="space-between" mb="sm">
@@ -508,27 +621,35 @@ function MentorProfilesPanel({
                     <div>
                       <Text fw={500}>{getAlumniName(mentor.alumniId)}</Text>
                       <Text size="sm" c="dimmed">
-                        {alumniDetails?.currentPosition} at {alumniDetails?.currentCompany}
+                        {alumniDetails?.currentPosition} at{' '}
+                        {alumniDetails?.currentCompany}
                       </Text>
                       <Text size="xs" c="dimmed">
                         {mentor.yearsOfExperience} years experience
                       </Text>
                     </div>
                   </Group>
-                  <Badge color={getAvailabilityColor(mentor.availability)} size="sm">
+                  <Badge
+                    color={getAvailabilityColor(mentor.availability)}
+                    size="sm"
+                  >
                     {mentor.availability}
                   </Badge>
                 </Group>
 
                 <Stack gap="xs" mb="md">
                   <div>
-                    <Text size="sm" fw={500} c="dimmed">Specializations</Text>
+                    <Text size="sm" fw={500} c="dimmed">
+                      Specializations
+                    </Text>
                     <Group gap="xs">
-                      {mentor.specializations.slice(0, 3).map((spec: string) => (
-                        <Badge key={spec} size="xs" variant="light">
-                          {spec}
-                        </Badge>
-                      ))}
+                      {mentor.specializations
+                        .slice(0, 3)
+                        .map((spec: string) => (
+                          <Badge key={spec} size="xs" variant="light">
+                            {spec}
+                          </Badge>
+                        ))}
                       {mentor.specializations.length > 3 && (
                         <Badge size="xs" variant="light" color="gray">
                           +{mentor.specializations.length - 3} more
@@ -538,33 +659,79 @@ function MentorProfilesPanel({
                   </div>
 
                   <div>
-                    <Text size="sm" fw={500} c="dimmed">Industries</Text>
+                    <Text size="sm" fw={500} c="dimmed">
+                      Industries
+                    </Text>
                     <Text size="sm">{mentor.industries.join(', ')}</Text>
                   </div>
 
                   <Group>
                     <div>
-                      <Text size="sm" fw={500} c="dimmed">Capacity</Text>
+                      <Text size="sm" fw={500} c="dimmed">
+                        Capacity
+                      </Text>
                       <Text size="sm">
                         {mentor.currentMentees}/{mentor.maxMentees} mentees
                       </Text>
                     </div>
                     <div>
-                      <Text size="sm" fw={500} c="dimmed">Meeting Frequency</Text>
+                      <Text size="sm" fw={500} c="dimmed">
+                        Meeting Frequency
+                      </Text>
                       <Text size="sm">{mentor.preferredMeetingFrequency}</Text>
                     </div>
                   </Group>
+
+                  {/* Pricing Information */}
+                  <div>
+                    <Text size="sm" fw={500} c="dimmed">
+                      Mentorship Type
+                    </Text>
+                    <Group gap="xs">
+                      <Badge
+                        size="xs"
+                        color={
+                          mentor.mentorshipType === 'free'
+                            ? 'green'
+                            : mentor.mentorshipType === 'paid'
+                              ? 'blue'
+                              : 'orange'
+                        }
+                      >
+                        {mentor.mentorshipType === 'free'
+                          ? 'Free'
+                          : mentor.mentorshipType === 'paid'
+                            ? 'Paid'
+                            : 'Free & Paid'}
+                      </Badge>
+                      {mentor.mentorshipType !== 'free' && (
+                        <Text size="sm" c="blue">
+                          {mentor.hourlyRate ? `$${mentor.hourlyRate}/hr` : ''}
+                          {mentor.sessionRate ? ` $${mentor.sessionRate}/session` : ''}
+                          {mentor.monthlyRate ? ` $${mentor.monthlyRate}/month` : ''}
+                        </Text>
+                      )}
+                    </Group>
+                  </div>
                 </Stack>
 
-                <Progress 
-                  value={(mentor.currentMentees / mentor.maxMentees) * 100} 
-                  size="xs" 
+                <Progress
+                  value={(mentor.currentMentees / mentor.maxMentees) * 100}
+                  size="xs"
                   mb="sm"
-                  color={mentor.currentMentees >= mentor.maxMentees ? 'red' : 'blue'}
+                  color={
+                    mentor.currentMentees >= mentor.maxMentees ? 'red' : 'blue'
+                  }
                 />
 
                 <Group justify="flex-end">
-                  <Button size="xs" variant="light" leftSection={<IconEye size={14} />}>
+                  <Button
+                    size="xs"
+                    variant="light"
+                    leftSection={<IconEye size={14} />}
+                    component={Link}
+                    href={`/mentorship/${mentor.alumniId}`}
+                  >
                     View Profile
                   </Button>
                 </Group>
@@ -593,18 +760,36 @@ function NewRequestForm({ alumni, onSave, onCancel }: any) {
 
   const alumniOptions = alumni.map((a: any) => ({
     value: a.id,
-    label: `${a.firstName} ${a.lastName} (${a.graduationYear})`
+    label: `${a.firstName} ${a.lastName} (${a.graduationYear})`,
   }));
 
   const specializationOptions = [
-    'Software Engineering', 'Data Science', 'Product Management', 'Marketing',
-    'Business Strategy', 'Consulting', 'Finance', 'Sales', 'Design',
-    'Engineering', 'Healthcare', 'Education', 'Entrepreneurship'
+    'Software Engineering',
+    'Data Science',
+    'Product Management',
+    'Marketing',
+    'Business Strategy',
+    'Consulting',
+    'Finance',
+    'Sales',
+    'Design',
+    'Engineering',
+    'Healthcare',
+    'Education',
+    'Entrepreneurship',
   ];
 
   const industryOptions = [
-    'Technology', 'Healthcare', 'Finance', 'Consulting', 'Education',
-    'Manufacturing', 'Retail', 'Media', 'Non-profit', 'Government'
+    'Technology',
+    'Healthcare',
+    'Finance',
+    'Consulting',
+    'Education',
+    'Manufacturing',
+    'Retail',
+    'Media',
+    'Non-profit',
+    'Government',
   ];
 
   const handleSave = async () => {
@@ -612,16 +797,16 @@ function NewRequestForm({ alumni, onSave, onCancel }: any) {
 
     try {
       setLoading(true);
-      
+
       await mockMentorshipService.createMenteeRequest({
         alumniId,
         requestedSpecializations: specializations,
         careerGoals,
         currentSituation,
         preferredMentorIndustries: industries,
-        timeCommitment
+        timeCommitment,
       });
-      
+
       onSave();
     } catch (err) {
       console.error('Failed to create request:', err);
@@ -637,7 +822,7 @@ function NewRequestForm({ alumni, onSave, onCancel }: any) {
         placeholder="Select mentee"
         data={alumniOptions}
         value={alumniId}
-        onChange={(value) => setAlumniId(value || '')}
+        onChange={value => setAlumniId(value || '')}
         searchable
         required
       />
@@ -647,7 +832,7 @@ function NewRequestForm({ alumni, onSave, onCancel }: any) {
         placeholder="Select specializations"
         data={specializationOptions}
         value={specializations[0] || ''}
-        onChange={(value) => setSpecializations(value ? [value] : [])}
+        onChange={value => setSpecializations(value ? [value] : [])}
         searchable
         required
       />
@@ -656,7 +841,7 @@ function NewRequestForm({ alumni, onSave, onCancel }: any) {
         label="Career Goals"
         placeholder="Describe the mentee's career goals..."
         value={careerGoals}
-        onChange={(e) => setCareerGoals(e.target.value)}
+        onChange={e => setCareerGoals(e.target.value)}
         required
         rows={3}
       />
@@ -665,7 +850,7 @@ function NewRequestForm({ alumni, onSave, onCancel }: any) {
         label="Current Situation"
         placeholder="Describe the mentee's current situation..."
         value={currentSituation}
-        onChange={(e) => setCurrentSituation(e.target.value)}
+        onChange={e => setCurrentSituation(e.target.value)}
         rows={3}
       />
 
@@ -674,7 +859,7 @@ function NewRequestForm({ alumni, onSave, onCancel }: any) {
         placeholder="Select preferred industries"
         data={industryOptions}
         value={industries[0] || ''}
-        onChange={(value) => setIndustries(value ? [value] : [])}
+        onChange={value => setIndustries(value ? [value] : [])}
         searchable
       />
 
@@ -685,10 +870,10 @@ function NewRequestForm({ alumni, onSave, onCancel }: any) {
           { value: 'Weekly meetings', label: 'Weekly meetings' },
           { value: 'Bi-weekly meetings', label: 'Bi-weekly meetings' },
           { value: 'Monthly meetings', label: 'Monthly meetings' },
-          { value: 'As needed', label: 'As needed' }
+          { value: 'As needed', label: 'As needed' },
         ]}
         value={timeCommitment}
-        onChange={(value) => setTimeCommitment(value || '')}
+        onChange={value => setTimeCommitment(value || '')}
       />
 
       <Group justify="flex-end">

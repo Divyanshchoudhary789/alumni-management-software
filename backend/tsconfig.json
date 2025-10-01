@@ -52,7 +52,8 @@
     /* Node.js Compatibility */
     "types": [
       "node",
-      "express"
+      "express",
+      "jest"
     ]
   },
   "include": [

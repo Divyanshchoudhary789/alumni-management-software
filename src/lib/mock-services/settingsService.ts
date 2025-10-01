@@ -125,29 +125,29 @@ class SettingsService {
         smtpUser: 'system@university.edu',
         smtpPassword: '',
         fromEmail: 'noreply@university.edu',
-        fromName: 'Alumni Management System'
+        fromName: 'Alumni Management System',
       },
       notificationSettings: {
         enableEmailNotifications: true,
         enablePushNotifications: false,
-        defaultNotificationFrequency: 'daily'
+        defaultNotificationFrequency: 'daily',
       },
       integrationSettings: {
         googleOAuth: {
           enabled: false,
           clientId: '',
-          clientSecret: ''
+          clientSecret: '',
         },
         linkedinOAuth: {
           enabled: false,
           clientId: '',
-          clientSecret: ''
+          clientSecret: '',
         },
         paymentProcessor: {
           provider: 'none',
           publicKey: '',
-          secretKey: ''
-        }
+          secretKey: '',
+        },
       },
       systemPreferences: {
         defaultTimeZone: 'America/New_York',
@@ -156,10 +156,10 @@ class SettingsService {
         language: 'en',
         maintenanceMode: false,
         allowSelfRegistration: true,
-        requireEmailVerification: true
+        requireEmailVerification: true,
       },
       updatedAt: new Date(),
-      updatedBy: 'admin'
+      updatedBy: 'admin',
     };
   }
 
@@ -187,54 +187,57 @@ class SettingsService {
           view: true,
           create: false,
           edit: false,
-          delete: false
+          delete: false,
         },
         events: {
           view: true,
           create: false,
           edit: false,
           delete: false,
-          manageRegistrations: false
+          manageRegistrations: false,
         },
         communications: {
           view: true,
           create: false,
           edit: false,
           delete: false,
-          send: false
+          send: false,
         },
         donations: {
           view: false,
           create: false,
           edit: false,
           delete: false,
-          viewReports: false
+          viewReports: false,
         },
         mentorship: {
           view: true,
           create: true,
           edit: false,
           delete: false,
-          manageConnections: false
+          manageConnections: false,
         },
         analytics: {
           view: false,
           export: false,
-          viewSensitiveData: false
+          viewSensitiveData: false,
         },
         settings: {
           view: false,
           edit: false,
           manageUsers: false,
-          manageIntegrations: false
-        }
+          manageIntegrations: false,
+        },
       },
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
   }
 
-  async updateUserPermissions(userId: string, permissions: UserPermission['permissions']): Promise<void> {
+  async updateUserPermissions(
+    userId: string,
+    permissions: UserPermission['permissions']
+  ): Promise<void> {
     await this.delay();
     console.log('Updating user permissions:', userId, permissions);
     // In a real implementation, this would update permissions via API
@@ -254,7 +257,7 @@ class SettingsService {
       welcomeMessage: 'Welcome to our Alumni Community!',
       enableCustomBranding: true,
       logoPosition: 'left',
-      theme: 'light'
+      theme: 'light',
     };
   }
 
@@ -272,40 +275,42 @@ class SettingsService {
         enabled: false,
         clientId: '',
         clientSecret: '',
-        redirectUri: `${window.location.origin}/auth/callback/google`
+        redirectUri: `${window.location.origin}/auth/callback/google`,
       },
       linkedinOAuth: {
         enabled: false,
         clientId: '',
         clientSecret: '',
-        redirectUri: `${window.location.origin}/auth/callback/linkedin`
+        redirectUri: `${window.location.origin}/auth/callback/linkedin`,
       },
       emailProvider: {
-        provider: 'smtp'
+        provider: 'smtp',
       },
       paymentProcessor: {
-        provider: 'none'
+        provider: 'none',
       },
       analytics: {
         googleAnalytics: {
-          enabled: false
+          enabled: false,
         },
         mixpanel: {
-          enabled: false
-        }
+          enabled: false,
+        },
       },
       socialMedia: {
         facebook: {
-          enabled: false
+          enabled: false,
         },
         twitter: {
-          enabled: false
-        }
-      }
+          enabled: false,
+        },
+      },
     };
   }
 
-  async updateIntegrationSettings(settings: IntegrationSettings): Promise<void> {
+  async updateIntegrationSettings(
+    settings: IntegrationSettings
+  ): Promise<void> {
     await this.delay();
     console.log('Updating integration settings:', settings);
     // In a real implementation, this would save integration settings
@@ -328,30 +333,30 @@ class SettingsService {
         requireLowercase: true,
         requireNumbers: true,
         requireSpecialChars: false,
-        passwordExpiry: 90
+        passwordExpiry: 90,
       },
       sessionSettings: {
         sessionTimeout: 60,
         maxConcurrentSessions: 3,
-        requireReauthentication: false
+        requireReauthentication: false,
       },
       twoFactorAuth: {
         enabled: false,
         enforceForAdmins: true,
-        allowedMethods: ['totp', 'sms']
+        allowedMethods: ['totp', 'sms'],
       },
       loginSecurity: {
         maxFailedAttempts: 5,
         lockoutDuration: 15,
         enableCaptcha: true,
-        allowedIpRanges: []
+        allowedIpRanges: [],
       },
       auditSettings: {
         enableAuditLog: true,
         retentionPeriod: 365,
         logFailedLogins: true,
-        logDataChanges: true
-      }
+        logDataChanges: true,
+      },
     };
   }
 

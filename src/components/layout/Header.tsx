@@ -106,7 +106,7 @@ export function Header({
     router.push(result.url);
     setShowSearchResults(false);
     clearSearch();
-    
+
     // Reset navigation state after a short delay
     setTimeout(() => setIsNavigating(false), 500);
   };
@@ -120,7 +120,9 @@ export function Header({
 
     setIsSearching(true);
     try {
-      const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      const response = await fetch(
+        `/api/search?q=${encodeURIComponent(query)}`
+      );
       const data = await response.json();
       setSearchResults(data.results || []);
       setShowSearchResults(true);
@@ -150,8 +152,6 @@ export function Header({
     }
   };
 
-
-
   return (
     <Group h="100%" px="md" justify="space-between">
       <Group gap="sm">
@@ -179,10 +179,12 @@ export function Header({
           <form onSubmit={handleSearch}>
             <TextInput
               placeholder="Search alumni, events..."
-              leftSection={<IconSearch style={{ width: rem(16), height: rem(16) }} />}
+              leftSection={
+                <IconSearch style={{ width: rem(16), height: rem(16) }} />
+              }
               rightSection={isSearching ? <Loader size="xs" /> : null}
               value={searchQuery}
-              onChange={(event) => setSearchQuery(event.currentTarget.value)}
+              onChange={event => setSearchQuery(event.currentTarget.value)}
               onFocus={handleSearchFocus}
               className={classes.searchInput}
               visibleFrom="sm"
@@ -195,7 +197,7 @@ export function Header({
             transition="fade"
             duration={200}
           >
-            {(styles) => (
+            {styles => (
               <Paper
                 shadow="md"
                 p="xs"
@@ -203,7 +205,7 @@ export function Header({
                 style={styles}
               >
                 <Stack gap="xs">
-                  {searchResults.slice(0, 5).map((result) => (
+                  {searchResults.slice(0, 5).map(result => (
                     <UnstyledButton
                       key={result.id}
                       onClick={() => handleSearchResultClick(result)}
@@ -244,9 +246,9 @@ export function Header({
 
         <div className={classes.notificationButton}>
           <Indicator inline label="3" size={16} color="red" disabled={false}>
-            <ActionIcon 
-              variant="subtle" 
-              size="lg" 
+            <ActionIcon
+              variant="subtle"
+              size="lg"
               aria-label="Notifications (3 unread)"
               title="Notifications"
             >

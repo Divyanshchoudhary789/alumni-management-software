@@ -16,14 +16,19 @@ import {
   Image,
   Box,
   Text,
-  rem
+  rem,
 } from '@mantine/core';
 import { DateTimePicker } from '@mantine/dates';
 import { useForm } from '@mantine/form';
-import { IconUpload, IconAlertCircle, IconCalendar, IconMapPin } from '@tabler/icons-react';
+import {
+  IconUpload,
+  IconAlertCircle,
+  IconCalendar,
+  IconMapPin,
+} from '@tabler/icons-react';
 import { Event } from '@/types';
 import { notifications } from '@mantine/notifications';
-import { eventsApiService } from '@/services/api/eventsService';
+import { eventsApiService } from '@/services/api';
 
 interface EventFormData {
   title: string;
@@ -43,9 +48,16 @@ interface EventFormProps {
   loading?: boolean;
 }
 
-export function EventForm({ event, onSubmit, onCancel, loading = false }: EventFormProps) {
+export function EventForm({
+  event,
+  onSubmit,
+  onCancel,
+  loading = false,
+}: EventFormProps) {
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>(event?.imageUrl || '');
+  const [imagePreview, setImagePreview] = useState<string>(
+    event?.imageUrl || ''
+  );
 
   const form = useForm<EventFormData>({
     initialValues: {
@@ -56,30 +68,30 @@ export function EventForm({ event, onSubmit, onCancel, loading = false }: EventF
       capacity: event?.capacity || 50,
       registrationDeadline: event?.registrationDeadline || null,
       status: event?.status || 'draft',
-      imageUrl: event?.imageUrl || ''
+      imageUrl: event?.imageUrl || '',
     },
     validate: {
-      title: (value) => (!value ? 'Event title is required' : null),
-      description: (value) => (!value ? 'Event description is required' : null),
-      eventDate: (value) => (!value ? 'Event date is required' : null),
-      location: (value) => (!value ? 'Event location is required' : null),
-      capacity: (value) => (value < 1 ? 'Capacity must be at least 1' : null),
+      title: value => (!value ? 'Event title is required' : null),
+      description: value => (!value ? 'Event description is required' : null),
+      eventDate: value => (!value ? 'Event date is required' : null),
+      location: value => (!value ? 'Event location is required' : null),
+      capacity: value => (value < 1 ? 'Capacity must be at least 1' : null),
       registrationDeadline: (value, values) => {
         if (!value) return 'Registration deadline is required';
         if (values.eventDate && value >= values.eventDate) {
           return 'Registration deadline must be before event date';
         }
         return null;
-      }
-    }
+      },
+    },
   });
 
   const handleImageUpload = (file: File | null) => {
     setImageFile(file);
-    
+
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = e => {
         const result = e.target?.result as string;
         setImagePreview(result);
         form.setFieldValue('imageUrl', result);
@@ -94,11 +106,15 @@ export function EventForm({ event, onSubmit, onCancel, loading = false }: EventF
   const handleSubmit = async (values: EventFormData) => {
     try {
       // Validate dates
-      if (values.eventDate && values.eventDate <= new Date() && values.status === 'published') {
+      if (
+        values.eventDate &&
+        values.eventDate <= new Date() &&
+        values.status === 'published'
+      ) {
         notifications.show({
           title: 'Validation Error',
           message: 'Published events must have a future date',
-          color: 'red'
+          color: 'red',
         });
         return;
       }
@@ -108,7 +124,7 @@ export function EventForm({ event, onSubmit, onCancel, loading = false }: EventF
       notifications.show({
         title: 'Error',
         message: error.message || 'Failed to save event',
-        color: 'red'
+        color: 'red',
       });
     }
   };
@@ -117,7 +133,7 @@ export function EventForm({ event, onSubmit, onCancel, loading = false }: EventF
     { value: 'draft', label: 'Draft' },
     { value: 'published', label: 'Published' },
     { value: 'cancelled', label: 'Cancelled' },
-    { value: 'completed', label: 'Completed' }
+    { value: 'completed', label: 'Completed' },
   ];
 
   const locationSuggestions = [
@@ -127,15 +143,13 @@ export function EventForm({ event, onSubmit, onCancel, loading = false }: EventF
     'Hotel Ballroom',
     'Restaurant Private Room',
     'Company Office',
-    'Community Center'
+    'Community Center',
   ];
 
   return (
     <Paper p="xl" withBorder>
       <Stack gap="lg">
-        <Title order={2}>
-          {event ? 'Edit Event' : 'Create New Event'}
-        </Title>
+        <Title order={2}>{event ? 'Edit Event' : 'Create New Event'}</Title>
 
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <Stack gap="md">
@@ -161,7 +175,9 @@ export function EventForm({ event, onSubmit, onCancel, loading = false }: EventF
                 label="Event Date & Time"
                 placeholder="Select date and time"
                 required
-                leftSection={<IconCalendar style={{ width: rem(16), height: rem(16) }} />}
+                leftSection={
+                  <IconCalendar style={{ width: rem(16), height: rem(16) }} />
+                }
                 minDate={new Date()}
                 {...form.getInputProps('eventDate')}
               />
@@ -170,7 +186,9 @@ export function EventForm({ event, onSubmit, onCancel, loading = false }: EventF
                 label="Registration Deadline"
                 placeholder="Select deadline"
                 required
-                leftSection={<IconCalendar style={{ width: rem(16), height: rem(16) }} />}
+                leftSection={
+                  <IconCalendar style={{ width: rem(16), height: rem(16) }} />
+                }
                 minDate={new Date()}
                 maxDate={form.values.eventDate || undefined}
                 {...form.getInputProps('registrationDeadline')}
@@ -185,7 +203,9 @@ export function EventForm({ event, onSubmit, onCancel, loading = false }: EventF
                 required
                 searchable
                 data={locationSuggestions}
-                leftSection={<IconMapPin style={{ width: rem(16), height: rem(16) }} />}
+                leftSection={
+                  <IconMapPin style={{ width: rem(16), height: rem(16) }} />
+                }
                 {...form.getInputProps('location')}
               />
 
@@ -213,11 +233,13 @@ export function EventForm({ event, onSubmit, onCancel, loading = false }: EventF
               <Text size="sm" fw={500}>
                 Event Image
               </Text>
-              
+
               <FileInput
                 placeholder="Upload event image"
                 accept="image/*"
-                leftSection={<IconUpload style={{ width: rem(16), height: rem(16) }} />}
+                leftSection={
+                  <IconUpload style={{ width: rem(16), height: rem(16) }} />
+                }
                 onChange={handleImageUpload}
                 clearable
               />
@@ -240,18 +262,30 @@ export function EventForm({ event, onSubmit, onCancel, loading = false }: EventF
             </Stack>
 
             {/* Validation Warnings */}
-            {form.values.status === 'published' && form.values.eventDate && form.values.eventDate <= new Date() && (
-              <Alert icon={<IconAlertCircle />} color="orange" title="Date Warning">
-                Published events should have a future date. Consider changing the status to draft or updating the date.
-              </Alert>
-            )}
+            {form.values.status === 'published' &&
+              form.values.eventDate &&
+              form.values.eventDate <= new Date() && (
+                <Alert
+                  icon={<IconAlertCircle />}
+                  color="orange"
+                  title="Date Warning"
+                >
+                  Published events should have a future date. Consider changing
+                  the status to draft or updating the date.
+                </Alert>
+              )}
 
-            {form.values.registrationDeadline && form.values.eventDate && 
-             form.values.registrationDeadline >= form.values.eventDate && (
-              <Alert icon={<IconAlertCircle />} color="red" title="Deadline Error">
-                Registration deadline must be before the event date.
-              </Alert>
-            )}
+            {form.values.registrationDeadline &&
+              form.values.eventDate &&
+              form.values.registrationDeadline >= form.values.eventDate && (
+                <Alert
+                  icon={<IconAlertCircle />}
+                  color="red"
+                  title="Deadline Error"
+                >
+                  Registration deadline must be before the event date.
+                </Alert>
+              )}
 
             {/* Form Actions */}
             <Group justify="flex-end" mt="xl">

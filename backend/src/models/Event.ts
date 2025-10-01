@@ -40,7 +40,6 @@ const EventSchema = new Schema<IEvent>({
   eventDate: {
     type: Date,
     required: true,
-    index: true,
   },
   location: {
     type: String,
@@ -69,7 +68,6 @@ const EventSchema = new Schema<IEvent>({
     enum: ['draft', 'published', 'cancelled', 'completed'],
     default: 'draft',
     required: true,
-    index: true,
   },
   imageUrl: {
     type: String,
@@ -79,7 +77,6 @@ const EventSchema = new Schema<IEvent>({
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true,
-    index: true,
   },
 }, {
   timestamps: true,

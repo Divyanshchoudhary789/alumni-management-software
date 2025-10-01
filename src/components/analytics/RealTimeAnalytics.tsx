@@ -1,19 +1,25 @@
 'use client';
 
-import { 
-  Card, 
-  Title, 
-  Group, 
-  Text, 
-  SimpleGrid, 
-  Skeleton, 
-  Badge, 
+import {
+  Card,
+  Title,
+  Group,
+  Text,
+  SimpleGrid,
+  Skeleton,
+  Badge,
   Timeline,
   ScrollArea,
   ActionIcon,
-  Indicator
+  Indicator,
 } from '@mantine/core';
-import { IconUsers, IconEye, IconUserPlus, IconCurrencyDollar, IconRefresh } from '@tabler/icons-react';
+import {
+  IconUsers,
+  IconEye,
+  IconUserPlus,
+  IconCurrencyDollar,
+  IconRefresh,
+} from '@tabler/icons-react';
 import { useState, useEffect, useRef } from 'react';
 import { mockAnalyticsService } from '@/lib/mock-services/analyticsService';
 
@@ -99,8 +105,10 @@ export function RealTimeAnalytics() {
 
   const formatTimeAgo = (timestamp: Date) => {
     const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - timestamp.getTime()) / 1000);
-    
+    const diffInSeconds = Math.floor(
+      (now.getTime() - timestamp.getTime()) / 1000
+    );
+
     if (diffInSeconds < 60) {
       return `${diffInSeconds}s ago`;
     } else if (diffInSeconds < 3600) {
@@ -129,7 +137,9 @@ export function RealTimeAnalytics() {
   if (!data) {
     return (
       <Card withBorder radius="md" p="lg">
-        <Text c="dimmed" ta="center">Failed to load real-time data</Text>
+        <Text c="dimmed" ta="center">
+          Failed to load real-time data
+        </Text>
       </Card>
     );
   }
@@ -141,13 +151,13 @@ export function RealTimeAnalytics() {
         <Group justify="space-between" mb="md">
           <Group>
             <Title order={4}>Live Metrics</Title>
-            <Indicator 
-              color={isLive ? 'green' : 'gray'} 
+            <Indicator
+              color={isLive ? 'green' : 'gray'}
               size={8}
               processing={isLive}
             >
-              <Badge 
-                variant="light" 
+              <Badge
+                variant="light"
                 color={isLive ? 'green' : 'gray'}
                 size="sm"
               >
@@ -155,7 +165,7 @@ export function RealTimeAnalytics() {
               </Badge>
             </Indicator>
           </Group>
-          
+
           <ActionIcon
             variant="light"
             onClick={toggleLiveUpdates}
@@ -169,41 +179,62 @@ export function RealTimeAnalytics() {
           <div>
             <Group gap="xs" mb="xs">
               <IconUsers size={16} color="var(--mantine-color-blue-6)" />
-              <Text size="sm" c="dimmed">Active Users</Text>
+              <Text size="sm" c="dimmed">
+                Active Users
+              </Text>
             </Group>
-            <Text size="xl" fw={700}>{data.activeUsers}</Text>
+            <Text size="xl" fw={700}>
+              {data.activeUsers}
+            </Text>
           </div>
 
           <div>
             <Group gap="xs" mb="xs">
               <IconEye size={16} color="var(--mantine-color-green-6)" />
-              <Text size="sm" c="dimmed">Page Views</Text>
+              <Text size="sm" c="dimmed">
+                Page Views
+              </Text>
             </Group>
-            <Text size="xl" fw={700}>{data.liveMetrics.pageViews}</Text>
+            <Text size="xl" fw={700}>
+              {data.liveMetrics.pageViews}
+            </Text>
           </div>
 
           <div>
             <Group gap="xs" mb="xs">
               <IconUserPlus size={16} color="var(--mantine-color-orange-6)" />
-              <Text size="sm" c="dimmed">New Registrations</Text>
+              <Text size="sm" c="dimmed">
+                New Registrations
+              </Text>
             </Group>
-            <Text size="xl" fw={700}>{data.liveMetrics.newRegistrations}</Text>
+            <Text size="xl" fw={700}>
+              {data.liveMetrics.newRegistrations}
+            </Text>
           </div>
 
           <div>
             <Group gap="xs" mb="xs">
-              <IconCurrencyDollar size={16} color="var(--mantine-color-teal-6)" />
-              <Text size="sm" c="dimmed">Donations Today</Text>
+              <IconCurrencyDollar
+                size={16}
+                color="var(--mantine-color-teal-6)"
+              />
+              <Text size="sm" c="dimmed">
+                Donations Today
+              </Text>
             </Group>
-            <Text size="xl" fw={700}>{data.liveMetrics.donations}</Text>
+            <Text size="xl" fw={700}>
+              {data.liveMetrics.donations}
+            </Text>
           </div>
         </SimpleGrid>
       </Card>
 
       {/* Recent Activity Feed */}
       <Card withBorder radius="md" p="lg">
-        <Title order={4} mb="md">Recent Activity</Title>
-        
+        <Title order={4} mb="md">
+          Recent Activity
+        </Title>
+
         <ScrollArea h={300}>
           <Timeline active={-1} bulletSize={24} lineWidth={2}>
             {data.recentActions.map((action, index) => (
@@ -212,10 +243,12 @@ export function RealTimeAnalytics() {
                 bullet={getActionIcon(action.action)}
                 title={
                   <Group gap="xs">
-                    <Text size="sm" fw={500}>{action.action}</Text>
-                    <Badge 
-                      size="xs" 
-                      variant="light" 
+                    <Text size="sm" fw={500}>
+                      {action.action}
+                    </Text>
+                    <Badge
+                      size="xs"
+                      variant="light"
                       color={getActionColor(action.action)}
                     >
                       {formatTimeAgo(action.timestamp)}
@@ -234,18 +267,23 @@ export function RealTimeAnalytics() {
 
       {/* Active Users Chart Placeholder */}
       <Card withBorder radius="md" p="lg">
-        <Title order={4} mb="md">Active Users (Last Hour)</Title>
-        <div style={{ 
-          height: 200, 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          backgroundColor: 'var(--mantine-color-gray-0)',
-          borderRadius: 'var(--mantine-radius-md)',
-          border: '1px dashed var(--mantine-color-gray-4)'
-        }}>
+        <Title order={4} mb="md">
+          Active Users (Last Hour)
+        </Title>
+        <div
+          style={{
+            height: 200,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'var(--mantine-color-gray-0)',
+            borderRadius: 'var(--mantine-radius-md)',
+            border: '1px dashed var(--mantine-color-gray-4)',
+          }}
+        >
           <Text c="dimmed" ta="center">
-            Real-time user activity chart<br />
+            Real-time user activity chart
+            <br />
             <Text size="xs">Updates every 5 seconds when live</Text>
           </Text>
         </div>
@@ -253,29 +291,31 @@ export function RealTimeAnalytics() {
 
       {/* System Status */}
       <Card withBorder radius="md" p="lg">
-        <Title order={4} mb="md">System Status</Title>
-        
+        <Title order={4} mb="md">
+          System Status
+        </Title>
+
         <Group justify="space-between" mb="md">
           <Text size="sm">API Response Time</Text>
           <Badge variant="light" color="green">
             ~200ms
           </Badge>
         </Group>
-        
+
         <Group justify="space-between" mb="md">
           <Text size="sm">Database Status</Text>
           <Badge variant="light" color="green">
             Healthy
           </Badge>
         </Group>
-        
+
         <Group justify="space-between" mb="md">
           <Text size="sm">Cache Hit Rate</Text>
           <Badge variant="light" color="blue">
             94.2%
           </Badge>
         </Group>
-        
+
         <Group justify="space-between">
           <Text size="sm">Last Updated</Text>
           <Text size="sm" c="dimmed">

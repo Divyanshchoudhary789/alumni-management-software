@@ -1,6 +1,14 @@
 'use client';
 
-import { Card, Title, Group, SegmentedControl, Grid, Text, Skeleton } from '@mantine/core';
+import {
+  Card,
+  Title,
+  Group,
+  SegmentedControl,
+  Grid,
+  Text,
+  Skeleton,
+} from '@mantine/core';
 import { useState } from 'react';
 import { AreaChart, BarChart, PieChart } from '@mantine/charts';
 
@@ -26,7 +34,10 @@ export function DonationCharts({ stats, loading }: DonationChartsProps) {
   const monthlyData = Object.entries(stats.monthlyTotals || {})
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([month, amount]) => ({
-      month: new Date(month + '-01').toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+      month: new Date(month + '-01').toLocaleDateString('en-US', {
+        month: 'short',
+        year: 'numeric',
+      }),
       amount: amount as number,
     }));
 
@@ -64,30 +75,28 @@ export function DonationCharts({ stats, loading }: DonationChartsProps) {
             withXAxis
             withYAxis
             yAxisProps={{
-              tickFormatter: (value) => `$${(value / 1000).toFixed(0)}k`,
+              tickFormatter: value => `$${(value / 1000).toFixed(0)}k`,
             }}
           />
         );
-      
+
       case 'purposes':
         return (
           <BarChart
             h={300}
             data={purposeData.slice(0, 8)} // Top 8 purposes
             dataKey="name"
-            series={[
-              { name: 'value', label: 'Amount', color: 'green.6' },
-            ]}
+            series={[{ name: 'value', label: 'Amount', color: 'green.6' }]}
             tickLine="y"
             gridAxis="y"
             withXAxis
             withYAxis
             yAxisProps={{
-              tickFormatter: (value) => `$${(value / 1000).toFixed(0)}k`,
+              tickFormatter: value => `$${(value / 1000).toFixed(0)}k`,
             }}
           />
         );
-      
+
       case 'methods':
         return (
           <PieChart
@@ -99,7 +108,7 @@ export function DonationCharts({ stats, loading }: DonationChartsProps) {
             withTooltip
           />
         );
-      
+
       default:
         return null;
     }
@@ -128,26 +137,40 @@ export function DonationCharts({ stats, loading }: DonationChartsProps) {
         {chartType === 'trends' && (
           <>
             <Grid.Col span={4}>
-              <Text size="sm" c="dimmed">Peak Month</Text>
+              <Text size="sm" c="dimmed">
+                Peak Month
+              </Text>
               <Text fw={500}>
-                {monthlyData.length > 0 
-                  ? monthlyData.reduce((max, curr) => curr.amount > max.amount ? curr : max).month
-                  : 'N/A'
-                }
+                {monthlyData.length > 0
+                  ? monthlyData.reduce((max, curr) =>
+                      curr.amount > max.amount ? curr : max
+                    ).month
+                  : 'N/A'}
               </Text>
             </Grid.Col>
             <Grid.Col span={4}>
-              <Text size="sm" c="dimmed">Monthly Average</Text>
+              <Text size="sm" c="dimmed">
+                Monthly Average
+              </Text>
               <Text fw={500}>
-                ${monthlyData.length > 0 
-                  ? (monthlyData.reduce((sum, curr) => sum + curr.amount, 0) / monthlyData.length / 1000).toFixed(1)
-                  : '0'
-                }k
+                $
+                {monthlyData.length > 0
+                  ? (
+                      monthlyData.reduce((sum, curr) => sum + curr.amount, 0) /
+                      monthlyData.length /
+                      1000
+                    ).toFixed(1)
+                  : '0'}
+                k
               </Text>
             </Grid.Col>
             <Grid.Col span={4}>
-              <Text size="sm" c="dimmed">Growth Trend</Text>
-              <Text fw={500} c="green">+12.5%</Text>
+              <Text size="sm" c="dimmed">
+                Growth Trend
+              </Text>
+              <Text fw={500} c="green">
+                +12.5%
+              </Text>
             </Grid.Col>
           </>
         )}
@@ -155,22 +178,31 @@ export function DonationCharts({ stats, loading }: DonationChartsProps) {
         {chartType === 'purposes' && (
           <>
             <Grid.Col span={4}>
-              <Text size="sm" c="dimmed">Top Purpose</Text>
+              <Text size="sm" c="dimmed">
+                Top Purpose
+              </Text>
               <Text fw={500}>
                 {purposeData.length > 0 ? purposeData[0].name : 'N/A'}
               </Text>
             </Grid.Col>
             <Grid.Col span={4}>
-              <Text size="sm" c="dimmed">Categories</Text>
+              <Text size="sm" c="dimmed">
+                Categories
+              </Text>
               <Text fw={500}>{purposeData.length}</Text>
             </Grid.Col>
             <Grid.Col span={4}>
-              <Text size="sm" c="dimmed">Diversity Index</Text>
+              <Text size="sm" c="dimmed">
+                Diversity Index
+              </Text>
               <Text fw={500}>
-                {purposeData.length > 0 
-                  ? (purposeData.length > 5 ? 'High' : purposeData.length > 2 ? 'Medium' : 'Low')
-                  : 'N/A'
-                }
+                {purposeData.length > 0
+                  ? purposeData.length > 5
+                    ? 'High'
+                    : purposeData.length > 2
+                      ? 'Medium'
+                      : 'Low'
+                  : 'N/A'}
               </Text>
             </Grid.Col>
           </>
@@ -179,25 +211,43 @@ export function DonationCharts({ stats, loading }: DonationChartsProps) {
         {chartType === 'methods' && (
           <>
             <Grid.Col span={4}>
-              <Text size="sm" c="dimmed">Most Popular</Text>
+              <Text size="sm" c="dimmed">
+                Most Popular
+              </Text>
               <Text fw={500}>
-                {paymentMethodData.length > 0 ? paymentMethodData[0].name : 'N/A'}
+                {paymentMethodData.length > 0
+                  ? paymentMethodData[0].name
+                  : 'N/A'}
               </Text>
             </Grid.Col>
             <Grid.Col span={4}>
-              <Text size="sm" c="dimmed">Methods Used</Text>
+              <Text size="sm" c="dimmed">
+                Methods Used
+              </Text>
               <Text fw={500}>{paymentMethodData.length}</Text>
             </Grid.Col>
             <Grid.Col span={4}>
-              <Text size="sm" c="dimmed">Digital %</Text>
+              <Text size="sm" c="dimmed">
+                Digital %
+              </Text>
               <Text fw={500}>
-                {paymentMethodData.length > 0 
-                  ? Math.round((paymentMethodData.filter(m => 
-                      ['Credit Card', 'PayPal', 'Cryptocurrency'].includes(m.name)
-                    ).reduce((sum, m) => sum + m.value, 0) / 
-                    paymentMethodData.reduce((sum, m) => sum + m.value, 0)) * 100)
-                  : 0
-                }%
+                {paymentMethodData.length > 0
+                  ? Math.round(
+                      (paymentMethodData
+                        .filter(m =>
+                          ['Credit Card', 'PayPal', 'Cryptocurrency'].includes(
+                            m.name
+                          )
+                        )
+                        .reduce((sum, m) => sum + m.value, 0) /
+                        paymentMethodData.reduce(
+                          (sum, m) => sum + m.value,
+                          0
+                        )) *
+                        100
+                    )
+                  : 0}
+                %
               </Text>
             </Grid.Col>
           </>

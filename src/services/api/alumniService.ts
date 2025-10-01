@@ -2,84 +2,78 @@ import { apiClient } from '@/lib/api';
 import { AlumniProfile } from '@/types';
 
 export interface AlumniListResponse {
-    alumni: AlumniProfile[];
-    pagination: {
-        currentPage: number;
-        totalPages: number;
-        totalItems: number;
-        itemsPerPage: number;
-        hasNextPage: boolean;
-        hasPrevPage: boolean;
-    };
+  alumni: AlumniProfile[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
 }
 
 export interface AlumniFilters {
-    page?: number;
-    limit?: number;
-    search?: string;
-    graduationYear?: number;
-    location?: string;
-    company?: string;
-    skills?: string;
-    sortBy?: string;
-    sortOrder?: 'asc' | 'desc';
+  page?: number;
+  limit?: number;
+  search?: string;
+  graduationYear?: number;
+  location?: string;
+  company?: string;
+  skills?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface AlumniStats {
-    totalAlumni: number;
-    publicProfiles: number;
-    privateProfiles: number;
-    recentAlumni: number;
-    graduationYearStats: Array<{ _id: number; count: number }>;
-    locationStats: Array<{ _id: string; count: number }>;
-    companyStats: Array<{ _id: string; count: number }>;
+  totalAlumni: number;
+  publicProfiles: number;
+  privateProfiles: number;
+  recentAlumni: number;
+  graduationYearStats: Array<{ _id: number; count: number }>;
+  locationStats: Array<{ _id: string; count: number }>;
+  companyStats: Array<{ _id: string; count: number }>;
 }
 
 class AlumniApiService {
-    // Get all alumni with filters
-    async getAlumni(filters: AlumniFilters = {}): Promise<AlumniListResponse> {
-        const queryParams = new URLSearchParams();
+  // Get all alumni with filters
+  async getAlumni(filters: AlumniFilters = {}): Promise<AlumniListResponse> {
+    return apiClient.get<AlumniListResponse>('/alumni', filters);
+  }
 
-        Object.entries(filters).forEach(([key, value]) => {
-            if (value !== undefined && value !== null) {
-                queryParams.append(key, value.toString());
-            }
-        });
+  // Get single alumni profile
+  async getAlumniById(id: string): Promise<AlumniProfile> {
+    return apiClient.get<AlumniProfile>(`/alumni/${id}`);
+  }
 
-        const endpoint = `/api/alumni${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-        return apiClient.get<AlumniListResponse>(endpoint);
-    }
+  // Create alumni profile (admin only)
+  async createAlumni(data: Partial<AlumniProfile>): Promise<AlumniProfile> {
+    return apiClient.post<AlumniProfile>('/alumni', data);
+  }
 
-    // Get single alumni profile
-    async getAlumniById(id: string): Promise<AlumniProfile> {
-        return apiClient.get<AlumniProfile>(`/api/alumni/${id}`);
-    }
+  // Update alumni profile
+  async updateAlumni(
+    id: string,
+    data: Partial<AlumniProfile>
+  ): Promise<AlumniProfile> {
+    return apiClient.put<AlumniProfile>(`/alumni/${id}`, data);
+  }
 
-    // Create alumni profile (admin only)
-    async createAlumni(data: Partial<AlumniProfile>): Promise<AlumniProfile> {
-        return apiClient.post<AlumniProfile>('/api/alumni', data);
-    }
+  // Delete alumni profile (admin only)
+  async deleteAlumni(id: string): Promise<{ message: string }> {
+    return apiClient.delete<{ message: string }>(`/alumni/${id}`);
+  }
 
-    // Update alumni profile
-    async updateAlumni(id: string, data: Partial<AlumniProfile>): Promise<AlumniProfile> {
-        return apiClient.put<AlumniProfile>(`/api/alumni/${id}`, data);
-    }
+  // Get alumni statistics (admin only)
+  async getAlumniStats(): Promise<AlumniStats> {
+    return apiClient.get<AlumniStats>('/alumni/stats/overview');
+  }
 
-    // Delete alumni profile (admin only)
-    async deleteAlumni(id: string): Promise<{ message: string }> {
-        return apiClient.delete<{ message: string }>(`/api/alumni/${id}`);
-    }
-
-    // Get alumni statistics (admin only)
-    async getAlumniStats(): Promise<AlumniStats> {
-        return apiClient.get<AlumniStats>('/api/alumni/stats/overview');
-    }
-
-    // Search alumni
-    async searchAlumni(query: string): Promise<AlumniProfile[]> {
-        const response = await this.getAlumni({ search: query, limit: 10 });
-        return response.alumni;
-    }
+  // Search alumni
+  async searchAlumni(query: string): Promise<AlumniProfile[]> {
+    const response = await this.getAlumni({ search: query, limit: 10 });
+    return response.alumni;
+  }
 }
 
 export const alumniApiService = new AlumniApiService();

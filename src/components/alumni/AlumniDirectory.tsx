@@ -26,7 +26,7 @@ import {
   Avatar,
   Anchor,
   Tooltip,
-  Box
+  Box,
 } from '@mantine/core';
 import {
   IconSearch,
@@ -44,15 +44,15 @@ import {
   IconEye,
   IconEyeOff,
   IconChevronDown,
-  IconChevronUp
+  IconChevronUp,
 } from '@tabler/icons-react';
 import { AlumniProfile } from '@/types';
-import { alumniApiService, AlumniFilters } from '@/services/api/alumniService';
+import { mockAlumniService, AlumniFilters } from '@/lib/mock-services/alumniService';
 import { useUserRole } from '@/hooks/useUserRole';
 
 interface AlumniSortOptions {
-  sortBy: string;
-  sortOrder: 'asc' | 'desc';
+  field: keyof AlumniProfile;
+  direction: 'asc' | 'desc';
 }
 
 interface AlumniDirectoryProps {
@@ -68,7 +68,7 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
     page: 1,
     limit: 12,
     total: 0,
-    totalPages: 0
+    totalPages: 0,
   });
 
   // Filter states
@@ -87,7 +87,7 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
     degrees: [] as string[],
     locations: [] as string[],
     companies: [] as string[],
-    skills: [] as string[]
+    skills: [] as string[],
   });
 
   // Load alumni data
@@ -98,12 +98,12 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
 
       const sortOptions: AlumniSortOptions = {
         field: sortField,
-        direction: sortDirection
+        direction: sortDirection,
       };
 
       const currentFilters = {
         ...filters,
-        search: searchQuery || undefined
+        search: searchQuery || undefined,
       };
 
       const apiParams = {
@@ -112,19 +112,32 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
         page,
         limit: pagination.limit,
       };
-      
-      console.log('API Params:', apiParams);
-      const response = await alumniApiService.getAlumni(apiParams);
 
-      // Ensure response.alumni is an array
-      const alumniData = Array.isArray(response.alumni) ? response.alumni : [];
+      console.log('API Params:', apiParams);
+      const response = await mockAlumniService.getAlumni(
+        {
+          search: currentFilters.search,
+          graduationYear: currentFilters.graduationYear,
+          degree: currentFilters.degree,
+          location: currentFilters.location,
+          company: currentFilters.company,
+          skills: currentFilters.skills,
+          isPublic: currentFilters.isPublic,
+        },
+        sortOptions.field === 'lastName' ? { field: 'lastName', direction: sortOptions.direction } : undefined,
+        page,
+        pagination.limit
+      );
+
+      // Ensure response.data is an array
+      const alumniData = Array.isArray(response.data) ? response.data : [];
       setAlumni(alumniData);
-      
+
       setPagination({
-        page: response.pagination?.currentPage || 1,
-        limit: response.pagination?.itemsPerPage || 12,
-        total: response.pagination?.totalItems || 0,
-        totalPages: response.pagination?.totalPages || 0
+        page: response.pagination.page,
+        limit: response.pagination.limit,
+        total: response.pagination.total,
+        totalPages: response.pagination.totalPages,
       });
     } catch (err) {
       console.error('Alumni API Error:', err);
@@ -135,7 +148,7 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
         page: 1,
         limit: 12,
         total: 0,
-        totalPages: 0
+        totalPages: 0,
       });
     } finally {
       setLoading(false);
@@ -145,7 +158,7 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
   // Load filter options
   const loadFilterOptions = async () => {
     try {
-      const stats = await alumniApiService.getAlumniStats();
+      const stats = await mockAlumniService.getAlumniStats().then(res => res.data);
 
       setFilterOptions({
         graduationYears: Object.keys(stats.graduationYearDistribution)
@@ -154,7 +167,7 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
         degrees: [...new Set(alumni.map(a => a.degree))].sort(),
         locations: Object.keys(stats.locationDistribution).sort(),
         companies: stats.topCompanies.map(c => c.company),
-        skills: stats.topSkills.map(s => s.skill)
+        skills: stats.topSkills.map(s => s.skill),
       });
     } catch (err) {
       console.error('Failed to load filter options:', err);
@@ -175,7 +188,7 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
   const handleFilterChange = (key: keyof AlumniFilters, value: any) => {
     setFilters(prev => ({
       ...prev,
-      [key]: value || undefined
+      [key]: value || undefined,
     }));
   };
 
@@ -196,7 +209,7 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
   // Handle sort change
   const handleSortChange = (field: keyof AlumniProfile) => {
     if (field === sortField) {
-      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+      setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
     } else {
       setSortField(field);
       setSortDirection('asc');
@@ -262,7 +275,11 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
             }
           >
             Filters
-            {showFilters ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
+            {showFilters ? (
+              <IconChevronUp size={16} />
+            ) : (
+              <IconChevronDown size={16} />
+            )}
           </Button>
         </Group>
       </Group>
@@ -272,7 +289,7 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
         placeholder="Search alumni by name, company, position, skills, location..."
         leftSection={<IconSearch size={16} />}
         value={searchInput}
-        onChange={(e) => handleSearch(e.target.value)}
+        onChange={e => handleSearch(e.target.value)}
         mb="md"
         size="md"
         rightSection={loading && searchInput ? <Loader size="xs" /> : null}
@@ -287,7 +304,7 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
                 label="Graduation Year"
                 placeholder="e.g. 2020"
                 value={filters.graduationYear || ''}
-                onChange={(value) => handleFilterChange('graduationYear', value)}
+                onChange={value => handleFilterChange('graduationYear', value)}
                 min={1950}
                 max={new Date().getFullYear()}
               />
@@ -298,7 +315,7 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
                 placeholder="Select degree"
                 data={filterOptions.degrees}
                 value={filters.degree || null}
-                onChange={(value) => handleFilterChange('degree', value)}
+                onChange={value => handleFilterChange('degree', value)}
                 clearable
               />
             </Grid.Col>
@@ -308,7 +325,7 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
                 placeholder="Select location"
                 data={filterOptions.locations}
                 value={filters.location || null}
-                onChange={(value) => handleFilterChange('location', value)}
+                onChange={value => handleFilterChange('location', value)}
                 clearable
                 searchable
               />
@@ -319,7 +336,7 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
                 placeholder="Select company"
                 data={filterOptions.companies}
                 value={filters.company || null}
-                onChange={(value) => handleFilterChange('company', value)}
+                onChange={value => handleFilterChange('company', value)}
                 clearable
                 searchable
               />
@@ -330,7 +347,7 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
                 placeholder="Select skills"
                 data={filterOptions.skills}
                 value={filters.skills || []}
-                onChange={(value) => handleFilterChange('skills', value)}
+                onChange={value => handleFilterChange('skills', value)}
                 clearable
                 searchable
               />
@@ -339,8 +356,11 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
               <Switch
                 label="Public profiles only"
                 checked={filters.isPublic === true}
-                onChange={(event) =>
-                  handleFilterChange('isPublic', event.currentTarget.checked ? true : undefined)
+                onChange={event =>
+                  handleFilterChange(
+                    'isPublic',
+                    event.currentTarget.checked ? true : undefined
+                  )
                 }
                 mt="xl"
               />
@@ -351,7 +371,8 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
               Clear All Filters
             </Button>
             <Text size="sm" c="dimmed">
-              {activeFilterCount} filter{activeFilterCount !== 1 ? 's' : ''} active
+              {activeFilterCount} filter{activeFilterCount !== 1 ? 's' : ''}{' '}
+              active
             </Text>
           </Group>
         </Paper>
@@ -359,13 +380,24 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
 
       {/* Sort Options */}
       <Group mb="lg">
-        <Text size="sm" c="dimmed">Sort by:</Text>
+        <Text size="sm" c="dimmed">
+          Sort by:
+        </Text>
         <Group gap="xs">
           {[
             { field: 'lastName' as keyof AlumniProfile, label: 'Name' },
-            { field: 'graduationYear' as keyof AlumniProfile, label: 'Graduation Year' },
-            { field: 'currentCompany' as keyof AlumniProfile, label: 'Company' },
-            { field: 'createdAt' as keyof AlumniProfile, label: 'Recently Added' }
+            {
+              field: 'graduationYear' as keyof AlumniProfile,
+              label: 'Graduation Year',
+            },
+            {
+              field: 'currentCompany' as keyof AlumniProfile,
+              label: 'Company',
+            },
+            {
+              field: 'createdAt' as keyof AlumniProfile,
+              label: 'Recently Added',
+            },
           ].map(({ field, label }) => (
             <Button
               key={field}
@@ -374,9 +406,11 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
               onClick={() => handleSortChange(field)}
               rightSection={
                 sortField === field ? (
-                  sortDirection === 'asc' ?
-                    <IconSortAscending size={14} /> :
+                  sortDirection === 'asc' ? (
+                    <IconSortAscending size={14} />
+                  ) : (
                     <IconSortDescending size={14} />
+                  )
                 ) : null
               }
             >
@@ -404,21 +438,26 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
       {!loading && !error && (
         <>
           <Grid>
-            {alumni && alumni.length > 0 ? alumni.map((alumniProfile) => (
-              <Grid.Col key={alumniProfile.id} span={{ base: 12, sm: 6, lg: 4 }}>
-                <AlumniCard
-                  alumni={alumniProfile}
-                  onClick={() => {
-                    if (onSelectAlumni) {
-                      onSelectAlumni(alumniProfile);
-                    } else {
-                      // Navigate to alumni profile page
-                      window.location.href = `/alumni/${alumniProfile.id}`;
-                    }
-                  }}
-                />
-              </Grid.Col>
-            )) : (
+            {alumni && alumni.length > 0 ? (
+              alumni.map(alumniProfile => (
+                <Grid.Col
+                  key={alumniProfile.id}
+                  span={{ base: 12, sm: 6, lg: 4 }}
+                >
+                  <AlumniCard
+                    alumni={alumniProfile}
+                    onClick={() => {
+                      if (onSelectAlumni) {
+                        onSelectAlumni(alumniProfile);
+                      } else {
+                        // Navigate to alumni profile page
+                        window.location.href = `/alumni/${alumniProfile.id}`;
+                      }
+                    }}
+                  />
+                </Grid.Col>
+              ))
+            ) : (
               <Grid.Col span={12}>
                 <Text ta="center" c="dimmed" py="xl">
                   No alumni found. Try adjusting your filters.
@@ -432,7 +471,9 @@ export function AlumniDirectory({ onSelectAlumni }: AlumniDirectoryProps) {
             <Center py="xl">
               <Stack align="center">
                 <IconUser size={48} color="gray" />
-                <Text size="lg" c="dimmed">No alumni found</Text>
+                <Text size="lg" c="dimmed">
+                  No alumni found
+                </Text>
                 <Text size="sm" c="dimmed">
                   Try adjusting your search criteria or filters
                 </Text>
@@ -515,8 +556,12 @@ function AlumniCard({ alumni, onClick }: AlumniCardProps) {
           <Group gap="xs">
             <IconBriefcase size={16} color="gray" />
             <div>
-              <Text size="sm" fw={500}>{alumni.currentPosition}</Text>
-              <Text size="xs" c="dimmed">{alumni.currentCompany}</Text>
+              <Text size="sm" fw={500}>
+                {alumni.currentPosition}
+              </Text>
+              <Text size="xs" c="dimmed">
+                {alumni.currentCompany}
+              </Text>
             </div>
           </Group>
         )}
@@ -540,7 +585,7 @@ function AlumniCard({ alumni, onClick }: AlumniCardProps) {
         {alumni.skills.length > 0 && (
           <div>
             <Group gap="xs" mb="xs">
-              {alumni.skills.slice(0, 3).map((skill) => (
+              {alumni.skills.slice(0, 3).map(skill => (
                 <Badge key={skill} variant="light" size="sm">
                   {skill}
                 </Badge>
@@ -567,7 +612,7 @@ function AlumniCard({ alumni, onClick }: AlumniCardProps) {
                   component="a"
                   href={alumni.linkedinUrl}
                   target="_blank"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={e => e.stopPropagation()}
                 >
                   <IconBrandLinkedin size={16} />
                 </ActionIcon>
@@ -581,7 +626,7 @@ function AlumniCard({ alumni, onClick }: AlumniCardProps) {
                   component="a"
                   href={alumni.websiteUrl}
                   target="_blank"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={e => e.stopPropagation()}
                 >
                   <IconWorld size={16} />
                 </ActionIcon>
@@ -596,7 +641,7 @@ function AlumniCard({ alumni, onClick }: AlumniCardProps) {
                   size="sm"
                   component="a"
                   href={`tel:${alumni.phone}`}
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={e => e.stopPropagation()}
                 >
                   <IconPhone size={16} />
                 </ActionIcon>
@@ -608,13 +653,18 @@ function AlumniCard({ alumni, onClick }: AlumniCardProps) {
                 size="sm"
                 component="a"
                 href={`mailto:${alumni.firstName.toLowerCase()}.${alumni.lastName.toLowerCase()}@example.com`}
-                onClick={(e) => e.stopPropagation()}
+                onClick={e => e.stopPropagation()}
               >
                 <IconMail size={16} />
               </ActionIcon>
             </Tooltip>
           </Group>
         </Group>
+
+        {/* Last Updated */}
+        <Text size="xs" c="dimmed" mt="xs">
+          Last updated: {alumni.updatedAt.toLocaleDateString()}
+        </Text>
       </Stack>
     </Card>
   );

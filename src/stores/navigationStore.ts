@@ -49,44 +49,47 @@ export const useNavigationStore = create<NavigationState>((set, get) => ({
   searchResults: [],
   isNavigating: false,
   navigationHistory: ['/dashboard'],
-  
-  setActiveRoute: (route) => {
+
+  setActiveRoute: route => {
     set({ activeRoute: route });
     get().addToHistory(route);
   },
-  
-  setSearchQuery: (query) => set({ searchQuery: query }),
-  
-  setIsSearching: (searching) => set({ isSearching: searching }),
-  
-  setSearchResults: (results) => set({ searchResults: results }),
-  
-  setIsNavigating: (navigating) => set({ isNavigating: navigating }),
-  
-  addToHistory: (route) => {
+
+  setSearchQuery: query => set({ searchQuery: query }),
+
+  setIsSearching: searching => set({ isSearching: searching }),
+
+  setSearchResults: results => set({ searchResults: results }),
+
+  setIsNavigating: navigating => set({ isNavigating: navigating }),
+
+  addToHistory: route => {
     const { navigationHistory } = get();
     const newHistory = [...navigationHistory];
-    
+
     // Remove the route if it already exists to avoid duplicates
     const existingIndex = newHistory.indexOf(route);
     if (existingIndex > -1) {
       newHistory.splice(existingIndex, 1);
     }
-    
+
     // Add to the beginning
     newHistory.unshift(route);
-    
+
     // Keep only the last 10 routes
     if (newHistory.length > 10) {
       newHistory.pop();
     }
-    
+
     set({ navigationHistory: newHistory });
   },
-  
-  clearSearch: () => set({ searchQuery: '', searchResults: [], isSearching: false }),
-  
-  getRouteTitle: (route) => {
-    return routeTitles[route] || route.split('/').pop()?.replace('-', ' ') || 'Page';
+
+  clearSearch: () =>
+    set({ searchQuery: '', searchResults: [], isSearching: false }),
+
+  getRouteTitle: route => {
+    return (
+      routeTitles[route] || route.split('/').pop()?.replace('-', ' ') || 'Page'
+    );
   },
 }));

@@ -13,7 +13,7 @@ import {
   Card,
   Title,
   Alert,
-  Grid
+  Grid,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { IconInfoCircle, IconUser, IconBriefcase } from '@tabler/icons-react';
@@ -31,7 +31,7 @@ export function MentorProfileForm({
   initialData,
   onSave,
   onCancel,
-  loading = false
+  loading = false,
 }: MentorProfileFormProps) {
   const form = useForm({
     initialValues: {
@@ -41,27 +41,66 @@ export function MentorProfileForm({
       yearsOfExperience: initialData?.yearsOfExperience || 0,
       maxMentees: initialData?.maxMentees || 2,
       availability: initialData?.availability || 'Available',
-      preferredMeetingFrequency: initialData?.preferredMeetingFrequency || 'Bi-weekly',
-      communicationPreference: initialData?.communicationPreference || 'Video calls',
+      preferredMeetingFrequency:
+        initialData?.preferredMeetingFrequency || 'Bi-weekly',
+      communicationPreference:
+        initialData?.communicationPreference || 'Video calls',
       bio: initialData?.bio || '',
       isActive: initialData?.isActive ?? true,
       mentorshipAreas: initialData?.mentorshipAreas || [],
       timeZone: initialData?.timeZone || '',
       linkedinProfile: initialData?.linkedinProfile || '',
-      personalWebsite: initialData?.personalWebsite || ''
+      personalWebsite: initialData?.personalWebsite || '',
+      // Pricing fields
+      mentorshipType: initialData?.mentorshipType || 'free',
+      hourlyRate: initialData?.hourlyRate || 0,
+      sessionRate: initialData?.sessionRate || 0,
+      monthlyRate: initialData?.monthlyRate || 0,
+      currency: initialData?.currency || 'USD',
+      paymentMethods: initialData?.paymentMethods || ['stripe'],
     },
     validate: {
-      specializations: (value) => 
+      specializations: value =>
         value.length === 0 ? 'At least one specialization is required' : null,
-      industries: (value) => 
+      industries: value =>
         value.length === 0 ? 'At least one industry is required' : null,
-      yearsOfExperience: (value) => 
+      yearsOfExperience: value =>
         value < 0 ? 'Years of experience cannot be negative' : null,
-      maxMentees: (value) => 
+      maxMentees: value =>
         value < 1 ? 'Must be able to mentor at least 1 mentee' : null,
-      bio: (value) => 
-        value.length < 50 ? 'Bio must be at least 50 characters' : null
-    }
+      bio: value =>
+        value.length < 50 ? 'Bio must be at least 50 characters' : null,
+      mentorshipType: value => {
+        if (!['free', 'paid', 'both'].includes(value)) {
+          return 'Invalid mentorship type';
+        }
+        return null;
+      },
+      hourlyRate: (value, values) => {
+        if ((values.mentorshipType === 'paid' || values.mentorshipType === 'both') && (!value || value <= 0)) {
+          return 'Hourly rate is required for paid mentorship';
+        }
+        if (value && value < 0) return 'Rate cannot be negative';
+        if (value && value > 1000) return 'Rate cannot exceed $1000/hour';
+        return null;
+      },
+      sessionRate: value => {
+        if (value && value < 0) return 'Rate cannot be negative';
+        if (value && value > 5000) return 'Rate cannot exceed $5000/session';
+        return null;
+      },
+      monthlyRate: value => {
+        if (value && value < 0) return 'Rate cannot be negative';
+        if (value && value > 10000) return 'Rate cannot exceed $10000/month';
+        return null;
+      },
+      paymentMethods: (value, values) => {
+        if ((values.mentorshipType === 'paid' || values.mentorshipType === 'both') && (!value || value.length === 0)) {
+          return 'At least one payment method is required for paid mentorship';
+        }
+        return null;
+      },
+    },
   });
 
   const specializationOptions = [
@@ -87,7 +126,7 @@ export function MentorProfileForm({
     'Operations',
     'Human Resources',
     'Legal',
-    'Research & Development'
+    'Research & Development',
   ];
 
   const industryOptions = [
@@ -112,7 +151,7 @@ export function MentorProfileForm({
     'Travel & Hospitality',
     'Agriculture',
     'Telecommunications',
-    'Aerospace'
+    'Aerospace',
   ];
 
   const mentorshipAreaOptions = [
@@ -127,7 +166,7 @@ export function MentorProfileForm({
     'Skill Development',
     'Personal Branding',
     'Goal Setting',
-    'Professional Growth'
+    'Professional Growth',
   ];
 
   const handleSubmit = (values: typeof form.values) => {
@@ -138,8 +177,9 @@ export function MentorProfileForm({
     <form onSubmit={form.onSubmit(handleSubmit)}>
       <Stack gap="lg">
         <Alert icon={<IconInfoCircle size={16} />} color="blue">
-          Create a comprehensive mentor profile to help match you with suitable mentees.
-          Your profile will be visible to administrators and potential mentees.
+          Create a comprehensive mentor profile to help match you with suitable
+          mentees. Your profile will be visible to administrators and potential
+          mentees.
         </Alert>
 
         {/* Basic Information */}
@@ -148,7 +188,7 @@ export function MentorProfileForm({
             <IconUser size={20} />
             <Title order={4}>Basic Information</Title>
           </Group>
-          
+
           <Grid>
             <Grid.Col span={{ base: 12, md: 6 }}>
               <MultiSelect
@@ -160,7 +200,7 @@ export function MentorProfileForm({
                 {...form.getInputProps('specializations')}
               />
             </Grid.Col>
-            
+
             <Grid.Col span={{ base: 12, md: 6 }}>
               <MultiSelect
                 label="Industries"
@@ -171,7 +211,7 @@ export function MentorProfileForm({
                 {...form.getInputProps('industries')}
               />
             </Grid.Col>
-            
+
             <Grid.Col span={{ base: 12, md: 6 }}>
               <NumberInput
                 label="Years of Experience"
@@ -182,7 +222,7 @@ export function MentorProfileForm({
                 {...form.getInputProps('yearsOfExperience')}
               />
             </Grid.Col>
-            
+
             <Grid.Col span={{ base: 12, md: 6 }}>
               <NumberInput
                 label="Maximum Mentees"
@@ -202,7 +242,7 @@ export function MentorProfileForm({
             <IconBriefcase size={20} />
             <Title order={4}>Mentorship Preferences</Title>
           </Group>
-          
+
           <Grid>
             <Grid.Col span={{ base: 12, md: 6 }}>
               <Select
@@ -210,13 +250,13 @@ export function MentorProfileForm({
                 data={[
                   { value: 'Available', label: 'Available' },
                   { value: 'Limited', label: 'Limited' },
-                  { value: 'Unavailable', label: 'Unavailable' }
+                  { value: 'Unavailable', label: 'Unavailable' },
                 ]}
                 required
                 {...form.getInputProps('availability')}
               />
             </Grid.Col>
-            
+
             <Grid.Col span={{ base: 12, md: 6 }}>
               <Select
                 label="Preferred Meeting Frequency"
@@ -224,28 +264,31 @@ export function MentorProfileForm({
                   { value: 'Weekly', label: 'Weekly' },
                   { value: 'Bi-weekly', label: 'Bi-weekly' },
                   { value: 'Monthly', label: 'Monthly' },
-                  { value: 'As needed', label: 'As needed' }
+                  { value: 'As needed', label: 'As needed' },
                 ]}
                 required
                 {...form.getInputProps('preferredMeetingFrequency')}
               />
             </Grid.Col>
-            
+
             <Grid.Col span={{ base: 12, md: 6 }}>
               <Select
                 label="Communication Preference"
                 data={[
                   { value: 'Video calls', label: 'Video calls' },
                   { value: 'Phone calls', label: 'Phone calls' },
-                  { value: 'Video calls + messaging', label: 'Video calls + messaging' },
+                  {
+                    value: 'Video calls + messaging',
+                    label: 'Video calls + messaging',
+                  },
                   { value: 'Email only', label: 'Email only' },
-                  { value: 'In-person meetings', label: 'In-person meetings' }
+                  { value: 'In-person meetings', label: 'In-person meetings' },
                 ]}
                 required
                 {...form.getInputProps('communicationPreference')}
               />
             </Grid.Col>
-            
+
             <Grid.Col span={{ base: 12, md: 6 }}>
               <TextInput
                 label="Time Zone"
@@ -253,7 +296,7 @@ export function MentorProfileForm({
                 {...form.getInputProps('timeZone')}
               />
             </Grid.Col>
-            
+
             <Grid.Col span={12}>
               <MultiSelect
                 label="Mentorship Areas"
@@ -268,8 +311,10 @@ export function MentorProfileForm({
 
         {/* Profile Details */}
         <Card withBorder>
-          <Title order={4} mb="md">Profile Details</Title>
-          
+          <Title order={4} mb="md">
+            Profile Details
+          </Title>
+
           <Stack gap="md">
             <Textarea
               label="Bio"
@@ -278,7 +323,7 @@ export function MentorProfileForm({
               required
               {...form.getInputProps('bio')}
             />
-            
+
             <Grid>
               <Grid.Col span={{ base: 12, md: 6 }}>
                 <TextInput
@@ -287,7 +332,7 @@ export function MentorProfileForm({
                   {...form.getInputProps('linkedinProfile')}
                 />
               </Grid.Col>
-              
+
               <Grid.Col span={{ base: 12, md: 6 }}>
                 <TextInput
                   label="Personal Website"
@@ -296,12 +341,88 @@ export function MentorProfileForm({
                 />
               </Grid.Col>
             </Grid>
-            
+
             <Switch
               label="Active Mentor"
               description="Make your profile visible to potential mentees"
               {...form.getInputProps('isActive', { type: 'checkbox' })}
             />
+          </Stack>
+        </Card>
+
+        {/* Pricing Information */}
+        <Card withBorder>
+          <Group mb="md">
+            <IconBriefcase size={20} />
+            <Title order={4}>Mentorship Pricing</Title>
+          </Group>
+
+          <Stack gap="md">
+            <Select
+              label="Mentorship Type"
+              data={[
+                { value: 'free', label: 'Free Only' },
+                { value: 'paid', label: 'Paid Only' },
+                { value: 'both', label: 'Free and Paid' },
+              ]}
+              required
+              {...form.getInputProps('mentorshipType')}
+            />
+
+            {(form.values.mentorshipType === 'paid' || form.values.mentorshipType === 'both') && (
+              <>
+                <Grid>
+                  <Grid.Col span={{ base: 12, md: 4 }}>
+                    <NumberInput
+                      label="Hourly Rate (USD)"
+                      placeholder="50"
+                      min={0}
+                      max={1000}
+                      leftSection="$"
+                      required
+                      {...form.getInputProps('hourlyRate')}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, md: 4 }}>
+                    <NumberInput
+                      label="Per Session Rate (USD)"
+                      placeholder="100"
+                      min={0}
+                      max={5000}
+                      leftSection="$"
+                      {...form.getInputProps('sessionRate')}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, md: 4 }}>
+                    <NumberInput
+                      label="Monthly Retainer (USD)"
+                      placeholder="500"
+                      min={0}
+                      max={10000}
+                      leftSection="$"
+                      {...form.getInputProps('monthlyRate')}
+                    />
+                  </Grid.Col>
+                </Grid>
+
+                <MultiSelect
+                  label="Accepted Payment Methods"
+                  data={[
+                    { value: 'stripe', label: 'Stripe' },
+                    { value: 'paypal', label: 'PayPal' },
+                    { value: 'bank_transfer', label: 'Bank Transfer' },
+                  ]}
+                  required
+                  {...form.getInputProps('paymentMethods')}
+                />
+              </>
+            )}
+
+            <div style={{ fontSize: '14px', color: 'var(--mantine-color-dimmed)' }}>
+              {form.values.mentorshipType === 'free' && 'You offer mentorship services for free.'}
+              {form.values.mentorshipType === 'paid' && 'You offer paid mentorship services only.'}
+              {form.values.mentorshipType === 'both' && 'You offer both free and paid mentorship options.'}
+            </div>
           </Stack>
         </Card>
 

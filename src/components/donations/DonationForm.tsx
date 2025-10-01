@@ -28,35 +28,42 @@ interface DonationFormProps {
   editingDonation?: any;
 }
 
-export function DonationForm({ opened, onClose, onSuccess, editingDonation }: DonationFormProps) {
+export function DonationForm({
+  opened,
+  onClose,
+  onSuccess,
+  editingDonation,
+}: DonationFormProps) {
   const [loading, setLoading] = useState(false);
 
   const form = useForm({
     initialValues: {
       donorId: editingDonation?.donorId || '',
       amount: editingDonation?.amount || '',
-      donationDate: editingDonation?.donationDate ? new Date(editingDonation.donationDate) : new Date(),
+      donationDate: editingDonation?.donationDate
+        ? new Date(editingDonation.donationDate)
+        : new Date(),
       purpose: editingDonation?.purpose || '',
       campaignId: editingDonation?.campaignId || '',
       paymentMethod: editingDonation?.paymentMethod || '',
       notes: '',
     },
     validate: {
-      donorId: (value) => (!value ? 'Please select a donor' : null),
-      amount: (value) => {
+      donorId: value => (!value ? 'Please select a donor' : null),
+      amount: value => {
         if (!value || value <= 0) return 'Amount must be greater than 0';
         if (value > 100000) return 'Amount cannot exceed $100,000';
         return null;
       },
-      purpose: (value) => (!value ? 'Purpose is required' : null),
-      paymentMethod: (value) => (!value ? 'Payment method is required' : null),
+      purpose: value => (!value ? 'Purpose is required' : null),
+      paymentMethod: value => (!value ? 'Payment method is required' : null),
     },
   });
 
   const handleSubmit = async (values: typeof form.values) => {
     try {
       setLoading(true);
-      
+
       const donationData = {
         donorId: values.donorId,
         amount: Number(values.amount),
@@ -126,7 +133,10 @@ export function DonationForm({ opened, onClose, onSuccess, editingDonation }: Do
     { value: 'General Fund', label: 'General Fund' },
     { value: 'Scholarship Fund', label: 'Scholarship Fund' },
     { value: 'Alumni Events', label: 'Alumni Events' },
-    { value: 'Infrastructure Development', label: 'Infrastructure Development' },
+    {
+      value: 'Infrastructure Development',
+      label: 'Infrastructure Development',
+    },
     { value: 'Research Fund', label: 'Research Fund' },
     { value: 'Student Support', label: 'Student Support' },
     { value: 'Faculty Development', label: 'Faculty Development' },
@@ -144,9 +154,14 @@ export function DonationForm({ opened, onClose, onSuccess, editingDonation }: Do
     >
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack gap="md">
-          <Alert icon={<IconAlertCircle size={16} />} color="blue" variant="light">
+          <Alert
+            icon={<IconAlertCircle size={16} />}
+            color="blue"
+            variant="light"
+          >
             <Text size="sm">
-              Record donations made by alumni to track contributions and generate receipts.
+              Record donations made by alumni to track contributions and
+              generate receipts.
             </Text>
           </Alert>
 

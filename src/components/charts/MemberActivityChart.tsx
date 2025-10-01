@@ -1,58 +1,82 @@
-import { Card, Title, Skeleton } from '@mantine/core';
+import { Card, Title, Skeleton, Text } from '@mantine/core';
 import { PieChart } from '@mantine/charts';
-import { useState, useEffect } from 'react';
-import { mockChartData } from '@/lib/mock-data';
+import { useCallback } from 'react';
+import { useApi } from '@/hooks/useApi';
+import { mockAlumniService } from '@/lib/mock-services/alumniService';
 
 interface MemberActivityChartProps {
   height?: number;
 }
 
-export function MemberActivityChart({ height = 300 }: MemberActivityChartProps) {
-  const [data, setData] = useState<Array<{ name: string; value: number; color: string }>>([]);
-  const [loading, setLoading] = useState(true);
+export function MemberActivityChart({
+  height = 300,
+}: MemberActivityChartProps) {
+  // Fetch alumni statistics for the chart
+  const apiCall = useCallback(() => mockAlumniService.getAlumniStats().then(res => res.data), []);
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        // Transform mock data for pie chart
-        const colors = ['blue.6', 'green.6', 'yellow.6', 'red.6', 'purple.6', 'orange.6'];
-        const transformedData = mockChartData.memberActivity.map((item, index) => ({
-          name: item.category,
-          value: item.count,
-          color: colors[index % colors.length]
-        }));
-        
-        setData(transformedData);
-      } catch (error) {
-        console.error('Failed to load member activity data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const {
+    data: alumniStats,
+    loading,
+    error,
+  } = useApi(apiCall, {
+    showErrorNotification: false,
+    immediate: true,
+  });
 
-    loadData();
-  }, []);
+  // Transform data for pie chart
+  const chartData = alumniStats
+    ? [
+        {
+          name: 'Public Profiles',
+          value: alumniStats.publicProfiles,
+          color: 'blue.6',
+        },
+        {
+          name: 'Private Profiles',
+          value: alumniStats.totalAlumni - alumniStats.publicProfiles,
+          color: 'gray.6',
+        },
+        {
+          name: 'Recent Alumni',
+          value: Math.floor(alumniStats.totalAlumni * 0.1), // Assume 10% are recent
+          color: 'green.6',
+        },
+      ]
+    : [];
 
   if (loading) {
     return (
       <Card withBorder radius="md" p="lg">
-        <Title order={3} mb="md">Member Activity</Title>
+        <Title order={3} mb="md">
+          Member Activity
+        </Title>
         <Skeleton height={height} />
+      </Card>
+    );
+  }
+
+  if (!chartData || chartData.length === 0) {
+    return (
+      <Card withBorder radius="md" p="lg">
+        <Title order={3} mb="md">
+          Member Activity
+        </Title>
+        <div style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Text c="dimmed">No data available</Text>
+        </div>
       </Card>
     );
   }
 
   return (
     <Card withBorder radius="md" p="lg">
-      <Title order={3} mb="md">Member Activity</Title>
-      
+      <Title order={3} mb="md">
+        Member Activity
+      </Title>
+
       <PieChart
         h={height}
-        data={data}
+        data={chartData}
         withLabelsLine
         labelsPosition="outside"
         labelsType="percent"
@@ -60,7 +84,7 @@ export function MemberActivityChart({ height = 300 }: MemberActivityChartProps) 
         tooltipDataSource="segment"
         mx="auto"
         strokeWidth={1}
-        valueFormatter={(value) => value.toLocaleString()}
+        valueFormatter={value => value.toLocaleString()}
       />
     </Card>
   );

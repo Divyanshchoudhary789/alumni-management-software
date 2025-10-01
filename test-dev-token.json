@@ -1,0 +1,9 @@
+{
+  "id": "admin-1",
+  "fullName": "Admin User",
+  "firstName": "Admin",
+  "lastName": "User",
+  "emailAddresses": [{"emailAddress": "admin@alumni-dashboard.com"}],
+  "imageUrl": "https://via.placeholder.com/40",
+  "publicMetadata": {"role": "admin"}
+}

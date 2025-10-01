@@ -1,7 +1,12 @@
 'use client';
 
 import { Grid, Card, Text, Group, ThemeIcon, Skeleton } from '@mantine/core';
-import { IconCurrencyDollar, IconTrendingUp, IconUsers, IconGift } from '@tabler/icons-react';
+import {
+  IconCurrencyDollar,
+  IconTrendingUp,
+  IconUsers,
+  IconGift,
+} from '@tabler/icons-react';
 import { StatsCard } from '@/components/ui/StatsCard';
 
 interface DonationMetricsProps {
@@ -39,7 +44,8 @@ export function DonationMetrics({ stats, loading }: DonationMetricsProps) {
   const totalAmountTrend = 12.5; // Mock percentage increase
   const donationCountTrend = 8.3;
   const averageTrend = 3.7;
-  const completionRate = ((stats.completedDonations / stats.totalDonations) * 100);
+  const completionRate =
+    (stats.completedDonations / stats.totalDonations) * 100;
 
   return (
     <Grid>

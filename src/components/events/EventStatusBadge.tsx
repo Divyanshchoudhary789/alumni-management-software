@@ -8,7 +8,10 @@ interface EventStatusBadgeProps {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 }
 
-export function EventStatusBadge({ status, size = 'sm' }: EventStatusBadgeProps) {
+export function EventStatusBadge({
+  status,
+  size = 'sm',
+}: EventStatusBadgeProps) {
   const getStatusConfig = (status: Event['status']) => {
     switch (status) {
       case 'published':

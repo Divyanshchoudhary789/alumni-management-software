@@ -11,7 +11,7 @@ import {
   SimpleGrid,
   Center,
   Loader,
-  Alert
+  Alert,
 } from '@mantine/core';
 import { IconPlus, IconAlertCircle } from '@tabler/icons-react';
 import { Event } from '@/types';
@@ -43,7 +43,7 @@ export function EventList({
   onEventRegister,
   onCreateEvent,
   showActions = true,
-  registeredEventIds = []
+  registeredEventIds = [],
 }: EventListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState<string>('eventDate');
@@ -53,7 +53,7 @@ export function EventList({
     status: '',
     dateFrom: null,
     dateTo: null,
-    location: ''
+    location: '',
   });
 
   // Get unique locations for filter dropdown
@@ -69,10 +69,11 @@ export function EventList({
     // Apply filters
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
-      filtered = filtered.filter(event =>
-        event.title.toLowerCase().includes(searchLower) ||
-        event.description.toLowerCase().includes(searchLower) ||
-        event.location.toLowerCase().includes(searchLower)
+      filtered = filtered.filter(
+        event =>
+          event.title.toLowerCase().includes(searchLower) ||
+          event.description.toLowerCase().includes(searchLower) ||
+          event.location.toLowerCase().includes(searchLower)
       );
     }
 
@@ -139,7 +140,7 @@ export function EventList({
       status: '',
       dateFrom: null,
       dateTo: null,
-      location: ''
+      location: '',
     });
     setCurrentPage(1);
   };
@@ -148,7 +149,7 @@ export function EventList({
     { value: 'eventDate', label: 'Event Date' },
     { value: 'title', label: 'Title' },
     { value: 'createdAt', label: 'Created Date' },
-    { value: 'capacity', label: 'Capacity' }
+    { value: 'capacity', label: 'Capacity' },
   ];
 
   if (loading) {
@@ -161,7 +162,11 @@ export function EventList({
 
   if (error) {
     return (
-      <Alert icon={<IconAlertCircle />} color="red" title="Error loading events">
+      <Alert
+        icon={<IconAlertCircle />}
+        color="red"
+        title="Error loading events"
+      >
         {error}
       </Alert>
     );
@@ -179,7 +184,7 @@ export function EventList({
             Manage and view alumni events
           </Text>
         </div>
-        
+
         {onCreateEvent && (
           <Button leftSection={<IconPlus size={16} />} onClick={onCreateEvent}>
             Create Event
@@ -201,17 +206,17 @@ export function EventList({
           label="Sort by"
           data={sortOptions}
           value={sortBy}
-          onChange={(value) => setSortBy(value || 'eventDate')}
+          onChange={value => setSortBy(value || 'eventDate')}
           w={150}
         />
         <Select
           label="Order"
           data={[
             { value: 'asc', label: 'Ascending' },
-            { value: 'desc', label: 'Descending' }
+            { value: 'desc', label: 'Descending' },
           ]}
           value={sortOrder}
-          onChange={(value) => setSortOrder(value as 'asc' | 'desc' || 'asc')}
+          onChange={value => setSortOrder((value as 'asc' | 'desc') || 'asc')}
           w={120}
         />
       </Group>
@@ -229,7 +234,10 @@ export function EventList({
                 : 'No events have been created yet.'}
             </Text>
             {onCreateEvent && events.length === 0 && (
-              <Button leftSection={<IconPlus size={16} />} onClick={onCreateEvent}>
+              <Button
+                leftSection={<IconPlus size={16} />}
+                onClick={onCreateEvent}
+              >
                 Create First Event
               </Button>
             )}
@@ -237,10 +245,7 @@ export function EventList({
         </Center>
       ) : (
         <>
-          <SimpleGrid
-            cols={{ base: 1, sm: 2, lg: 3, xl: 4 }}
-            spacing="md"
-          >
+          <SimpleGrid cols={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing="md">
             {paginatedEvents.map(event => (
               <EventCard
                 key={event.id}

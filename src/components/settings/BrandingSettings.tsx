@@ -20,18 +20,18 @@ import {
   Select,
   LoadingOverlay,
   ActionIcon,
-  Paper
+  Paper,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
-import { 
-  IconUpload, 
-  IconCheck, 
-  IconAlertCircle, 
-  IconPalette, 
+import {
+  IconUpload,
+  IconCheck,
+  IconAlertCircle,
+  IconPalette,
   IconPhoto,
   IconX,
-  IconEye
+  IconEye,
 } from '@tabler/icons-react';
 import { settingsService } from '@/lib/mock-services/settingsService';
 
@@ -70,13 +70,14 @@ export function BrandingSettings() {
       welcomeMessage: 'Welcome to our Alumni Community!',
       enableCustomBranding: true,
       logoPosition: 'left',
-      theme: 'light'
+      theme: 'light',
     },
     validate: {
-      organizationName: (value) => (!value ? 'Organization name is required' : null),
-      primaryColor: (value) => (!value ? 'Primary color is required' : null),
-      secondaryColor: (value) => (!value ? 'Secondary color is required' : null)
-    }
+      organizationName: value =>
+        !value ? 'Organization name is required' : null,
+      primaryColor: value => (!value ? 'Primary color is required' : null),
+      secondaryColor: value => (!value ? 'Secondary color is required' : null),
+    },
   });
 
   const handleSubmit = async (values: BrandingSettings) => {
@@ -87,14 +88,14 @@ export function BrandingSettings() {
         title: 'Branding Updated',
         message: 'Branding settings have been saved successfully',
         color: 'green',
-        icon: <IconCheck size={16} />
+        icon: <IconCheck size={16} />,
       });
     } catch (error) {
       notifications.show({
         title: 'Error',
         message: 'Failed to update branding settings',
         color: 'red',
-        icon: <IconAlertCircle size={16} />
+        icon: <IconAlertCircle size={16} />,
       });
     } finally {
       setLoading(false);
@@ -104,7 +105,7 @@ export function BrandingSettings() {
   const handleLogoUpload = (file: File | null) => {
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = e => {
         const result = e.target?.result as string;
         setLogoPreview(result);
         form.setFieldValue('organizationLogo', result);
@@ -116,7 +117,7 @@ export function BrandingSettings() {
   const handleFaviconUpload = (file: File | null) => {
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = e => {
         const result = e.target?.result as string;
         setFaviconPreview(result);
         form.setFieldValue('favicon', result);
@@ -134,10 +135,12 @@ export function BrandingSettings() {
           style={{
             backgroundColor: color,
             borderRadius: '4px',
-            border: '1px solid #dee2e6'
+            border: '1px solid #dee2e6',
           }}
         />
-        <Text size="xs" c="dimmed">{label}</Text>
+        <Text size="xs" c="dimmed">
+          {label}
+        </Text>
       </Group>
     </Paper>
   );
@@ -153,7 +156,9 @@ export function BrandingSettings() {
             <Title order={3}>Basic Branding</Title>
             <Switch
               label="Enable Custom Branding"
-              {...form.getInputProps('enableCustomBranding', { type: 'checkbox' })}
+              {...form.getInputProps('enableCustomBranding', {
+                type: 'checkbox',
+              })}
             />
           </Group>
 
@@ -187,11 +192,15 @@ export function BrandingSettings() {
 
         {/* Logo and Images */}
         <Card withBorder>
-          <Title order={3} mb="md">Logo and Images</Title>
+          <Title order={3} mb="md">
+            Logo and Images
+          </Title>
           <Grid>
             <Grid.Col span={6}>
               <Stack gap="sm">
-                <Text size="sm" fw={500}>Organization Logo</Text>
+                <Text size="sm" fw={500}>
+                  Organization Logo
+                </Text>
                 <FileInput
                   placeholder="Upload logo"
                   accept="image/*"
@@ -228,7 +237,7 @@ export function BrandingSettings() {
                   data={[
                     { value: 'left', label: 'Left' },
                     { value: 'center', label: 'Center' },
-                    { value: 'right', label: 'Right' }
+                    { value: 'right', label: 'Right' },
                   ]}
                   {...form.getInputProps('logoPosition')}
                 />
@@ -236,7 +245,9 @@ export function BrandingSettings() {
             </Grid.Col>
             <Grid.Col span={6}>
               <Stack gap="sm">
-                <Text size="sm" fw={500}>Favicon</Text>
+                <Text size="sm" fw={500}>
+                  Favicon
+                </Text>
                 <FileInput
                   placeholder="Upload favicon"
                   accept="image/*"
@@ -275,7 +286,9 @@ export function BrandingSettings() {
 
         {/* Color Scheme */}
         <Card withBorder>
-          <Title order={3} mb="md">Color Scheme</Title>
+          <Title order={3} mb="md">
+            Color Scheme
+          </Title>
           <Grid>
             <Grid.Col span={6}>
               <ColorInput
@@ -320,7 +333,7 @@ export function BrandingSettings() {
                 data={[
                   { value: 'light', label: 'Light' },
                   { value: 'dark', label: 'Dark' },
-                  { value: 'auto', label: 'Auto (System)' }
+                  { value: 'auto', label: 'Auto (System)' },
                 ]}
                 {...form.getInputProps('theme')}
               />
@@ -329,12 +342,20 @@ export function BrandingSettings() {
 
           {/* Color Preview */}
           <Box mt="md">
-            <Text size="sm" fw={500} mb="xs">Color Preview</Text>
+            <Text size="sm" fw={500} mb="xs">
+              Color Preview
+            </Text>
             <Group gap="xs">
               <ColorPreview color={form.values.primaryColor} label="Primary" />
-              <ColorPreview color={form.values.secondaryColor} label="Secondary" />
+              <ColorPreview
+                color={form.values.secondaryColor}
+                label="Secondary"
+              />
               <ColorPreview color={form.values.accentColor} label="Accent" />
-              <ColorPreview color={form.values.backgroundColor} label="Background" />
+              <ColorPreview
+                color={form.values.backgroundColor}
+                label="Background"
+              />
               <ColorPreview color={form.values.textColor} label="Text" />
             </Group>
           </Box>
@@ -342,9 +363,12 @@ export function BrandingSettings() {
 
         {/* Advanced Customization */}
         <Card withBorder>
-          <Title order={3} mb="md">Advanced Customization</Title>
+          <Title order={3} mb="md">
+            Advanced Customization
+          </Title>
           <Alert icon={<IconPalette size={16} />} mb="md">
-            Custom CSS will be applied globally. Use with caution and test thoroughly.
+            Custom CSS will be applied globally. Use with caution and test
+            thoroughly.
           </Alert>
           <Textarea
             label="Custom CSS"
@@ -365,7 +389,7 @@ export function BrandingSettings() {
                 notifications.show({
                   title: 'Preview',
                   message: 'Preview functionality would show live changes',
-                  color: 'blue'
+                  color: 'blue',
                 });
               }}
             >
@@ -378,7 +402,7 @@ export function BrandingSettings() {
             style={{
               backgroundColor: form.values.backgroundColor,
               color: form.values.textColor,
-              borderColor: form.values.secondaryColor
+              borderColor: form.values.secondaryColor,
             }}
           >
             <Group gap="md" mb="md">
@@ -397,7 +421,7 @@ export function BrandingSettings() {
             <Button
               style={{
                 backgroundColor: form.values.primaryColor,
-                color: form.values.backgroundColor
+                color: form.values.backgroundColor,
               }}
             >
               Sample Button

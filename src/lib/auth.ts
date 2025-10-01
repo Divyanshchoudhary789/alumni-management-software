@@ -3,11 +3,11 @@ import { redirect } from 'next/navigation';
 
 export async function requireAuth() {
   const { userId } = auth();
-  
+
   if (!userId) {
     redirect('/sign-in');
   }
-  
+
   return userId;
 }
 
@@ -32,9 +32,10 @@ export function hasPermission(userRole: string, requiredRole: string): boolean {
     admin: 2,
     alumni: 1,
   };
-  
+
   const userLevel = roleHierarchy[userRole as keyof typeof roleHierarchy] || 0;
-  const requiredLevel = roleHierarchy[requiredRole as keyof typeof roleHierarchy] || 0;
-  
+  const requiredLevel =
+    roleHierarchy[requiredRole as keyof typeof roleHierarchy] || 0;
+
   return userLevel >= requiredLevel;
 }

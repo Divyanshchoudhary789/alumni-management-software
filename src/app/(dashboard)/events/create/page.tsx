@@ -2,7 +2,7 @@
 
 import { Container } from '@mantine/core';
 import { EventForm } from '@/components/events';
-import { eventsApiService } from '@/services/api/eventsService';
+import { eventsApiService } from '@/services/api';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -37,13 +37,13 @@ export default function CreateEventPage() {
         capacity: data.capacity,
         registrationDeadline: data.registrationDeadline,
         status: data.status,
-        imageUrl: data.imageUrl
+        imageUrl: data.imageUrl,
       });
 
       notifications.show({
         title: 'Success',
         message: 'Event created successfully',
-        color: 'green'
+        color: 'green',
       });
 
       router.push('/events');

@@ -16,7 +16,12 @@ export default function HomePage() {
           <Button component={Link} href="/dashboard" size="lg">
             Go to Dashboard
           </Button>
-          <Button component={Link} href="/dev-signin" variant="outline" size="lg">
+          <Button
+            component={Link}
+            href="/dev-signin"
+            variant="outline"
+            size="lg"
+          >
             Test Users
           </Button>
         </Group>

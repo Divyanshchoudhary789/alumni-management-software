@@ -38,29 +38,31 @@ describe('Header Component', () => {
 
   it('renders header with logo and user menu', () => {
     renderHeader();
-    
+
     expect(screen.getByText('Alumni Dashboard')).toBeInTheDocument();
     expect(screen.getByText('Test User')).toBeInTheDocument();
   });
 
   it('renders search input', () => {
     renderHeader();
-    
-    expect(screen.getByPlaceholderText('Search alumni, events...')).toBeInTheDocument();
+
+    expect(
+      screen.getByPlaceholderText('Search alumni, events...')
+    ).toBeInTheDocument();
   });
 
   it('renders notification indicator', () => {
     renderHeader();
-    
+
     expect(screen.getByLabelText('Notifications')).toBeInTheDocument();
   });
 
   it('renders user menu with profile options', async () => {
     renderHeader();
-    
+
     const userButton = screen.getByText('Test User').closest('button');
     fireEvent.click(userButton!);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Profile')).toBeInTheDocument();
       expect(screen.getByText('Settings')).toBeInTheDocument();
@@ -70,9 +72,9 @@ describe('Header Component', () => {
 
   it('handles burger menu toggles', () => {
     renderHeader();
-    
+
     const burgers = screen.getAllByRole('button', { name: /open navigation/i });
-    
+
     if (burgers.length > 0) {
       fireEvent.click(burgers[0]);
       expect(mockProps.toggleMobile).toHaveBeenCalled();

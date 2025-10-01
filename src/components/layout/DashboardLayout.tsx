@@ -77,7 +77,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         </AppShell.Main>
       </AppShell>
-      
+
       <LoadingOverlay />
     </>
   );

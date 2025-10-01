@@ -38,6 +38,9 @@ export interface Event {
   capacity: number;
   registrationDeadline: Date;
   status: 'draft' | 'published' | 'cancelled' | 'completed';
+  eventType?: 'free' | 'paid';
+  ticketPrice?: number;
+  paymentMethods?: string[];
   imageUrl?: string;
   createdBy: string;
   registrations: EventRegistration[];
@@ -94,7 +97,14 @@ export interface DashboardMetrics {
 
 export interface RecentActivity {
   id: string;
-  type: 'new_alumni' | 'event_created' | 'donation' | 'mentorship' | 'event_registration' | 'communication_sent' | 'profile_update';
+  type:
+    | 'new_alumni'
+    | 'event_created'
+    | 'donation'
+    | 'mentorship'
+    | 'event_registration'
+    | 'communication_sent'
+    | 'profile_update';
   title: string;
   description: string;
   timestamp: Date;
@@ -125,6 +135,11 @@ export interface MentorProfile {
   communicationPreference: string;
   bio: string;
   isActive: boolean;
+  mentorshipType?: 'free' | 'paid' | 'both';
+  hourlyRate?: number;
+  sessionRate?: number;
+  monthlyRate?: number;
+  paymentMethods?: string[];
   mentorshipAreas?: string[];
   timeZone?: string;
   linkedinProfile?: string;

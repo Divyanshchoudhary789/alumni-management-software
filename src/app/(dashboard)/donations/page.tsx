@@ -1,7 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Container, Title, Grid, Card, Text, Group, Badge, ActionIcon, Tooltip } from '@mantine/core';
+import {
+  Container,
+  Title,
+  Grid,
+  Card,
+  Text,
+  Group,
+  Badge,
+  ActionIcon,
+  Tooltip,
+} from '@mantine/core';
 import { IconRefresh, IconDownload, IconPlus } from '@tabler/icons-react';
 import { mockDonationService } from '@/lib/mock-services';
 import { DonationMetrics } from '@/components/donations/DonationMetrics';
@@ -21,11 +31,12 @@ export default function DonationsPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [statsResponse, campaignsResponse, recentResponse] = await Promise.all([
-        mockDonationService.getDonationStats(),
-        mockDonationService.getCampaigns(),
-        mockDonationService.getRecentDonations(10)
-      ]);
+      const [statsResponse, campaignsResponse, recentResponse] =
+        await Promise.all([
+          mockDonationService.getDonationStats(),
+          mockDonationService.getCampaigns(),
+          mockDonationService.getRecentDonations(10),
+        ]);
 
       setStats(statsResponse.data);
       setCampaigns(campaignsResponse.data);
@@ -35,7 +46,7 @@ export default function DonationsPage() {
       notifications.show({
         title: 'Error',
         message: 'Failed to load donation data',
-        color: 'red'
+        color: 'red',
       });
     } finally {
       setLoading(false);
@@ -51,7 +62,7 @@ export default function DonationsPage() {
     notifications.show({
       title: 'Data Refreshed',
       message: 'Donation data has been updated',
-      color: 'green'
+      color: 'green',
     });
   };
 
@@ -60,7 +71,7 @@ export default function DonationsPage() {
     notifications.show({
       title: 'Export Started',
       message: 'Donation report is being generated...',
-      color: 'blue'
+      color: 'blue',
     });
   };
 
@@ -85,11 +96,7 @@ export default function DonationsPage() {
             </ActionIcon>
           </Tooltip>
           <Tooltip label="Export report">
-            <ActionIcon
-              variant="light"
-              size="lg"
-              onClick={handleExport}
-            >
+            <ActionIcon variant="light" size="lg" onClick={handleExport}>
               <IconDownload size={18} />
             </ActionIcon>
           </Tooltip>

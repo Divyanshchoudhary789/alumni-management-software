@@ -19,7 +19,7 @@ import {
   Textarea,
   rem,
   Loader,
-  Center
+  Center,
 } from '@mantine/core';
 import {
   IconUsers,
@@ -29,10 +29,10 @@ import {
   IconDots,
   IconAlertCircle,
   IconClock,
-  IconArrowUp
+  IconArrowUp,
 } from '@tabler/icons-react';
 import { Event, AlumniProfile } from '@/types';
-import { mockAlumniService } from '@/lib/mock-services/alumniService';
+import { alumniProfileService } from '@/services/alumniProfileService';
 import { notifications } from '@mantine/notifications';
 import { modals } from '@mantine/modals';
 import { format } from 'date-fns';
@@ -52,7 +52,10 @@ interface WaitlistManagementProps {
   onEventUpdate?: () => void;
 }
 
-export function WaitlistManagement({ event, onEventUpdate }: WaitlistManagementProps) {
+export function WaitlistManagement({
+  event,
+  onEventUpdate,
+}: WaitlistManagementProps) {
   const [waitlist, setWaitlist] = useState<WaitlistEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [addToWaitlistModalOpen, setAddToWaitlistModalOpen] = useState(false);
@@ -61,52 +64,56 @@ export function WaitlistManagement({ event, onEventUpdate }: WaitlistManagementP
 
   // Mock waitlist data - in real implementation, this would come from the API
   const generateMockWaitlist = async (): Promise<WaitlistEntry[]> => {
-    const alumniResponse = await mockAlumniService.getAlumni();
+    const alumniResponse = await alumniProfileService.getAlumni();
     const allAlumni = alumniResponse.data;
-    
+
     // Get registered alumni IDs to exclude them
     const registeredAlumniIds = event.registrations?.map(r => r.alumniId) || [];
-    
+
     // Create mock waitlist entries
-    const availableForWaitlist = allAlumni.filter(alumni => 
-      !registeredAlumniIds.includes(alumni.id)
-    ).slice(0, 5); // Mock 5 people on waitlist
+    const availableForWaitlist = allAlumni
+      .filter(alumni => !registeredAlumniIds.includes(alumni.id))
+      .slice(0, 5); // Mock 5 people on waitlist
 
     return availableForWaitlist.map((alumni, index) => ({
       id: `waitlist_${alumni.id}`,
       alumniId: alumni.id,
       eventId: event.id,
-      joinedDate: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000), // Random date within last week
+      joinedDate: new Date(
+        Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000
+      ), // Random date within last week
       position: index + 1,
       notified: Math.random() > 0.5,
-      profile: alumni
+      profile: alumni,
     }));
   };
 
   const loadWaitlist = async () => {
     try {
       setLoading(true);
-      
+
       // In real implementation, this would be an API call
       const mockWaitlist = await generateMockWaitlist();
       setWaitlist(mockWaitlist);
 
       // Load available alumni for adding to waitlist
-      const alumniResponse = await mockAlumniService.getAlumni();
-      const registeredAlumniIds = event.registrations?.map(r => r.alumniId) || [];
+      const alumniResponse = await alumniProfileService.getAlumni();
+      const registeredAlumniIds =
+        event.registrations?.map(r => r.alumniId) || [];
       const waitlistAlumniIds = mockWaitlist.map(w => w.alumniId);
-      
-      const available = alumniResponse.data.filter(alumni => 
-        !registeredAlumniIds.includes(alumni.id) && 
-        !waitlistAlumniIds.includes(alumni.id)
+
+      const available = alumniResponse.data.filter(
+        alumni =>
+          !registeredAlumniIds.includes(alumni.id) &&
+          !waitlistAlumniIds.includes(alumni.id)
       );
-      
+
       setAvailableAlumni(available);
     } catch (error: any) {
       notifications.show({
         title: 'Error',
         message: 'Failed to load waitlist',
-        color: 'red'
+        color: 'red',
       });
     } finally {
       setLoading(false);
@@ -120,27 +127,29 @@ export function WaitlistManagement({ event, onEventUpdate }: WaitlistManagementP
   const handlePromoteFromWaitlist = async (waitlistEntry: WaitlistEntry) => {
     try {
       // Check if there's space available
-      const currentRegistrations = event.registrations?.filter(r => r.status === 'registered').length || 0;
-      
+      const currentRegistrations =
+        event.registrations?.filter(r => r.status === 'registered').length || 0;
+
       if (currentRegistrations >= event.capacity) {
         notifications.show({
           title: 'Cannot Promote',
           message: 'Event is at full capacity',
-          color: 'orange'
+          color: 'orange',
         });
         return;
       }
 
       // Remove from waitlist and add to registrations
-      const updatedWaitlist = waitlist.filter(w => w.id !== waitlistEntry.id)
+      const updatedWaitlist = waitlist
+        .filter(w => w.id !== waitlistEntry.id)
         .map((w, index) => ({ ...w, position: index + 1 })); // Reorder positions
-      
+
       setWaitlist(updatedWaitlist);
 
       notifications.show({
         title: 'Success',
         message: `${waitlistEntry.profile?.firstName} ${waitlistEntry.profile?.lastName} has been promoted from waitlist`,
-        color: 'green'
+        color: 'green',
       });
 
       onEventUpdate?.();
@@ -148,7 +157,7 @@ export function WaitlistManagement({ event, onEventUpdate }: WaitlistManagementP
       notifications.show({
         title: 'Error',
         message: 'Failed to promote from waitlist',
-        color: 'red'
+        color: 'red',
       });
     }
   };
@@ -158,31 +167,33 @@ export function WaitlistManagement({ event, onEventUpdate }: WaitlistManagementP
       title: 'Remove from Waitlist',
       children: (
         <Text size="sm">
-          Are you sure you want to remove {waitlistEntry.profile?.firstName} {waitlistEntry.profile?.lastName} from the waitlist?
+          Are you sure you want to remove {waitlistEntry.profile?.firstName}{' '}
+          {waitlistEntry.profile?.lastName} from the waitlist?
         </Text>
       ),
       labels: { confirm: 'Remove', cancel: 'Cancel' },
       confirmProps: { color: 'red' },
       onConfirm: async () => {
         try {
-          const updatedWaitlist = waitlist.filter(w => w.id !== waitlistEntry.id)
+          const updatedWaitlist = waitlist
+            .filter(w => w.id !== waitlistEntry.id)
             .map((w, index) => ({ ...w, position: index + 1 })); // Reorder positions
-          
+
           setWaitlist(updatedWaitlist);
 
           notifications.show({
             title: 'Success',
             message: 'Removed from waitlist successfully',
-            color: 'green'
+            color: 'green',
           });
         } catch (error: any) {
           notifications.show({
             title: 'Error',
             message: 'Failed to remove from waitlist',
-            color: 'red'
+            color: 'red',
           });
         }
-      }
+      },
     });
   };
 
@@ -200,7 +211,7 @@ export function WaitlistManagement({ event, onEventUpdate }: WaitlistManagementP
         joinedDate: new Date(),
         position: waitlist.length + 1,
         notified: false,
-        profile: alumni
+        profile: alumni,
       };
 
       setWaitlist([...waitlist, newWaitlistEntry]);
@@ -211,13 +222,13 @@ export function WaitlistManagement({ event, onEventUpdate }: WaitlistManagementP
       notifications.show({
         title: 'Success',
         message: `${alumni.firstName} ${alumni.lastName} added to waitlist`,
-        color: 'green'
+        color: 'green',
       });
     } catch (error: any) {
       notifications.show({
         title: 'Error',
         message: 'Failed to add to waitlist',
-        color: 'red'
+        color: 'red',
       });
     }
   };
@@ -232,18 +243,19 @@ export function WaitlistManagement({ event, onEventUpdate }: WaitlistManagementP
       notifications.show({
         title: 'Success',
         message: 'Notification sent successfully',
-        color: 'green'
+        color: 'green',
       });
     } catch (error: any) {
       notifications.show({
         title: 'Error',
         message: 'Failed to send notification',
-        color: 'red'
+        color: 'red',
       });
     }
   };
 
-  const currentRegistrations = event.registrations?.filter(r => r.status === 'registered').length || 0;
+  const currentRegistrations =
+    event.registrations?.filter(r => r.status === 'registered').length || 0;
   const hasAvailableSpots = currentRegistrations < event.capacity;
 
   if (loading) {
@@ -268,14 +280,14 @@ export function WaitlistManagement({ event, onEventUpdate }: WaitlistManagementP
                 {waitlist.length} people on waitlist
               </Text>
             </div>
-            
+
             <Group>
               {hasAvailableSpots && waitlist.length > 0 && (
                 <Badge color="green" variant="light">
                   {event.capacity - currentRegistrations} spots available
                 </Badge>
               )}
-              
+
               <Button
                 size="sm"
                 leftSection={<IconUserPlus size={16} />}
@@ -316,15 +328,18 @@ export function WaitlistManagement({ event, onEventUpdate }: WaitlistManagementP
                       <Group gap="sm">
                         <Avatar
                           src={entry.profile?.profileImage}
-                          alt={entry.profile ? `${entry.profile.firstName} ${entry.profile.lastName}` : 'Unknown'}
+                          alt={
+                            entry.profile
+                              ? `${entry.profile.firstName} ${entry.profile.lastName}`
+                              : 'Unknown'
+                          }
                           size="sm"
                         />
                         <div>
                           <Text size="sm" fw={500}>
-                            {entry.profile 
+                            {entry.profile
                               ? `${entry.profile.firstName} ${entry.profile.lastName}`
-                              : 'Unknown User'
-                            }
+                              : 'Unknown User'}
                           </Text>
                           <Text size="xs" c="dimmed">
                             Class of {entry.profile?.graduationYear || 'N/A'}
@@ -341,11 +356,15 @@ export function WaitlistManagement({ event, onEventUpdate }: WaitlistManagementP
                       </Text>
                     </Table.Td>
                     <Table.Td>
-                      <Text size="sm">
-                        {format(entry.joinedDate, 'PPP')}
-                      </Text>
+                      <Text size="sm">{format(entry.joinedDate, 'PPP')}</Text>
                       <Text size="xs" c="dimmed">
-                        <IconClock style={{ width: rem(12), height: rem(12), marginRight: rem(4) }} />
+                        <IconClock
+                          style={{
+                            width: rem(12),
+                            height: rem(12),
+                            marginRight: rem(4),
+                          }}
+                        />
                         {format(entry.joinedDate, 'p')}
                       </Text>
                     </Table.Td>
@@ -362,31 +381,45 @@ export function WaitlistManagement({ event, onEventUpdate }: WaitlistManagementP
                       <Menu shadow="md" width={200}>
                         <Menu.Target>
                           <ActionIcon variant="subtle" color="gray">
-                            <IconDots style={{ width: rem(16), height: rem(16) }} />
+                            <IconDots
+                              style={{ width: rem(16), height: rem(16) }}
+                            />
                           </ActionIcon>
                         </Menu.Target>
 
                         <Menu.Dropdown>
                           {hasAvailableSpots && (
                             <Menu.Item
-                              leftSection={<IconArrowUp style={{ width: rem(14), height: rem(14) }} />}
+                              leftSection={
+                                <IconArrowUp
+                                  style={{ width: rem(14), height: rem(14) }}
+                                />
+                              }
                               onClick={() => handlePromoteFromWaitlist(entry)}
                             >
                               Promote to Registration
                             </Menu.Item>
                           )}
-                          
+
                           <Menu.Item
-                            leftSection={<IconMail style={{ width: rem(14), height: rem(14) }} />}
+                            leftSection={
+                              <IconMail
+                                style={{ width: rem(14), height: rem(14) }}
+                              />
+                            }
                             onClick={() => handleNotifyWaitlist(entry)}
                             disabled={entry.notified}
                           >
                             Send Notification
                           </Menu.Item>
-                          
+
                           <Menu.Item
                             color="red"
-                            leftSection={<IconUserX style={{ width: rem(14), height: rem(14) }} />}
+                            leftSection={
+                              <IconUserX
+                                style={{ width: rem(14), height: rem(14) }}
+                              />
+                            }
                             onClick={() => handleRemoveFromWaitlist(entry)}
                           >
                             Remove from Waitlist
@@ -413,28 +446,32 @@ export function WaitlistManagement({ event, onEventUpdate }: WaitlistManagementP
           <Text size="sm" c="dimmed">
             Select an alumni to add to the waitlist for this event.
           </Text>
-          
+
           <select
             value={selectedAlumni}
-            onChange={(e) => setSelectedAlumni(e.target.value)}
+            onChange={e => setSelectedAlumni(e.target.value)}
             style={{
               width: '100%',
               padding: '8px 12px',
               border: '1px solid #ced4da',
               borderRadius: '4px',
-              fontSize: '14px'
+              fontSize: '14px',
             }}
           >
             <option value="">Select an alumni...</option>
             {availableAlumni.map(alumni => (
               <option key={alumni.id} value={alumni.id}>
-                {alumni.firstName} {alumni.lastName} - Class of {alumni.graduationYear}
+                {alumni.firstName} {alumni.lastName} - Class of{' '}
+                {alumni.graduationYear}
               </option>
             ))}
           </select>
 
           <Group justify="flex-end">
-            <Button variant="light" onClick={() => setAddToWaitlistModalOpen(false)}>
+            <Button
+              variant="light"
+              onClick={() => setAddToWaitlistModalOpen(false)}
+            >
               Cancel
             </Button>
             <Button onClick={handleAddToWaitlist} disabled={!selectedAlumni}>

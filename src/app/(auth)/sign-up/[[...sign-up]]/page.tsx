@@ -13,14 +13,16 @@ export default function SignUpPage() {
             <Text c="dimmed" ta="center">
               Create your account to connect with fellow alumni
             </Text>
-            <SignUp 
+            <SignUp
               appearance={{
                 elements: {
                   formButtonPrimary: 'bg-blue-600 hover:bg-blue-700',
                   card: 'shadow-none',
-                  socialButtonsBlockButton: 'border border-gray-300 hover:bg-gray-50',
-                  formFieldInput: 'border border-gray-300 focus:border-blue-500',
-                }
+                  socialButtonsBlockButton:
+                    'border border-gray-300 hover:bg-gray-50',
+                  formFieldInput:
+                    'border border-gray-300 focus:border-blue-500',
+                },
               }}
               routing="path"
               path="/sign-up"

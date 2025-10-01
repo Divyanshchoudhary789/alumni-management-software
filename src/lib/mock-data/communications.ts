@@ -27,7 +27,7 @@ export const mockCommunications: Communication[] = [
     createdBy: 'admin_1',
     status: 'sent',
     createdAt: new Date('2024-01-03'),
-    updatedAt: new Date('2024-01-05')
+    updatedAt: new Date('2024-01-05'),
   },
   {
     id: '2',
@@ -56,7 +56,7 @@ export const mockCommunications: Communication[] = [
     createdBy: 'admin_1',
     status: 'sent',
     createdAt: new Date('2024-01-28'),
-    updatedAt: new Date('2024-02-01')
+    updatedAt: new Date('2024-02-01'),
   },
   {
     id: '3',
@@ -84,7 +84,7 @@ export const mockCommunications: Communication[] = [
     createdBy: 'admin_2',
     status: 'sent',
     createdAt: new Date('2024-02-08'),
-    updatedAt: new Date('2024-02-10')
+    updatedAt: new Date('2024-02-10'),
   },
   {
     id: '4',
@@ -120,7 +120,7 @@ export const mockCommunications: Communication[] = [
     createdBy: 'admin_2',
     status: 'draft',
     createdAt: new Date('2024-02-15'),
-    updatedAt: new Date('2024-02-18')
+    updatedAt: new Date('2024-02-18'),
   },
   {
     id: '5',
@@ -156,8 +156,8 @@ export const mockCommunications: Communication[] = [
     createdBy: 'admin_1',
     status: 'scheduled',
     createdAt: new Date('2024-02-20'),
-    updatedAt: new Date('2024-02-22')
-  }
+    updatedAt: new Date('2024-02-22'),
+  },
 ];
 
 // Communication templates
@@ -165,7 +165,7 @@ export const mockCommunicationTemplates = [
   {
     id: 'template_1',
     name: 'Event Invitation',
-    subject: '[Event Name] - You\'re Invited!',
+    subject: "[Event Name] - You're Invited!",
     content: `
       <h2>[Event Name]</h2>
       <p>Dear [Recipient Name],</p>
@@ -185,7 +185,7 @@ export const mockCommunicationTemplates = [
       
       <p>Best regards,<br>[Sender Name]</p>
     `,
-    type: 'event_invitation'
+    type: 'event_invitation',
   },
   {
     id: 'template_2',
@@ -211,7 +211,7 @@ export const mockCommunicationTemplates = [
       <p>Stay connected!</p>
       <p>Alumni Relations Team</p>
     `,
-    type: 'newsletter'
+    type: 'newsletter',
   },
   {
     id: 'template_3',
@@ -237,35 +237,66 @@ export const mockCommunicationTemplates = [
       
       <p>With gratitude,<br>Development Team</p>
     `,
-    type: 'donation_receipt'
-  }
+    type: 'donation_receipt',
+  },
 ];
 
 // Generate additional communications
-export const generateMockCommunications = (count: number = 20): Communication[] => {
-  const types = ['newsletter', 'event_invitation', 'announcement', 'fundraising', 'program_launch'];
-  const statuses: Array<'draft' | 'scheduled' | 'sent' | 'failed'> = ['draft', 'scheduled', 'sent', 'failed'];
-  const audiences = [
-    ['all'], ['tech', 'engineering'], ['business'], ['recent_graduates'], 
-    ['donors'], ['entrepreneurs'], ['leadership'], ['regional_sf'], ['regional_ny']
+export const generateMockCommunications = (
+  count: number = 20
+): Communication[] => {
+  const types = [
+    'newsletter',
+    'event_invitation',
+    'announcement',
+    'fundraising',
+    'program_launch',
   ];
-  
+  const statuses: Array<'draft' | 'scheduled' | 'sent' | 'failed'> = [
+    'draft',
+    'scheduled',
+    'sent',
+    'failed',
+  ];
+  const audiences = [
+    ['all'],
+    ['tech', 'engineering'],
+    ['business'],
+    ['recent_graduates'],
+    ['donors'],
+    ['entrepreneurs'],
+    ['leadership'],
+    ['regional_sf'],
+    ['regional_ny'],
+  ];
+
   const additionalCommunications: Communication[] = [];
-  
+
   for (let i = 6; i <= count + 5; i++) {
     const type = types[Math.floor(Math.random() * types.length)];
     const status = statuses[Math.floor(Math.random() * statuses.length)];
-    const targetAudience = audiences[Math.floor(Math.random() * audiences.length)];
-    
+    const targetAudience =
+      audiences[Math.floor(Math.random() * audiences.length)];
+
     let sentDate: Date | null = null;
     if (status === 'sent') {
-      sentDate = new Date(2024, Math.floor(Math.random() * 2), Math.floor(Math.random() * 28) + 1);
+      sentDate = new Date(
+        2024,
+        Math.floor(Math.random() * 2),
+        Math.floor(Math.random() * 28) + 1
+      );
     } else if (status === 'scheduled') {
-      sentDate = new Date(2024, 2 + Math.floor(Math.random() * 6), Math.floor(Math.random() * 28) + 1);
+      sentDate = new Date(
+        2024,
+        2 + Math.floor(Math.random() * 6),
+        Math.floor(Math.random() * 28) + 1
+      );
     }
-    
-    const createdAt = sentDate ? new Date(sentDate.getTime() - Math.random() * 7 * 24 * 60 * 60 * 1000) : new Date();
-    
+
+    const createdAt = sentDate
+      ? new Date(sentDate.getTime() - Math.random() * 7 * 24 * 60 * 60 * 1000)
+      : new Date();
+
     additionalCommunications.push({
       id: i.toString(),
       title: `${type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} ${i}`,
@@ -276,38 +307,46 @@ export const generateMockCommunications = (count: number = 20): Communication[] 
       createdBy: `admin_${Math.floor(Math.random() * 2) + 1}`,
       status,
       createdAt,
-      updatedAt: createdAt
+      updatedAt: createdAt,
     });
   }
-  
+
   return [...mockCommunications, ...additionalCommunications];
 };
 
 // Communication analytics
-export const calculateCommunicationStats = (communications: Communication[]) => {
+export const calculateCommunicationStats = (
+  communications: Communication[]
+) => {
   const sent = communications.filter(c => c.status === 'sent');
   const scheduled = communications.filter(c => c.status === 'scheduled');
   const drafts = communications.filter(c => c.status === 'draft');
-  
-  const typeBreakdown = communications.reduce((acc, comm) => {
-    acc[comm.type] = (acc[comm.type] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-  
-  const monthlyActivity = sent.reduce((acc, comm) => {
-    if (comm.sentDate) {
-      const month = comm.sentDate.toISOString().slice(0, 7);
-      acc[month] = (acc[month] || 0) + 1;
-    }
-    return acc;
-  }, {} as Record<string, number>);
-  
+
+  const typeBreakdown = communications.reduce(
+    (acc, comm) => {
+      acc[comm.type] = (acc[comm.type] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
+
+  const monthlyActivity = sent.reduce(
+    (acc, comm) => {
+      if (comm.sentDate) {
+        const month = comm.sentDate.toISOString().slice(0, 7);
+        acc[month] = (acc[month] || 0) + 1;
+      }
+      return acc;
+    },
+    {} as Record<string, number>
+  );
+
   return {
     totalCommunications: communications.length,
     sent: sent.length,
     scheduled: scheduled.length,
     drafts: drafts.length,
     typeBreakdown,
-    monthlyActivity
+    monthlyActivity,
   };
 };

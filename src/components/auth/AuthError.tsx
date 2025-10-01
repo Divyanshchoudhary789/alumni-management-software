@@ -1,6 +1,14 @@
 'use client';
 
-import { Container, Paper, Stack, Title, Text, Button, Alert } from '@mantine/core';
+import {
+  Container,
+  Paper,
+  Stack,
+  Title,
+  Text,
+  Button,
+  Alert,
+} from '@mantine/core';
 import { IconAlertCircle, IconRefresh } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 
@@ -32,29 +40,26 @@ export function AuthError({ error, onRetry }: AuthErrorProps) {
           <Title order={2} ta="center">
             Authentication Error
           </Title>
-          
+
           {error && (
             <Alert icon={<IconAlertCircle size={16} />} color="red" w="100%">
               {error}
             </Alert>
           )}
-          
+
           <Text c="dimmed" ta="center">
             There was a problem with your authentication. Please try again.
           </Text>
-          
+
           <Stack gap="sm" w="100%">
-            <Button 
+            <Button
               leftSection={<IconRefresh size={16} />}
               onClick={handleRetry}
               variant="filled"
             >
               Try Again
             </Button>
-            <Button 
-              onClick={handleSignIn}
-              variant="outline"
-            >
+            <Button onClick={handleSignIn} variant="outline">
               Go to Sign In
             </Button>
           </Stack>

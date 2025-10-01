@@ -23,41 +23,40 @@ export interface UsersListResponse {
 class AuthApiService {
   // Get current user profile
   async getCurrentUser(): Promise<User> {
-    return apiClient.get<User>('/api/auth/me');
+    return apiClient.get<User>('/auth/me');
   }
 
   // Sync user data from Clerk
   async syncUser(): Promise<{ message: string; user: User }> {
-    return apiClient.post<{ message: string; user: User }>('/api/auth/sync');
+    return apiClient.post<{ message: string; user: User }>('/auth/sync');
   }
 
   // Update user role (admin only)
-  async updateUserRole(userId: string, role: 'admin' | 'alumni'): Promise<{ message: string; user: User }> {
-    return apiClient.put<{ message: string; user: User }>('/api/auth/role', { userId, role });
+  async updateUserRole(
+    userId: string,
+    role: 'admin' | 'alumni'
+  ): Promise<{ message: string; user: User }> {
+    return apiClient.put<{ message: string; user: User }>('/auth/role', {
+      userId,
+      role,
+    });
   }
 
   // Get all users (admin only)
-  async getUsers(params: {
-    page?: number;
-    limit?: number;
-    role?: 'admin' | 'alumni';
-    search?: string;
-  } = {}): Promise<UsersListResponse> {
-    const queryParams = new URLSearchParams();
-    
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        queryParams.append(key, value.toString());
-      }
-    });
-
-    const endpoint = `/api/auth/users${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-    return apiClient.get<UsersListResponse>(endpoint);
+  async getUsers(
+    params: {
+      page?: number;
+      limit?: number;
+      role?: 'admin' | 'alumni';
+      search?: string;
+    } = {}
+  ): Promise<UsersListResponse> {
+    return apiClient.get<UsersListResponse>('/auth/users', params);
   }
 
   // Delete user (admin only)
   async deleteUser(userId: string): Promise<{ message: string }> {
-    return apiClient.delete<{ message: string }>(`/api/auth/users/${userId}`);
+    return apiClient.delete<{ message: string }>(`/auth/users/${userId}`);
   }
 }
 
